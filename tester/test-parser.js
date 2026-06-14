@@ -8,7 +8,7 @@
 var KarsaParser = require('../parser/karsa-parser');
 var TT = require('../parser/token-types');
 var AST = require('../parser/ast-factory');
-var Visitor = require('../parser/visitor');
+var Visitor = require('../utils/visitor');
 var Err = require('../parser/error-codes');
 
 // ─── Helper ────────────────────────────────────────────────
