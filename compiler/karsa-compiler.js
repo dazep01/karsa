@@ -212,8 +212,27 @@ KarsaCompiler.prototype.visitKetikaStatement = function(node) {
 
 KarsaCompiler.prototype.visitPerbaruiStatement = function(node) {
   const val = this.lowerExpression(node.value);
-  // Target resolution (sederhana: querySelector jika string)
-  const target = node.target.type === 'Literal' ? `document.querySelector("${node.target.value}")` : node.target.name;
+  // Target resolution
+  let target;
+  if (node.target.type === 'Literal') {
+    // Selector string: "#id", ".class", "tag"
+    target = `document.querySelector("${node.target.value}")`;
+  } else if (node.target.type === 'Selector') {
+    // Selector object dari parser
+    const sel = node.target;
+    let selectorStr = sel.tag || '';
+    if (sel.id) selectorStr += '#' + sel.id;
+    if (sel.classes && sel.classes.length > 0) {
+      selectorStr += '.' + sel.classes.join('.');
+    }
+    target = `document.querySelector("${selectorStr}")`;
+  } else if (node.target.type === 'Identifier') {
+    // Variable reference
+    target = node.target.name;
+  } else {
+    // Fallback: coba akses property name atau gunakan querySelector
+    target = node.target.name || node.target.selector || 'null';
+  }
   
   if (node.property === 'teks') this.emit(`${target}.innerText = ${val};`);
   else if (node.property === 'nilai') this.emit(`${target}.value = ${val};`);
