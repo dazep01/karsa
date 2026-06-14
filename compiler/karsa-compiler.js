@@ -218,11 +218,24 @@ KarsaCompiler.prototype.visitPerbaruiStatement = function(node) {
   if (node.property === 'teks') this.emit(`${target}.innerText = ${val};`);
   else if (node.property === 'nilai') this.emit(`${target}.value = ${val};`);
   else if (node.property === 'kelas') this.emit(`${target}.className = ${val};`);
+  else if (node.property === 'gaya') this.emit(`${target}.style.cssText = ${val};`);
 };
 
 KarsaCompiler.prototype.visitSimpanStatement = function(node) {
   const val = this.lowerExpression(node.value);
   this.emit(`__setState(${node.target}, ${val});`);
+};
+
+KarsaCompiler.prototype.visitTambahkanStatement = function(node) {
+  const target = node.target; // string nama variabel
+  const jumlah = this.lowerExpression(node.value);
+  this.emit(`__setState(${target}, ${target}.value + ${jumlah});`);
+};
+
+KarsaCompiler.prototype.visitKurangiStatement = function(node) {
+  const target = node.target;
+  const jumlah = this.lowerExpression(node.value);
+  this.emit(`__setState(${target}, ${target}.value - ${jumlah});`);
 };
 
 KarsaCompiler.prototype.visitSaatStatement = function(node) {
@@ -248,6 +261,31 @@ KarsaCompiler.prototype.visitJikaStatement = function(node) {
   this.emit("}");
 };
 
+KarsaCompiler.prototype.visitFungsiDeclaration = function(node) {
+  const params = node.params.map(p => p.name).join(', ');
+  this.emit(`function ${node.name}(${params}) {`);
+  this.indent++;
+  accept(node.body, this);
+  this.indent--;
+  this.emit("}");
+};
+
+KarsaCompiler.prototype.visitLangsungBlock = function(node) {
+  this.emit(node.content);
+};
+
+KarsaCompiler.prototype.visitPanggilNativeExpression = function(node) {
+  const args = node.arguments.map(a => this.lowerExpression(a)).join(', ');
+  const code = `${node.callee.name}(${args})`;
+  
+  if (this.currentParent) {
+      // Jika dipanggil sebagai statement di dalam blok 'buat'
+      this.emit(`${code};`);
+  } else {
+      return code;
+  }
+};
+
 KarsaCompiler.prototype.visitUlangiStatement = function(node) {
   const source = this.lowerExpression(node.source);
   this.emit(`${source}.forEach((${node.iteratorName}, indeks) => {`);
@@ -255,6 +293,23 @@ KarsaCompiler.prototype.visitUlangiStatement = function(node) {
   accept(node.body, this);
   this.indent--;
   this.emit("});");
+};
+
+// ═══════════════════════════════════════════
+// HANDLER BARU: JalankanExpression
+// ═══════════════════════════════════════════
+KarsaCompiler.prototype.visitJalankanExpression = function(node) {
+  const args = (node.args || node.withArgs || [])
+    .map(a => this.lowerExpression(a));
+  const code = `${node.callee}(${args.join(', ')})`;
+  
+  // Jika dipakai sebagai statement di dalam blok 'buat' (ada currentParent),
+  // emit langsung; jika tidak, kembalikan sebagai ekspresi.
+  if (this.currentParent) {
+    this.emit(`${code};`);
+  } else {
+    return code;
+  }
 };
 
 // --- Expression Lowering ---
@@ -266,21 +321,31 @@ KarsaCompiler.prototype.lowerExpression = function(node) {
     case 'Literal':
       return JSON.stringify(node.value);
     case 'Identifier':
-      // Jika identifier reaktif, gunakan .value
-      if (node.resolved && (node.resolved.type === 'data' || node.resolved.type === 'turunan')) {
+      if (node.resolved && (node.resolved.kind === 'data' || node.resolved.kind === 'turunan')) {
         return `${node.name}.value`;
       }
       return node.name;
     case 'BinaryExpression':
-      const ops = { 'sama dengan': '===', 'tidak sama dengan': '!==', 'dan': '&&', 'atau': '||' };
+      const ops = { 
+        'sama dengan': '===', 
+        'tidak sama dengan': '!==', 
+        'dan': '&&', 
+        'atau': '||',
+        'paling sedikit': '>=',   
+        'paling banyak': '<=',      
+        'lebih dari': '>',       
+        'kurang dari': '<'
+      };
       const op = ops[node.operator] || node.operator;
       return `(${this.lowerExpression(node.left)} ${op} ${this.lowerExpression(node.right)})`;
     case 'MemberExpression':
-        let prop = node.property.name;
-        return `${this.lowerExpression(node.object)}.${prop}`;
+      let prop = node.property.name;
+      return `${this.lowerExpression(node.object)}.${prop}`;
     case 'CallExpression':
-        const args = node.arguments.map(a => this.lowerExpression(a)).join(', ');
-        return `${this.lowerExpression(node.callee)}(${args})`;
+      const args = node.arguments.map(a => this.lowerExpression(a)).join(', ');
+      return `${this.lowerExpression(node.callee)}(${args})`;
+    case 'JalankanExpression':
+      return this.visitJalankanExpression(node);
     default:
       return 'null';
   }

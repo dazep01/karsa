@@ -123,6 +123,14 @@ function parsePrefix(parser) {
     return parsePostfix(parser, idNode);
   }
 
+  // ─── Jalankan (JS Interop) ─────────────────────────
+  if (tok.tipe === TT.TK_JALANKAN) {
+    var stmtParser = require('./statement-parser');
+    var jalankanNode = stmtParser.parseJalankanExpression(parser);
+    // parseJalankanExpression mengembalikan node JalankanExpression (ekspresi)
+    return jalankanNode;
+  }
+
   // ─── Unary: bukan ─────────────────────────────────
   if (tok.tipe === TT.TK_BUKAN) {
     parser.advance();

@@ -1377,47 +1377,45 @@ function parseJalankanCallee(parser) {
  * parseLangsungBlock: "langsung" ":" (BLOK_LANGSUNG | BARIS_BARU INDENT baris_js*)
  */
 function parseLangsungBlock(parser) {
-  var startToken = parser.advance();
+  var startToken = parser.advance(); // konsumsi TK_LANGSUNG
 
-  // Cek TK_BLOK_LANGSUNG
-  if (parser.check(TT.TK_BLOK_LANGSUNG)) {
-    var contentToken = parser.advance();
-    return AST.buatLangsungBlock(contentToken.nilai,
-      AST.buatLoc(
-        { line: startToken.baris, column: startToken.kolom },
-        { line: contentToken.baris, column: contentToken.kolom + (contentToken.nilai || '').length }
-      ));
-  }
-
-  // ":" + blok indentasi
+  // Wajib ada ":"
   parser.expect(TT.TK_TITIK_DUA);
 
-  // Ambil konten dari baris-baris indentasi
-  var content = '';
+  // Lewati baris baru setelah ":"
   if (parser.check(TT.TK_BARIS_BARU)) {
     parser.skipBarisBaru();
   }
-  if (parser.check(TT.TK_INDENT)) {
-    parser.advance(); // konsumsi INDENT
-    // Baca semua token hingga DEDENT
-    while (!parser.check(TT.TK_DEDENT) && !parser.isAtEnd()) {
-      var lineTok = parser.advance();
-      if (lineTok.tipe === TT.TK_BARIS_BARU) {
-        content += '\n';
-      } else {
-        content += (content && !content.endsWith('\n') ? ' ' : '') + (lineTok.nilai || '');
-      }
+
+  // Sekarang harus ada TK_BLOK_LANGSUNG
+  if (parser.check(TT.TK_BLOK_LANGSUNG)) {
+    var contentToken = parser.advance();
+    
+    // Lewati baris baru setelah blok (jika ada)
+    if (parser.check(TT.TK_BARIS_BARU)) {
+      parser.skipBarisBaru();
     }
-    if (parser.check(TT.TK_DEDENT)) {
-      parser.advance();
-    }
+    
+    return AST.buatLangsungBlock(
+      contentToken.nilai,
+      AST.buatLoc(
+        { line: startToken.baris, column: startToken.kolom },
+        { line: contentToken.baris, column: contentToken.kolom + (contentToken.nilai || '').length }
+      )
+    );
   }
 
-  return AST.buatLangsungBlock(content.trim(),
-    AST.buatLoc(
-      { line: startToken.baris, column: startToken.kolom },
-      { line: startToken.baris, column: startToken.kolom + content.length + 10 }
-    ));
+  // Jika tidak ada TK_BLOK_LANGSUNG → error
+  parser.addError(
+    'E2021',
+    'Blok langsung diharapkan setelah "langsung:". Gunakan indentasi untuk konten JavaScript mentah.',
+    AST.buatLoc({ line: startToken.baris, column: startToken.kolom }, null)
+  );
+  return AST.buatErrorNode(
+    'E2021',
+    'Blok langsung tidak ditemukan',
+    AST.buatLoc({ line: startToken.baris, column: startToken.kolom }, null)
+  );
 }
 
 // ═══════════════════════════════════════════════════════════

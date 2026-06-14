@@ -64,7 +64,18 @@
           ast: analyzeResult.ast
         };
       } catch (err) {
-        return { success: false, errors: [{ pesan: err.message }], stage: 'System' };
+        console.error('=== SYSTEM ERROR STACK ===');
+        console.error(err.stack);
+        console.error('=========================');
+        return { 
+            success: false, 
+            errors: [{ 
+                kode: 'E0000',
+                pesan: err.message,
+                saran: 'Terjadi kesalahan sistem. Lihat stack trace di atas.'
+            }], 
+            stage: 'System' 
+        };
       }
     },
 

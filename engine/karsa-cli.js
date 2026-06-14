@@ -27,12 +27,40 @@ const result = Karsa.compile(source, { source: path.basename(filePath) });
 if (result.success) {
     console.log("// --- Hasil Kompilasi JavaScript ---");
     console.log(result.js);
-    // Jika ingin langsung dijalankan di Node (butuh DOM emulator seperti JSDOM)
-    // console.log("\n// Catatan: Untuk menjalankan ini di Node, gunakan JSDOM.");
 } else {
     console.error(`\n✗ GAGAL di tahap ${result.stage}:`);
     result.errors.forEach(err => {
-        console.error(`[${err.kode || 'Error'}] ${err.pesan} ${err.loc ? `(Baris ${err.loc.start.line})` : ''}`);
+        // Tampilkan kode error jika ada
+        const kode = err.kode ? `[${err.kode}] ` : '[Error] ';
+        
+        // Tampilkan pesan
+        const pesan = err.pesan || 'Kesalahan tidak diketahui';
+        
+        // Tampilkan lokasi jika ada (dukung berbagai format)
+        let posisi = '';
+        if (err.loc) {
+            if (typeof err.loc.baris === 'number') {
+                posisi = ` (Baris ${err.loc.baris})`;
+            } else if (err.loc.start && typeof err.loc.start.line === 'number') {
+                posisi = ` (Baris ${err.loc.start.line})`;
+            }
+        }
+        
+        console.error(`${kode}${pesan}${posisi}`);
+        
+        // Tampilkan saran jika ada
+        if (err.saran) {
+            console.error(`   💡 Saran: ${err.saran}`);
+        }
     });
+    
+    // Tampilkan warnings jika ada
+    if (result.warnings && result.warnings.length > 0) {
+        console.error(`\n⚠ PERINGATAN:`);
+        result.warnings.forEach(w => {
+            console.error(`   [${w.kode}] ${w.pesan}`);
+        });
+    }
+    
     process.exit(1);
 }
