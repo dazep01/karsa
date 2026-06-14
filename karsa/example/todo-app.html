@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karsa v0.3.1 — Aplikasi Daftar Tugas</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 50px; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 400px; }
+        h2 { margin-top: 0; color: #1c1e21; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
+        input:focus { border-color: #1877f2; }
+        button#tambah-btn { background: #1877f2; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button#tambah-btn:hover { background: #166fe5; }
+        ul { list-style: none; padding: 0; }
+        li { background: #f9f9f9; padding: 10px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #1877f2; }
+        .hapus-btn { color: #e41e3f; cursor: pointer; font-weight: bold; border: none; background: none; }
+        .info { font-size: 0.9rem; color: #65676b; margin-top: 15px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Daftar Tugasku</h2>
+        
+        <div class="input-group">
+            <input type="text" id="input-tugas" placeholder="Apa yang ingin dikerjakan?">
+            <button id="tambah-btn">Tambah</button>
+        </div>
+
+        <ul id="list-tugas">
+            <!-- Daftar akan muncul di sini secara reaktif -->
+        </ul>
+
+        <div class="info">
+            Total Tugas: <span id="total-angka">0</span>
+        </div>
+    </div>
+
+    <!-- 1. Panggil Standalone Engine Karsa -->
+    <script src="engine/karsa.standalone.js"></script>
+
+    <!-- 2. Tulis Logika Aplikasi dengan Karsa -->
+    <script type="text/karsa">
+        --! State aplikasi
+        data semuaTugas = []
+        data inputSekarang = ""
+
+        --! Event: Menambah tugas
+        ketika #tambah-btn diklik:
+            ambil nilai dari #input-tugas -> simpan ke teksBaru
+            jika teksBaru tidak kosong:
+                tambahkan teksBaru ke semuaTugas
+                perbarui nilai #input-tugas -> ""
+
+        --! Event: Tekan Enter di input
+        ketika #input-tugas ditekan:
+            langsung:
+                if (event.key === "Enter") {
+                    document.getElementById("tambah-btn").click();
+                }
+
+        --! Reaktivitas: Render daftar setiap kali data berubah
+        saat semuaTugas berubah:
+            kosongkan #list-tugas
+            
+            ulangi tugas dari semuaTugas:
+                buat li
+                    buat span -> teks: tugas
+                    buat tombol.hapus-btn -> teks: "Hapus"
+                        ketika diklik:
+                            langsung:
+                                // Logika hapus sederhana menggunakan JS native
+                                // karena compiler v0.3.1 kita sedang mematangkan filter array
+                                const idx = event.target.closest('li').dataset.index;
+                                semuaTugas.value.splice(idx, 1);
+                                semuaTugas.value = [...semuaTugas.value];
+            
+            --! Update counter
+            perbarui teks #total-angka -> semuaTugas.panjang
+
+        --! Injeksi atribut dataset untuk keperluan hapus (Virtual Index)
+        langsung:
+            // Helper tambahan untuk menaruh index pada elemen li
+            __watch(semuaTugas, () => {
+                const items = document.querySelectorAll('#list-tugas li');
+                items.forEach((li, i) => li.dataset.index = i);
+            });
+    </script>
+
+</body>
+</html>
