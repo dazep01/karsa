@@ -25,7 +25,10 @@ Cukup sertakan `engine/karsa.js` di file HTML Anda dan tulis kode dalam tag `<sc
 <script type="text/karsa">
   buat h1 -> teks: "Halo Dunia!"
 </script>
+
+<!-- atau dari file .ks -->
+<script type="text/karsa" src="patch_ke_filemu.ks"></script>
 ```
 
 ---
-Dibuat dengan ❤️ oleh KARSA Team.
+Dibuat dengan ❤️ oleh RaaRion.
