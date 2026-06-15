@@ -844,7 +844,9 @@ KarsaCompiler.prototype.visitPanggilNativeExpression = function(node) {
 };
 
 KarsaCompiler.prototype.visitJalankanExpression = function(node) {
-  const args = (node.arguments || node.withArgs || node.args || [])
+  // [Bug 5 FIX] Hapus node.args fallback — sudah deprecated di resolver (C2 fix).
+  // Hanya gunakan node.arguments atau node.withArgs.
+  const args = (node.arguments || node.withArgs || [])
     .map(a => this.lowerExpression(a));
   const code = `${node.callee}(${args.join(', ')})`;
   
