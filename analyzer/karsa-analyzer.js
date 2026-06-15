@@ -43,6 +43,14 @@ KarsaAnalyzer.prototype.analyze = function(ast) {
   this.errors = [];
   this.warnings = [];
   this._currentAst = ast;
+  // [Bug 4 FIX] Build Map sekali untuk lookup O(1)
+  this._symbolMap = null;
+  if (ast && ast.semantic && ast.semantic.symbols) {
+    this._symbolMap = new Map();
+    ast.semantic.symbols.forEach(function(sym) {
+      this._symbolMap.set(sym.name, sym);
+    }.bind(this));
+  }
   accept(ast, this);
   return {
     ast: ast,
@@ -127,6 +135,11 @@ KarsaAnalyzer.prototype.checkTypeHint = function(typeHint, valueNode) {
 // --- Symbol Lookup ---
 
 KarsaAnalyzer.prototype.lookupSymbol = function(name) {
+  // [Bug 4 FIX] Lookup O(1) via Map, bukan O(n) linear scan
+  if (this._symbolMap) {
+    return this._symbolMap.get(name) || null;
+  }
+  // Fallback jika Map belum dibangun
   if (!this._currentAst || !this._currentAst.semantic || !this._currentAst.semantic.symbols) {
     return null;
   }
