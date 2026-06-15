@@ -128,22 +128,58 @@
           if (lexResult.errors.length > 0) return { success: false, errors: lexResult.errors, stage: 'Lexer' };
 
           // 2. Parser
-          const parseResult = Parser.parse(lexResult.tokens);
+          var parseResult;
+          try {
+            parseResult = Parser.parse(lexResult.tokens);
+          } catch (parseErr) {
+            return {
+              success: false,
+              errors: [{ code: 'E0000', severity: 'error', message: 'Parser exception: ' + parseErr.message, suggestion: 'Terjadi kesalahan internal parser.' }],
+              stage: 'Parser'
+            };
+          }
           if (parseResult.errors.length > 0) return { success: false, errors: parseResult.errors, stage: 'Parser' };
 
           // 3. Resolver
-          const resolver = new Resolver();
-          const resolveResult = resolver.resolve(parseResult.ast);
+          var resolveResult;
+          try {
+            const resolver = new Resolver();
+            resolveResult = resolver.resolve(parseResult.ast);
+          } catch (resolveErr) {
+            return {
+              success: false,
+              errors: [{ code: 'E0000', severity: 'error', message: 'Resolver exception: ' + resolveErr.message, suggestion: 'Terjadi kesalahan internal resolver.' }],
+              stage: 'Resolver'
+            };
+          }
           if (resolveResult.errors.length > 0) return { success: false, errors: resolveResult.errors, stage: 'Resolver' };
 
           // 4. Analyzer
-          const analyzer = new Analyzer();
-          const analyzeResult = analyzer.analyze(resolveResult.ast);
+          var analyzeResult;
+          try {
+            const analyzer = new Analyzer();
+            analyzeResult = analyzer.analyze(resolveResult.ast);
+          } catch (analyzeErr) {
+            return {
+              success: false,
+              errors: [{ code: 'E0000', severity: 'error', message: 'Analyzer exception: ' + analyzeErr.message, suggestion: 'Terjadi kesalahan internal analyzer.' }],
+              stage: 'Analyzer'
+            };
+          }
           if (analyzeResult.errors.length > 0) return { success: false, errors: analyzeResult.errors, stage: 'Analyzer' };
 
           // 5. Compiler
-          const compiler = new Compiler();
-          const javascript = compiler.compile(analyzeResult.ast);
+          var javascript;
+          try {
+            const compiler = new Compiler();
+            javascript = compiler.compile(analyzeResult.ast);
+          } catch (compileErr) {
+            return {
+              success: false,
+              errors: [{ code: 'E0000', severity: 'error', message: 'Compiler exception: ' + compileErr.message, suggestion: 'Terjadi kesalahan internal compiler.' }],
+              stage: 'Compiler'
+            };
+          }
 
           return {
             success: true,
@@ -158,9 +194,10 @@
           return { 
               success: false, 
               errors: [{ 
-                  kode: 'E0000',
-                  pesan: err.message,
-                  saran: 'Terjadi kesalahan sistem. Lihat stack trace di atas.'
+                  code: 'E0000',
+                  severity: 'error',
+                  message: err.message,
+                  suggestion: 'Terjadi kesalahan sistem. Lihat stack trace di atas.'
               }], 
               stage: 'System' 
           };
