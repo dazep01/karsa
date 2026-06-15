@@ -74,9 +74,11 @@ var E3001 = 'E3001'; // Identifier tidak dideklarasikan (undefined)
 var E3002 = 'E3002'; // Simbol sudah dideklarasikan dalam scope yang sama (duplikat)
 var E3003 = 'E3003'; // Menulis ke variabel tetap (const)
 var E3004 = 'E3004'; // Menggunakan komponen sebelum dideklarasi
+var E3005 = 'E3005'; // "ketika" tanpa target di luar blok buat/komponen
 
 var W3001 = 'W3001'; // Variabel dideklarasikan tapi tidak pernah digunakan
 var W3002 = 'W3002'; // Variabel shadowing variabel di scope luar
+var W3003 = 'W3003'; // Watcher target bukan data reaktif
 
 // ═══════════════════════════════════════════════════════════════
 // ANALYZER (E4xxx / W4xxx)
@@ -92,6 +94,9 @@ var E4007 = 'E4007'; // Mode tampilkan tidak valid
 var E4008 = 'E4008'; // Properti perbarui tidak didukung
 var E4009 = 'E4009'; // Event name tidak dikenali
 var E4010 = 'E4010'; // Penggunaan gunakan untuk non-komponen
+var E4011 = 'E4011'; // berhenti di luar konteks loop/handler
+var E4012 = 'E4012'; // lewati di luar konteks loop
+var E4013 = 'E4013'; // kembalikan di luar fungsi/komponen
 
 var W4001 = 'W4001'; // Type hint tidak cocok dengan nilai
 var W4002 = 'W4002'; // Lifecycle hook di dalam loop/handler
@@ -176,6 +181,7 @@ ERROR_MESSAGES[E3001] = 'Identifier "{name}" tidak dideklarasikan';
 ERROR_MESSAGES[E3002] = 'Simbol "{name}" sudah dideklarasikan dalam scope yang sama';
 ERROR_MESSAGES[E3003] = 'Variabel tetap "{name}" tidak dapat diubah setelah inisialisasi';
 ERROR_MESSAGES[E3004] = 'Komponen "{name}" digunakan sebelum dideklarasi';
+ERROR_MESSAGES[E3005] = '"ketika" tanpa target hanya boleh di dalam blok "buat" atau "komponen"';
 
 // -- Analyzer --
 ERROR_MESSAGES[E4001] = 'Lifecycle hook hanya valid di dalam komponen';
@@ -188,6 +194,9 @@ ERROR_MESSAGES[E4007] = 'Mode tampilkan tidak valid';
 ERROR_MESSAGES[E4008] = 'Properti perbarui tidak didukung';
 ERROR_MESSAGES[E4009] = 'Event name tidak dikenali';
 ERROR_MESSAGES[E4010] = 'Penggunaan "gunakan" untuk non-komponen';
+ERROR_MESSAGES[E4011] = '"berhenti" tidak valid di luar loop atau event handler';
+ERROR_MESSAGES[E4012] = '"lewati" tidak valid di luar loop';
+ERROR_MESSAGES[E4013] = '"kembalikan" tidak valid di luar fungsi atau komponen';
 
 // -- Compiler --
 ERROR_MESSAGES[E5001] = 'Node AST bertipe "{type}" tidak didukung oleh compiler';
@@ -255,6 +264,7 @@ ERROR_SUGGESTIONS[E3001] = 'Periksa ejaan identifier atau deklarasikan variabel 
 ERROR_SUGGESTIONS[E3002] = 'Gunakan nama yang berbeda atau hapus deklarasi duplikat';
 ERROR_SUGGESTIONS[E3003] = 'Gunakan "ubah" jika variabel perlu diubah, bukan "tetap"';
 ERROR_SUGGESTIONS[E3004] = 'Pindahkan deklarasi komponen sebelum penggunaannya';
+ERROR_SUGGESTIONS[E3005] = 'Tambahkan target pada "ketika" atau letakkan di dalam blok "buat"/"komponen"';
 
 // -- Analyzer --
 ERROR_SUGGESTIONS[E4001] = 'Pindahkan lifecycle hook ke dalam definisi komponen';
@@ -267,6 +277,9 @@ ERROR_SUGGESTIONS[E4007] = 'Mode yang valid: tambahkan, ganti, awalan, sebelum, 
 ERROR_SUGGESTIONS[E4008] = 'Gunakan properti yang didukung oleh perbarui';
 ERROR_SUGGESTIONS[E4009] = 'Gunakan nama event yang valid: diklik, diketik, ditekan, dll.';
 ERROR_SUGGESTIONS[E4010] = 'Pastikan nama yang direferensikan adalah komponen (PascalCase)';
+ERROR_SUGGESTIONS[E4011] = '"berhenti" hanya valid di dalam loop atau event handler';
+ERROR_SUGGESTIONS[E4012] = 'Gunakan "lewati" hanya di dalam "ulangi" atau "selama"';
+ERROR_SUGGESTIONS[E4013] = 'Gunakan "kembalikan" hanya di dalam fungsi atau komponen';
 
 // -- Compiler --
 ERROR_SUGGESTIONS[E5001] = 'Periksa apakah node type sudah didukung oleh compiler';
@@ -340,6 +353,24 @@ function createError(code, loc, overrides) {
 }
 
 /**
+ * Alias untuk createError — kompatibilitas mundur dengan parser.
+ * Parser menggunakan Err.buatParseError(code, loc, overrides).
+ *
+ * @param {string} code - Kode error
+ * @param {object} loc - SourceLocation { start, end }
+ * @param {object} [overrides] - Properti opsional untuk override
+ * @returns {object} Objek error terformat (format: kode/pesan/saran/loc/severity)
+ */
+function buatParseError(code, loc, overrides) {
+  var err = createError(code, loc, overrides);
+  // Menambahkan field alias Indonesia untuk kompatibilitas dengan resolver/analyzer
+  err.kode = err.code;
+  err.pesan = err.message;
+  err.saran = err.suggestion;
+  return err;
+}
+
+/**
  * Format error untuk tampilan pengguna.
  * @param {object} err - Objek error
  * @returns {string} Pesan yang diformat
@@ -379,13 +410,13 @@ module.exports = {
   W2001: W2001, W2002: W2002, W2003: W2003, W2004: W2004,
 
   // Resolver errors
-  E3001: E3001, E3002: E3002, E3003: E3003, E3004: E3004,
-  W3001: W3001, W3002: W3002,
+  E3001: E3001, E3002: E3002, E3003: E3003, E3004: E3004, E3005: E3005,
+  W3001: W3001, W3002: W3002, W3003: W3003,
 
   // Analyzer errors
   E4001: E4001, E4002: E4002, E4003: E4003, E4004: E4004,
   E4005: E4005, E4006: E4006, E4007: E4007, E4008: E4008,
-  E4009: E4009, E4010: E4010,
+  E4009: E4009, E4010: E4010, E4011: E4011, E4012: E4012, E4013: E4013,
   W4001: W4001, W4002: W4002, W4003: W4003, W4004: W4004,
 
   // Compiler errors
@@ -406,5 +437,6 @@ module.exports = {
   getSeverity: getSeverity,
   getStage: getStage,
   createError: createError,
+  buatParseError: buatParseError,
   formatError: formatError
 };
