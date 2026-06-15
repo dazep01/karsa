@@ -12,6 +12,7 @@ function KarsaAnalyzer() {
   BaseVisitor.call(this);
   this.errors = [];
   this.warnings = [];
+  this._currentAst = null;
   
   // Context stacks
   this.context = {
@@ -29,6 +30,7 @@ KarsaAnalyzer.prototype.constructor = KarsaAnalyzer;
 KarsaAnalyzer.prototype.analyze = function(ast) {
   this.errors = [];
   this.warnings = [];
+  this._currentAst = ast;
   accept(ast, this);
   return {
     ast: ast,
@@ -53,14 +55,6 @@ KarsaAnalyzer.prototype.addWarning = function(kode, pesan, loc, saran) {
 KarsaAnalyzer.prototype.checkTypeHint = function(typeHint, valueNode) {
   if (!typeHint || !valueNode || valueNode.type === 'ErrorNode') return;
 
-  const mapping = {
-    'teks': 'teks',
-    'angka': 'angka',
-    'benar-salah': 'boolean',
-    'objek': 'ObjectLiteral',
-    'array': 'ArrayLiteral'
-  };
-
   let actualType = '';
   if (valueNode.type === 'Literal') {
     if (typeof valueNode.value === 'number') actualType = 'angka';
@@ -69,9 +63,42 @@ KarsaAnalyzer.prototype.checkTypeHint = function(typeHint, valueNode) {
   }
   else if (valueNode.type === 'ObjectLiteral') actualType = 'objek';
   else if (valueNode.type === 'ArrayLiteral') actualType = 'array';
+  else if (valueNode.type === 'CallExpression') {
+    // Try to infer from callee name
+    var callee = valueNode.callee;
+    if (callee && callee.type === 'Identifier') {
+      var name = callee.name;
+      if (name && name.indexOf('ambil') === 0) actualType = 'teks';
+      // Otherwise unknown — don't emit warning (too many false positives)
+    }
+  }
+  else if (valueNode.type === 'BinaryExpression') {
+    var op = valueNode.operator;
+    if (op === '+' || op === '-' || op === '*' || op === '/' || op === '%') {
+      actualType = 'angka';
+    } else {
+      // Comparison or logic operators -> boolean
+      actualType = 'benar-salah';
+    }
+  }
+  else if (valueNode.type === 'UnaryExpression') {
+    if (valueNode.operator === 'bukan') {
+      actualType = 'benar-salah';
+    } else if (valueNode.operator === '-') {
+      actualType = 'angka';
+    }
+  }
+  else if (valueNode.type === 'MemberExpression') {
+    // .panjang/.length -> angka, otherwise unknown
+    var prop = valueNode.property;
+    if (prop && prop.type === 'Identifier' && (prop.name === 'panjang' || prop.name === 'length')) {
+      actualType = 'angka';
+    }
+    // Otherwise unknown — don't emit warning
+  }
 
-  const expected = typeHint; // Kita bandingkan langsung dengan alias Karsa
-  if (expected && actualType && expected !== actualType) {
+  // Both expected and actualType use Karsa type names
+  if (actualType && typeHint !== actualType) {
     this.addWarning('W4001', 
       `Type hint "${typeHint}" tidak cocok dengan nilai awal bertipe "${actualType}".`, 
       valueNode.loc, 
@@ -146,6 +173,30 @@ KarsaAnalyzer.prototype.visitTurunanDeclaration = function(node) {
 };
 
 /**
+ * Validasi Type Hint pada Deklarasi Data (Section 7.3)
+ */
+KarsaAnalyzer.prototype.visitDataDeclaration = function(node) {
+  if (node.typeHint && node.init) {
+    this.checkTypeHint(node.typeHint, node.init);
+  }
+  this.genericVisit(node);
+};
+
+KarsaAnalyzer.prototype.visitTetapDeclaration = function(node) {
+  if (node.typeHint && node.init) {
+    this.checkTypeHint(node.typeHint, node.init);
+  }
+  this.genericVisit(node);
+};
+
+KarsaAnalyzer.prototype.visitUbahDeclaration = function(node) {
+  if (node.typeHint && node.init) {
+    this.checkTypeHint(node.typeHint, node.init);
+  }
+  this.genericVisit(node);
+};
+
+/**
  * Validasi Reaktivitas & Assignment (Section 7.5)
  */
 KarsaAnalyzer.prototype.visitSimpanStatement = function(node) {
@@ -154,11 +205,7 @@ KarsaAnalyzer.prototype.visitSimpanStatement = function(node) {
   }
 
   // Cek apakah target adalah turunan (read-only)
-  if (node.target) {
-    // Di KarsaParser, SimpanStatement menyimpan target sebagai string nama
-    // Kita perlu bantuan dari info resolve di Identifier (jika ada)
-    // Namun SimpanStatement biasanya memegang identifier node di value/target
-  }
+  this.checkWriteToTurunan(node);
 
   this.genericVisit(node);
 };
@@ -168,10 +215,31 @@ KarsaAnalyzer.prototype.visitTambahkanStatement = function(node) { this.checkWri
 KarsaAnalyzer.prototype.visitKurangiStatement = function(node) { this.checkWriteToTurunan(node); this.genericVisit(node); };
 KarsaAnalyzer.prototype.visitSisipkanStatement = function(node) { this.checkWriteToTurunan(node); this.genericVisit(node); };
 
+KarsaAnalyzer.prototype.lookupSymbol = function(name) {
+  if (!this._currentAst || !this._currentAst.semantic || !this._currentAst.semantic.symbols) {
+    return null;
+  }
+  var symbols = this._currentAst.semantic.symbols;
+  for (var i = 0; i < symbols.length; i++) {
+    if (symbols[i].name === name) {
+      return symbols[i];
+    }
+  }
+  return null;
+};
+
 KarsaAnalyzer.prototype.checkWriteToTurunan = function(node) {
   // Logic: Jika target me-resolve ke TurunanDeclaration -> Error
-  // (Implementasi ini membutuhkan mapping identifier dari Resolver)
-  // Diasumsikan Resolver sudah menaruh info di node.target jika itu identifier
+  if (!node.target) return;
+  var targetName = (typeof node.target === 'string') ? node.target : (node.target.name || null);
+  if (!targetName) return;
+  var symbol = this.lookupSymbol(targetName);
+  if (symbol && symbol.kind === 'turunan') {
+    this.addError('E4004', 
+      `Data turunan "${targetName}" bersifat read-only dan tidak boleh diubah.`, 
+      node.loc, 
+      'Gunakan data (var) biasa jika perlu mengubah nilainya.');
+  }
 };
 
 /**
