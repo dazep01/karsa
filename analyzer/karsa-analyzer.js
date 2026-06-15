@@ -4,9 +4,21 @@
  * Melakukan validasi semantik: tipe, reaktivitas, kontrol alur, dan lifecycle.
  *
  * Sesuai Spesifikasi: KARSA-grammar-spec_v0_3_1.md
+ *
+ * v0.3.1-patch1: Perbaikan bug kritikal
+ *   - [C5] Tambah visitPerbaruiStatement + checkWriteToTurunan
+ *   - [H4] Tambah visitor: visitGunakanStatement, visitSetelahStatement,
+ *          visitTampilkanStatement, visitSembunyikanStatement, visitHapusStatement,
+ *          visitKosongkanStatement, visitArahkanStatement, visitAmbilDomStatement,
+ *          visitAmbilLuarStatement, visitTambahkanStatement, visitKurangiStatement,
+ *          visitSisipkanStatement
+ *   - [H6] E6001/E6002/E6003 → E4011/E4012/E4013 (kode analyzer, bukan runtime)
+ *   - [H2] Standardisasi format error menggunakan Err.createError
+ *   - [M1] Tambah cek inTurunanExpr untuk tambahkan/kurangi/sisipkan
  */
 
 const { BaseVisitor, accept } = require('../utils/visitor');
+const Err = require('../parser/error-codes');
 
 function KarsaAnalyzer() {
   BaseVisitor.call(this);
@@ -41,12 +53,18 @@ KarsaAnalyzer.prototype.analyze = function(ast) {
 
 // --- Helpers ---
 
-KarsaAnalyzer.prototype.addError = function(kode, pesan, loc, saran) {
-  this.errors.push({ kode, pesan, loc, saran });
+KarsaAnalyzer.prototype.addError = function(code, pesan, loc, saran) {
+  this.errors.push(Err.createError(code, loc, {
+    message: pesan,
+    suggestion: saran || ''
+  }));
 };
 
-KarsaAnalyzer.prototype.addWarning = function(kode, pesan, loc, saran) {
-  this.warnings.push({ kode, pesan, loc, saran, severity: 'warning' });
+KarsaAnalyzer.prototype.addWarning = function(code, pesan, loc, saran) {
+  this.warnings.push(Err.createError(code, loc, {
+    message: pesan,
+    suggestion: saran || ''
+  }));
 };
 
 /**
@@ -103,6 +121,50 @@ KarsaAnalyzer.prototype.checkTypeHint = function(typeHint, valueNode) {
       `Type hint "${typeHint}" tidak cocok dengan nilai awal bertipe "${actualType}".`, 
       valueNode.loc, 
       `Gunakan nilai yang sesuai atau ubah type hint menjadi yang benar.`);
+  }
+};
+
+// --- Symbol Lookup ---
+
+KarsaAnalyzer.prototype.lookupSymbol = function(name) {
+  if (!this._currentAst || !this._currentAst.semantic || !this._currentAst.semantic.symbols) {
+    return null;
+  }
+  var symbols = this._currentAst.semantic.symbols;
+  for (var i = 0; i < symbols.length; i++) {
+    if (symbols[i].name === name) {
+      return symbols[i];
+    }
+  }
+  return null;
+};
+
+/**
+ * Cek apakah target adalah data turunan (read-only).
+ * Digunakan oleh simpan, tambahkan, kurangi, sisipkan, perbarui.
+ */
+KarsaAnalyzer.prototype.checkWriteToTurunan = function(node) {
+  if (!node.target) return;
+  var targetName = (typeof node.target === 'string') ? node.target : (node.target.name || null);
+  if (!targetName) return;
+  var symbol = this.lookupSymbol(targetName);
+  if (symbol && symbol.kind === 'turunan') {
+    this.addError('E4004', 
+      `Data turunan "${targetName}" bersifat read-only dan tidak boleh diubah.`, 
+      node.loc, 
+      'Gunakan data (var) biasa jika perlu mengubah nilainya.');
+  }
+};
+
+/**
+ * Cek apakah statement berada di dalam ekspresi turunan (side-effect check).
+ */
+KarsaAnalyzer.prototype.checkSideEffectInTurunan = function(node) {
+  if (this.context.inTurunanExpr) {
+    this.addError('E4002', 
+      'Ekspresi turunan tidak boleh mengandung aksi side-effect.', 
+      node.loc, 
+      'Hapus aksi simpan/tambahkan/kurangi/sisipkan dari ekspresi turunan.');
   }
 };
 
@@ -164,10 +226,6 @@ KarsaAnalyzer.prototype.visitTurunanDeclaration = function(node) {
   const prevInTurunan = this.context.inTurunanExpr;
   this.context.inTurunanExpr = true;
   
-  // Turunan tidak boleh berisi aksi (side-effect)
-  // Ini divalidasi dengan mengecek apakah ada statement di dalam expression-nya
-  // (Parser sudah menjamin Turunan berisi Expression, tapi kita cek isinya)
-  
   this.genericVisit(node);
   this.context.inTurunanExpr = prevInTurunan;
 };
@@ -186,6 +244,10 @@ KarsaAnalyzer.prototype.visitTetapDeclaration = function(node) {
   if (node.typeHint && node.init) {
     this.checkTypeHint(node.typeHint, node.init);
   }
+  // W4003: tetap tanpa nilai awal
+  if (!node.init) {
+    this.addWarning('W4003', `Deklarasi "tetap" untuk "${node.name}" tanpa nilai awal.`, node.loc, 'Berikan nilai awal untuk konstanta.');
+  }
   this.genericVisit(node);
 };
 
@@ -200,71 +262,121 @@ KarsaAnalyzer.prototype.visitUbahDeclaration = function(node) {
  * Validasi Reaktivitas & Assignment (Section 7.5)
  */
 KarsaAnalyzer.prototype.visitSimpanStatement = function(node) {
-  if (this.context.inTurunanExpr) {
-    this.addError('E4004', "Ekspresi turunan tidak boleh mengandung aksi simpan (side-effect).", node.loc);
-  }
-
+  // Cek side-effect dalam turunan
+  this.checkSideEffectInTurunan(node);
   // Cek apakah target adalah turunan (read-only)
   this.checkWriteToTurunan(node);
 
   this.genericVisit(node);
 };
 
-// Cek modifikasi ke data reaktif
-KarsaAnalyzer.prototype.visitTambahkanStatement = function(node) { this.checkWriteToTurunan(node); this.genericVisit(node); };
-KarsaAnalyzer.prototype.visitKurangiStatement = function(node) { this.checkWriteToTurunan(node); this.genericVisit(node); };
-KarsaAnalyzer.prototype.visitSisipkanStatement = function(node) { this.checkWriteToTurunan(node); this.genericVisit(node); };
+// ─── Mutation Statements (C5/M1 FIX) ──────────────────────
 
-KarsaAnalyzer.prototype.lookupSymbol = function(name) {
-  if (!this._currentAst || !this._currentAst.semantic || !this._currentAst.semantic.symbols) {
-    return null;
-  }
-  var symbols = this._currentAst.semantic.symbols;
-  for (var i = 0; i < symbols.length; i++) {
-    if (symbols[i].name === name) {
-      return symbols[i];
-    }
-  }
-  return null;
+KarsaAnalyzer.prototype.visitTambahkanStatement = function(node) {
+  this.checkSideEffectInTurunan(node);
+  this.checkWriteToTurunan(node);
+  this.genericVisit(node);
 };
 
-KarsaAnalyzer.prototype.checkWriteToTurunan = function(node) {
-  // Logic: Jika target me-resolve ke TurunanDeclaration -> Error
-  if (!node.target) return;
-  var targetName = (typeof node.target === 'string') ? node.target : (node.target.name || null);
-  if (!targetName) return;
-  var symbol = this.lookupSymbol(targetName);
-  if (symbol && symbol.kind === 'turunan') {
-    this.addError('E4004', 
-      `Data turunan "${targetName}" bersifat read-only dan tidak boleh diubah.`, 
-      node.loc, 
-      'Gunakan data (var) biasa jika perlu mengubah nilainya.');
+KarsaAnalyzer.prototype.visitKurangiStatement = function(node) {
+  this.checkSideEffectInTurunan(node);
+  this.checkWriteToTurunan(node);
+  this.genericVisit(node);
+};
+
+KarsaAnalyzer.prototype.visitSisipkanStatement = function(node) {
+  this.checkSideEffectInTurunan(node);
+  this.checkWriteToTurunan(node);
+  this.genericVisit(node);
+};
+
+// ─── PerbaruiStatement (C5 FIX) ────────────────────────────
+KarsaAnalyzer.prototype.visitPerbaruiStatement = function(node) {
+  // Cek side-effect dalam turunan
+  this.checkSideEffectInTurunan(node);
+  // Cek apakah target adalah turunan (read-only)
+  this.checkWriteToTurunan(node);
+  this.genericVisit(node);
+};
+
+// ─── GunakanStatement (H4 FIX) ─────────────────────────────
+KarsaAnalyzer.prototype.visitGunakanStatement = function(node) {
+  if (node.componentName) {
+    var symbol = this.lookupSymbol(node.componentName);
+    if (symbol && symbol.kind !== 'komponen') {
+      this.addError('E4010', `"${node.componentName}" bukan komponen, tidak dapat digunakan dengan "gunakan".`, node.loc, 'Pastikan nama yang direferensikan adalah komponen (PascalCase).');
+    }
   }
+  this.genericVisit(node);
+};
+
+// ─── TampilkanStatement (H4 FIX) ───────────────────────────
+KarsaAnalyzer.prototype.visitTampilkanStatement = function(node) {
+  const validModes = ["tambahkan", "ganti", "awalan", "sebelum", "sesudah"];
+  if (node.mode && validModes.indexOf(node.mode) === -1) {
+    this.addError('E4007', `Mode "${node.mode}" tidak dikenal.`, node.loc, `Mode yang valid: ${validModes.join(", ")}.`);
+  }
+  this.genericVisit(node);
+};
+
+// ─── SembunyikanStatement (H4 FIX) ─────────────────────────
+KarsaAnalyzer.prototype.visitSembunyikanStatement = function(node) {
+  this.genericVisit(node);
+};
+
+// ─── HapusStatement (H4 FIX) ───────────────────────────────
+KarsaAnalyzer.prototype.visitHapusStatement = function(node) {
+  this.genericVisit(node);
+};
+
+// ─── KosongkanStatement (H4 FIX) ───────────────────────────
+KarsaAnalyzer.prototype.visitKosongkanStatement = function(node) {
+  this.genericVisit(node);
+};
+
+// ─── ArahkanStatement (H4 FIX) ─────────────────────────────
+KarsaAnalyzer.prototype.visitArahkanStatement = function(node) {
+  this.genericVisit(node);
+};
+
+// ─── SetelahStatement (H4 FIX) ─────────────────────────────
+KarsaAnalyzer.prototype.visitSetelahStatement = function(node) {
+  this.genericVisit(node);
+};
+
+// ─── AmbilDomStatement (H4 FIX) ────────────────────────────
+KarsaAnalyzer.prototype.visitAmbilDomStatement = function(node) {
+  this.genericVisit(node);
+};
+
+// ─── AmbilLuarStatement (H4 FIX) ───────────────────────────
+KarsaAnalyzer.prototype.visitAmbilLuarStatement = function(node) {
+  this.genericVisit(node);
 };
 
 /**
  * Validasi Kontrol Alur (Section 6.5)
+ * [H6 FIX] E6xxx → E4xxx baru
  */
 KarsaAnalyzer.prototype.visitBerhentiStatement = function(node) {
   const isValid = this.context.loopDepth > 0 || this.context.handlerDepth > 0;
   if (!isValid) {
-    this.addError('E6001', '"berhenti" tidak valid di sini.', node.loc, '"berhenti" hanya valid di dalam loop atau event handler.');
+    this.addError('E4011', '"berhenti" tidak valid di luar loop atau event handler.', node.loc, '"berhenti" hanya valid di dalam loop atau event handler.');
   }
   if (this.context.inFunction && this.context.loopDepth === 0 && this.context.handlerDepth === 0) {
-    this.addError('E6001', '"berhenti" di dalam fungsi (bukan loop/handler) tidak valid.', node.loc, 'Gunakan "kembalikan" untuk keluar dari fungsi.');
+    this.addError('E4011', '"berhenti" di dalam fungsi (bukan loop/handler) tidak valid.', node.loc, 'Gunakan "kembalikan" untuk keluar dari fungsi.');
   }
 };
 
 KarsaAnalyzer.prototype.visitLewatiStatement = function(node) {
   if (this.context.loopDepth === 0) {
-    this.addError('E6002', '"lewati" tidak valid di luar loop.', node.loc, 'Gunakan "lewati" hanya di dalam "ulangi" atau "selama".');
+    this.addError('E4012', '"lewati" tidak valid di luar loop.', node.loc, 'Gunakan "lewati" hanya di dalam "ulangi" atau "selama".');
   }
 };
 
 KarsaAnalyzer.prototype.visitKembalikanStatement = function(node) {
   if (!this.context.inFunction && !this.context.inComponent) {
-    // Secara teknis komponen dan fungsi adalah tempat valid untuk kembalikan
-    this.addError('E6003', '"kembalikan" tidak valid di luar fungsi atau komponen.', node.loc);
+    this.addError('E4013', '"kembalikan" tidak valid di luar fungsi atau komponen.', node.loc, 'Gunakan "kembalikan" hanya di dalam fungsi atau komponen.');
   }
 };
 
@@ -297,21 +409,9 @@ KarsaAnalyzer.prototype.visitFungsiDeclaration = function(node) {
 };
 
 /**
- * Validasi Tampilkan (Section 4.4)
- */
-KarsaAnalyzer.prototype.visitTampilkanStatement = function(node) {
-  const validModes = ["tambahkan", "ganti", "awalan", "sebelum", "sesudah"];
-  if (node.mode && validModes.indexOf(node.mode) === -1) {
-    this.addError('E4007', `Mode "${node.mode}" tidak dikenal.`, node.loc, `Mode yang valid: ${validModes.join(", ")}.`);
-  }
-  this.genericVisit(node);
-};
-
-/**
  * Validasi Watcher (Section 7.6)
  */
 KarsaAnalyzer.prototype.visitSaatStatement = function(node) {
-  // Target watcher sudah di-resolve namanya, analyzer bisa cek tipenya jika metadata tersedia
   this.genericVisit(node);
 };
 
