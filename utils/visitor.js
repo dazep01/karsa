@@ -85,6 +85,9 @@ function getChildKeys(nodeType) {
     case 'ArrayLiteral': return ['elements'];
     case 'Selector': return ['attributes'];
     case 'PropertyNode': return ['value'];
+    case 'AttributeNode': return ['value'];
+    case 'Parameter': return ['defaultValue'];
+    case 'SelfReference': return [];
     case 'DataDeclaration': return ['init'];
     case 'TetapDeclaration': return ['init'];
     case 'UbahDeclaration': return ['init'];
@@ -138,6 +141,7 @@ var nodeTypes = [
   'MemberExpression', 'CallExpression', 'ObjectLiteral', 'ArrayLiteral',
   'Selector', 'PropertyNode', 'AttributeNode', 'Parameter',
   'FetchBranch', 'FetchOption',
+  'SelfReference',
   'ErrorNode'
 ];
 
