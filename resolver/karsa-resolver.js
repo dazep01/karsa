@@ -9,9 +9,24 @@
  *   - Self-reference "ketika" tanpa target (A)
  *   - Penanganan JS Interop (`jalankan`) agar tidak dianggap undefined (A)
  *   - Kode error & warning terpadu
+ *
+ * v0.3.1-patch1: Perbaikan bug kritikal
+ *   - [C2] Fix node.args → node.arguments di visitJalankanExpression
+ *   - [C3] Emit E3001 untuk identifier yang tidak dideklarasikan
+ *   - [C4] Emit E3003 untuk penulisan ke variabel tetap (const)
+ *   - [H1] E5001 → E3005 untuk error "ketika tanpa target"
+ *   - [H2] Standardisasi format objek error (code/message/severity/loc/suggestion)
+ *   - [H3] Tambah visitor: visitSelamaStatement, visitPerbaruiStatement,
+ *          visitGunakanStatement, visitTambahkanStatement, visitKurangiStatement,
+ *          visitSisipkanStatement, visitSetelahStatement, visitTampilkanStatement,
+ *          visitSembunyikanStatement, visitHapusStatement, visitKosongkanStatement,
+ *          visitArahkanStatement, visitAmbilDomStatement, visitAmbilLuarStatement
+ *   - [M2] Write tracking untuk tambahkan/kurangi/sisipkan
+ *   - [M4] W3001 di saatStatement → W3003 (kode baru untuk non-reaktif watcher)
  */
 
 const { BaseVisitor, accept } = require('../utils/visitor');
+const Err = require('../parser/error-codes');
 
 // ============================================================================
 // ALIAS PROPERTI (dari Tim A)
@@ -30,6 +45,24 @@ const ALIAS_PROPERTI = {
   'fokus': 'focus',
   'atribut': 'getAttribute'
 };
+
+// ============================================================================
+// EVENT NAMES yang valid untuk ketika (dari spesifikasi KARSA)
+// ============================================================================
+const VALID_EVENT_NAMES = new Set([
+  'diklik', 'diketik', 'ditekan', 'dilepas', 'dilewat', 'ditinggal',
+  'difokus', 'diblur', 'diubah', 'diseret', 'diubahukuran',
+  'dipindah', 'dikirim', 'direset', 'digulir', 'dikonteks',
+  'masuk', 'keluar', 'aktif', 'nonaktif', 'muat', 'salah'
+]);
+
+// ============================================================================
+// PROPERTI PERBARUI yang valid
+// ============================================================================
+const VALID_PERBARUI_PROPERTIES = new Set([
+  'teks', 'html', 'kelas', 'src', 'href', 'nilai', 'tipe',
+  'nama', 'ditandai', 'nonaktif', 'placeholder', 'gaya', 'atribut'
+]);
 
 // ============================================================================
 // SEMANTIC SYMBOL (dari Tim B)
@@ -86,7 +119,7 @@ function KarsaResolver() {
   this.currentScope = null;
   this.buatStack = [];
   this.allSymbols = [];
-  this.currentJalankanCallee = null;  // ← baru
+  this.currentJalankanCallee = null;
 }
 
 KarsaResolver.prototype = Object.create(BaseVisitor.prototype);
@@ -119,19 +152,24 @@ KarsaResolver.prototype.addSymbol = function(name, kind, node, metadata = {}) {
   // Deteksi duplikat (E3002 - Tim B)
   const existing = this.currentScope.symbols.get(name);
   if (existing) {
-    this.errors.push({
-      kode: 'E3002',
-      pesan: `Simbol "${name}" sudah dideklarasikan dalam scope yang sama.`,
-      loc: node.loc,
-      saran: `Deklarasi pertama ada di Baris ${existing.declarationNode.loc.start.line}.`
-    });
+    this.errors.push(Err.createError('E3002', node.loc, {
+      message: `Simbol "${name}" sudah dideklarasikan dalam scope yang sama.`,
+      suggestion: `Deklarasi pertama ada di Baris ${existing.declarationNode.loc.start.line}.`
+    }));
     return null;
   }
 
-  // Shadowing (Tim B)
+  // Shadowing (Tim B) → W3002
   const shadowed = this.currentScope.parent 
     ? this.currentScope.parent.lookup(name) 
     : null;
+
+  if (shadowed) {
+    this.warnings.push(Err.createError('W3002', node.loc, {
+      message: `Variabel "${name}" menyembunyikan variabel dengan nama sama di scope luar.`,
+      suggestion: 'Gunakan nama yang berbeda untuk menghindari kebingungan.'
+    }));
+  }
 
   const symbol = new SemanticSymbol(name, kind, node, this.currentScope.type, {
     ...metadata,
@@ -184,7 +222,12 @@ KarsaResolver.prototype.visitIdentifier = function(node) {
     symbol.readCount++;
     symbol.references.push(node);
   } else {
+    // [C3 FIX] Emit E3001 untuk identifier yang tidak dideklarasikan
     node.isUndefined = true;
+    this.errors.push(Err.createError('E3001', node.loc, {
+      message: `Identifier "${node.name}" tidak dideklarasikan.`,
+      suggestion: 'Periksa ejaan identifier atau deklarasikan variabel terlebih dahulu.'
+    }));
   }
 };
 
@@ -216,11 +259,11 @@ KarsaResolver.prototype.visitJalankanExpression = function(node) {
   const prevCallee = this.currentJalankanCallee;
   this.currentJalankanCallee = node.callee; // node.callee adalah string
 
-  // Jika ada argumen, visit mereka (identifier di dalamnya tetap di-resolve)
-  if (node.args) {
-    node.args.forEach(arg => accept(arg, this));
+  // [C2 FIX] node.args → node.arguments (sesuai AST factory)
+  if (node.arguments && node.arguments.length > 0) {
+    node.arguments.forEach(arg => accept(arg, this));
   }
-  if (node.withArgs) {
+  if (node.withArgs && node.withArgs.length > 0) {
     node.withArgs.forEach(arg => accept(arg, this));
   }
 
@@ -236,17 +279,193 @@ KarsaResolver.prototype.markAsJSExternal = function(node) {
   }
 };
 
+// ─── Write-Tracking Helper ────────────────────────────────
+/**
+ * Melacak penulisan ke variabel dan memvalidasi isWritable.
+ * Digunakan oleh simpan, tambahkan, kurangi, sisipkan, perbarui.
+ */
+KarsaResolver.prototype._trackWrite = function(targetName, node) {
+  if (!targetName) return;
+  const symbol = this.currentScope.lookup(targetName);
+  if (symbol) {
+    symbol.writeCount++;
+    node.targetSymbol = symbol;  // untuk Analyzer (proteksi read-only)
+
+    // [C4 FIX] Emit E3003 jika menulis ke variabel tetap (const)
+    if (!symbol.isWritable) {
+      this.errors.push(Err.createError('E3003', node.loc, {
+        message: `Variabel tetap "${targetName}" tidak dapat diubah setelah inisialisasi.`,
+        suggestion: 'Gunakan "ubah" jika variabel perlu diubah, bukan "tetap".'
+      }));
+    }
+  }
+};
+
 // ─── SimpanStatement (Tim B: write tracking) ──────────────
 KarsaResolver.prototype.visitSimpanStatement = function(node) {
   // Catat penulisan jika target berupa identifier (node.target adalah string nama)
   if (typeof node.target === 'string') {
-    const symbol = this.currentScope.lookup(node.target);
-    if (symbol) {
-      symbol.writeCount++;
-      node.targetSymbol = symbol;  // untuk Analyzer (proteksi read-only)
-    }
+    this._trackWrite(node.target, node);
+  } else if (node.target && node.target.type === 'Identifier') {
+    this._trackWrite(node.target.name, node);
   }
   this.genericVisit(node);
+};
+
+// ─── Mutation Statements: Write Tracking (M2 FIX) ─────────
+KarsaResolver.prototype.visitTambahkanStatement = function(node) {
+  if (typeof node.target === 'string') {
+    this._trackWrite(node.target, node);
+  } else if (node.target && node.target.type === 'Identifier') {
+    this._trackWrite(node.target.name, node);
+  }
+  this.genericVisit(node);
+};
+
+KarsaResolver.prototype.visitKurangiStatement = function(node) {
+  if (typeof node.target === 'string') {
+    this._trackWrite(node.target, node);
+  } else if (node.target && node.target.type === 'Identifier') {
+    this._trackWrite(node.target.name, node);
+  }
+  this.genericVisit(node);
+};
+
+KarsaResolver.prototype.visitSisipkanStatement = function(node) {
+  if (typeof node.target === 'string') {
+    this._trackWrite(node.target, node);
+  } else if (node.target && node.target.type === 'Identifier') {
+    this._trackWrite(node.target.name, node);
+  }
+  this.genericVisit(node);
+};
+
+// ─── PerbaruiStatement (H3 FIX: visitor baru) ──────────────
+KarsaResolver.prototype.visitPerbaruiStatement = function(node) {
+  // Resolve target jika berupa identifier
+  if (node.target) {
+    if (typeof node.target === 'string') {
+      this._trackWrite(node.target, node);
+    } else {
+      accept(node.target, this);
+      // Jika target adalah identifier, lacak penulisan
+      if (node.target.type === 'Identifier' && node.target.name) {
+        this._trackWrite(node.target.name, node);
+      }
+    }
+  }
+
+  // Resolve value expression
+  if (node.value) accept(node.value, this);
+
+  // Validasi properti perbarui
+  if (node.property && typeof node.property === 'string') {
+    if (!VALID_PERBARUI_PROPERTIES.has(node.property)) {
+      this.warnings.push(Err.createError('E4008', node.loc, {
+        message: `Properti perbarui "${node.property}" mungkin tidak didukung.`,
+        suggestion: 'Gunakan properti yang didukung: teks, html, kelas, src, href, nilai, dll.'
+      }));
+    }
+  }
+};
+
+// ─── GunakanStatement (H3 FIX: visitor baru) ───────────────
+KarsaResolver.prototype.visitGunakanStatement = function(node) {
+  // Validasi bahwa nama komponen terdaftar
+  if (node.componentName) {
+    const symbol = this.currentScope.lookup(node.componentName);
+    if (!symbol) {
+      // [E3004] Komponen tidak dideklarasikan
+      this.errors.push(Err.createError('E3004', node.loc, {
+        message: `Komponen "${node.componentName}" digunakan sebelum dideklarasi.`,
+        suggestion: 'Pindahkan deklarasi komponen sebelum penggunaannya.'
+      }));
+    } else if (symbol.kind !== 'komponen') {
+      // [E4010] gunakan untuk non-komponen
+      this.errors.push(Err.createError('E4010', node.loc, {
+        message: `"${node.componentName}" bukan komponen, tidak dapat digunakan dengan "gunakan".`,
+        suggestion: 'Pastikan nama yang direferensikan adalah komponen (PascalCase).'
+      }));
+    }
+  }
+
+  // Resolve props jika ada
+  if (node.props) {
+    node.props.forEach(prop => {
+      if (prop.value) accept(prop.value, this);
+    });
+  }
+
+  this.genericVisit(node);
+};
+
+// ─── TampilkanStatement (H3 FIX) ───────────────────────────
+KarsaResolver.prototype.visitTampilkanStatement = function(node) {
+  if (node.target) accept(node.target, this);
+  this.genericVisit(node);
+};
+
+// ─── SembunyikanStatement (H3 FIX) ─────────────────────────
+KarsaResolver.prototype.visitSembunyikanStatement = function(node) {
+  if (node.target) accept(node.target, this);
+  this.genericVisit(node);
+};
+
+// ─── HapusStatement (H3 FIX) ───────────────────────────────
+KarsaResolver.prototype.visitHapusStatement = function(node) {
+  if (node.target) accept(node.target, this);
+  this.genericVisit(node);
+};
+
+// ─── KosongkanStatement (H3 FIX) ───────────────────────────
+KarsaResolver.prototype.visitKosongkanStatement = function(node) {
+  if (node.target) accept(node.target, this);
+  this.genericVisit(node);
+};
+
+// ─── ArahkanStatement (H3 FIX) ─────────────────────────────
+KarsaResolver.prototype.visitArahkanStatement = function(node) {
+  if (node.url) accept(node.url, this);
+  this.genericVisit(node);
+};
+
+// ─── SetelahStatement (H3 FIX) ─────────────────────────────
+KarsaResolver.prototype.visitSetelahStatement = function(node) {
+  // Setelah (after-render hook) — body bisa berisi statement biasa
+  this.genericVisit(node);
+};
+
+// ─── AmbilDomStatement (H3 FIX) ────────────────────────────
+KarsaResolver.prototype.visitAmbilDomStatement = function(node) {
+  if (node.source) accept(node.source, this);
+  this.genericVisit(node);
+};
+
+// ─── AmbilLuarStatement (H3 FIX) ───────────────────────────
+KarsaResolver.prototype.visitAmbilLuarStatement = function(node) {
+  if (node.url) accept(node.url, this);
+
+  // Buat scope untuk callback
+  const prevScope = this.currentScope;
+  this.currentScope = new Scope('blok', prevScope);
+
+  if (node.saveTarget) {
+    this.addSymbol(node.saveTarget, 'ubah', node, { isWritable: true });
+  }
+
+  this.genericVisit(node);
+  this.currentScope = prevScope;
+};
+
+// ─── SelamaStatement (H3 FIX: scope untuk loop body) ───────
+KarsaResolver.prototype.visitSelamaStatement = function(node) {
+  // Resolve kondisi di scope sekarang
+  if (node.condition) accept(node.condition, this);
+
+  const prevScope = this.currentScope;
+  this.currentScope = new Scope('blok', prevScope);
+  if (node.body) accept(node.body, this);
+  this.currentScope = prevScope;
 };
 
 // ─── Scope: Blok, Fungsi, Komponen, Ulangi (Tim B, disempurnakan) ──
@@ -323,14 +542,22 @@ KarsaResolver.prototype.visitKetikaStatement = function(node) {
         loc: node.loc
       };
     } else {
-      this.errors.push({
-        kode: 'E5001',
-        pesan: 'Event listener "ketika" tanpa target hanya boleh di dalam blok "buat" atau "komponen".',
-        loc: node.loc
-      });
+      // [H1 FIX] E5001 → E3005 (kode error resolver, bukan compiler)
+      this.errors.push(Err.createError('E3005', node.loc, {
+        message: 'Event listener "ketika" tanpa target hanya boleh di dalam blok "buat" atau "komponen".',
+        suggestion: 'Tambahkan target pada "ketika" atau letakkan di dalam blok "buat"/"komponen".'
+      }));
     }
   } else {
     accept(node.target, this);
+  }
+
+  // Validasi event name jika tersedia
+  if (node.event && typeof node.event === 'string' && !VALID_EVENT_NAMES.has(node.event)) {
+    this.warnings.push(Err.createError('E4009', node.loc, {
+      message: `Event name "${node.event}" mungkin tidak dikenali.`,
+      suggestion: 'Gunakan nama event yang valid: diklik, diketik, ditekan, dll.'
+    }));
   }
 
   // Watcher-like scope (Tim A)
@@ -346,14 +573,18 @@ KarsaResolver.prototype.visitSaatStatement = function(node) {
   // Resolve target reaktif
   const binding = this.currentScope.lookup(node.target);
   if (!binding) {
-    // Tidak langsung error; Analyzer akan menangani (Tim B)
+    // Emit E3001 untuk watcher target yang tidak dideklarasikan
     node.isUndefined = true;
+    this.errors.push(Err.createError('E3001', node.loc, {
+      message: `Identifier "${node.target}" tidak dideklarasikan.`,
+      suggestion: 'Periksa ejaan identifier atau deklarasikan variabel terlebih dahulu.'
+    }));
   } else if (!binding.isReactive) {
-    this.warnings.push({
-      kode: 'W3001',
-      pesan: `Variabel "${node.target}" bukan data reaktif. Watcher mungkin tidak akan pernah terpicu.`,
-      loc: node.loc
-    });
+    // [M4 FIX] W3001 → W3003 (kode baru khusus: watcher target non-reaktif)
+    this.warnings.push(Err.createError('W3003', node.loc, {
+      message: `Variabel "${node.target}" bukan data reaktif. Watcher mungkin tidak akan pernah terpicu.`,
+      suggestion: 'Gunakan "data" (var) reaktif sebagai target watcher.'
+    }));
   }
 
   const prevScope = this.currentScope;
@@ -374,6 +605,13 @@ KarsaResolver.prototype.visitTetapDeclaration = function(node) {
   if (!this.currentScope.symbols.has(node.name)) {
     this.addSymbol(node.name, 'tetap', node, { isWritable: false });
   }
+  // [W4003] Warning: tetap tanpa nilai awal
+  if (!node.init) {
+    this.warnings.push(Err.createError('W4003', node.loc, {
+      message: `Deklarasi "tetap" untuk "${node.name}" tanpa nilai awal.`,
+      suggestion: 'Berikan nilai awal untuk konstanta.'
+    }));
+  }
   this.genericVisit(node);
 };
 
@@ -392,8 +630,18 @@ KarsaResolver.prototype.visitTurunanDeclaration = function(node) {
 };
 
 // ─── Error Helper ──────────────────────────────────────────
-KarsaResolver.prototype.addError = function(kode, pesan, loc) {
-  this.errors.push({ kode, pesan, loc });
+KarsaResolver.prototype.addError = function(code, message, loc, suggestion) {
+  this.errors.push(Err.createError(code, loc, {
+    message: message,
+    suggestion: suggestion || ''
+  }));
+};
+
+KarsaResolver.prototype.addWarning = function(code, message, loc, suggestion) {
+  this.warnings.push(Err.createError(code, loc, {
+    message: message,
+    suggestion: suggestion || ''
+  }));
 };
 
 module.exports = KarsaResolver;
