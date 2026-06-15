@@ -1,11 +1,37 @@
 /**
- * KARSA v0.3.1 — Kode Error Parser (E2xxx)
- *
- * Berdasarkan: RFC-PARSER-001 Lampiran A
- * Parser tidak pernah throw; semua error dikembalikan melalui array errors.
+ * KARSA v0.3.1 — Unified Error Code Registry
+ * ============================================================================
+ * Mendaftarkan semua kode error dan warning lintas tahap pipeline KARSA.
+ * Konvensi penomoran:
+ *   E1xxx / W1xxx — Lexer
+ *   E2xxx / W2xxx — Parser
+ *   E3xxx / W3xxx — Resolver
+ *   E4xxx / W4xxx — Analyzer
+ *   E5xxx / W5xxx — Compiler
+ *   E6xxx / W6xxx — Runtime / Engine
+ *   E0xxx         — System-level errors
  */
 
-// ─── Kode Error Fatal ──────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// LEXER (E1xxx / W1xxx)
+// ═══════════════════════════════════════════════════════════════
+
+var E1001 = 'E1001'; // Indentasi ganjil (bukan kelipatan 2)
+var E1002 = 'E1002'; // Karakter TAB ditemukan di indentasi
+var E1003 = 'E1003'; // DEDENT tidak cocok dengan level manapun
+var E1004 = 'E1004'; // String tidak ditutup
+var E1005 = 'E1005'; // Karakter tidak dikenali
+var E1006 = 'E1006'; // Komentar blok [[ tidak ditutup ]]
+var E1007 = 'E1007'; // Blok DocString [[ tidak ditutup ]]
+var E1008 = 'E1008'; // Angka literal tidak valid
+var E1009 = 'E1009'; // Selector CSS tidak valid
+
+var W1001 = 'W1001'; // DocString tidak menempel ke node manapun
+
+// ═══════════════════════════════════════════════════════════════
+// PARSER (E2xxx / W2xxx)
+// ═══════════════════════════════════════════════════════════════
+
 var E2001 = 'E2001'; // Token tidak sesuai yang diharapkan
 var E2002 = 'E2002'; // Selector tidak valid
 var E2003 = 'E2003'; // Nama komponen harus diawali huruf kapital
@@ -31,15 +57,91 @@ var E2022 = 'E2022'; // Target tampilkan tidak valid
 var E2023 = 'E2023'; // Token tidak terduga di akhir file
 var E2024 = 'E2024'; // ambil tanpa konteks yang jelas
 var E2025 = 'E2025'; // Daftar props gunakan tidak valid
+var E2026 = 'E2026'; // Ekspresi kosong tidak valid
+var E2027 = 'E2027'; // Properti perbarui tidak dikenali
+var E2028 = 'E2028'; // Body komponen/fungsi kosong
 
-// ─── Kode Warning ──────────────────────────────────────────
 var W2001 = 'W2001'; // DocString tidak menempel ke node manapun
 var W2002 = 'W2002'; // Blok kosong terdeteksi
 var W2003 = 'W2003'; // Rantai jika tanpa cabang jika tidak
 var W2004 = 'W2004'; // Jumlah argumen mungkin tidak sesuai
 
-// ─── Pesan Error per Kode ──────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// RESOLVER (E3xxx / W3xxx)
+// ═══════════════════════════════════════════════════════════════
+
+var E3001 = 'E3001'; // Identifier tidak dideklarasikan (undefined)
+var E3002 = 'E3002'; // Simbol sudah dideklarasikan dalam scope yang sama (duplikat)
+var E3003 = 'E3003'; // Menulis ke variabel tetap (const)
+var E3004 = 'E3004'; // Menggunakan komponen sebelum dideklarasi
+
+var W3001 = 'W3001'; // Variabel dideklarasikan tapi tidak pernah digunakan
+var W3002 = 'W3002'; // Variabel shadowing variabel di scope luar
+
+// ═══════════════════════════════════════════════════════════════
+// ANALYZER (E4xxx / W4xxx)
+// ═══════════════════════════════════════════════════════════════
+
+var E4001 = 'E4001'; // Lifecycle hook di luar komponen
+var E4002 = 'E4002'; // Aksi side-effect di dalam ekspresi turunan
+var E4003 = 'E4003'; // Tipe data tidak kompatibel
+var E4004 = 'E4004'; // Menulis ke data turunan (read-only)
+var E4005 = 'E4005'; // Parameter duplikat dalam komponen
+var E4006 = 'E4006'; // Parameter tanpa default setelah parameter dengan default
+var E4007 = 'E4007'; // Mode tampilkan tidak valid
+var E4008 = 'E4008'; // Properti perbarui tidak didukung
+var E4009 = 'E4009'; // Event name tidak dikenali
+var E4010 = 'E4010'; // Penggunaan gunakan untuk non-komponen
+
+var W4001 = 'W4001'; // Type hint tidak cocok dengan nilai
+var W4002 = 'W4002'; // Lifecycle hook di dalam loop/handler
+var W4003 = 'W4003'; // Deklarasi tetap tanpa nilai awal
+var W4004 = 'W4004'; // Potensi bug: perbandingan assignment
+
+// ═══════════════════════════════════════════════════════════════
+// COMPILER (E5xxx / W5xxx)
+// ═══════════════════════════════════════════════════════════════
+
+var E5001 = 'E5001'; // Node AST tidak didukung oleh compiler
+var E5002 = 'E5002'; // Gagal menurunkan ekspresi ke JavaScript
+var E5003 = 'E5003'; // Selector tidak dapat dikompilasi
+
+var W5001 = 'W5001'; // Kode yang dihasilkan mungkin tidak berjalan sesuai harapan
+var W5002 = 'W5002'; // Fitur eksperimental digunakan
+
+// ═══════════════════════════════════════════════════════════════
+// RUNTIME / ENGINE (E6xxx / W6xxx)
+// ═══════════════════════════════════════════════════════════════
+
+var E6001 = 'E6001'; // berhenti di luar konteks loop/handler
+var E6002 = 'E6002'; // lewati di luar konteks loop
+var E6003 = 'E6003'; // kembalikan di luar fungsi/komponen
+var E6004 = 'E6004'; // Pipeline gagal (system error)
+
+// ═══════════════════════════════════════════════════════════════
+// SYSTEM (E0xxx)
+// ═══════════════════════════════════════════════════════════════
+
+var E0000 = 'E0000'; // System error (unhandled exception)
+
+// ═══════════════════════════════════════════════════════════════
+// ERROR MESSAGES (unified registry)
+// ═══════════════════════════════════════════════════════════════
+
 var ERROR_MESSAGES = {};
+
+// -- Lexer --
+ERROR_MESSAGES[E1001] = 'Indentasi tidak valid: {n} spasi ditemukan, Karsa memakai 2 spasi per level';
+ERROR_MESSAGES[E1002] = 'Indentasi tidak valid: karakter TAB ditemukan';
+ERROR_MESSAGES[E1003] = 'Indentasi tidak konsisten: {n} spasi tidak cocok dengan level indentasi manapun';
+ERROR_MESSAGES[E1004] = 'String tidak ditutup: tanda kutip penutup tidak ditemukan';
+ERROR_MESSAGES[E1005] = 'Karakter tidak dikenali: "{char}"';
+ERROR_MESSAGES[E1006] = 'Komentar blok "[[" tidak ditutup dengan "]]"';
+ERROR_MESSAGES[E1007] = 'Blok DocString "[[" tidak ditutup dengan "]]"';
+ERROR_MESSAGES[E1008] = 'Angka literal tidak valid';
+ERROR_MESSAGES[E1009] = 'Selector CSS tidak valid';
+
+// -- Parser --
 ERROR_MESSAGES[E2001] = 'Diharapkan {expected}, tetapi ditemukan "{actual}"';
 ERROR_MESSAGES[E2002] = 'Selector tidak valid';
 ERROR_MESSAGES[E2003] = 'Nama komponen harus diawali huruf kapital';
@@ -65,9 +167,60 @@ ERROR_MESSAGES[E2022] = 'Target "tampilkan" tidak valid';
 ERROR_MESSAGES[E2023] = 'Token tidak terduga di akhir file';
 ERROR_MESSAGES[E2024] = '"ambil" tanpa konteks yang jelas';
 ERROR_MESSAGES[E2025] = 'Daftar props "gunakan" tidak valid';
+ERROR_MESSAGES[E2026] = 'Ekspresi kosong tidak valid';
+ERROR_MESSAGES[E2027] = 'Properti perbarui tidak dikenali';
+ERROR_MESSAGES[E2028] = 'Body komponen/fungsi kosong';
 
-// ─── Saran per Kode ────────────────────────────────────────
+// -- Resolver --
+ERROR_MESSAGES[E3001] = 'Identifier "{name}" tidak dideklarasikan';
+ERROR_MESSAGES[E3002] = 'Simbol "{name}" sudah dideklarasikan dalam scope yang sama';
+ERROR_MESSAGES[E3003] = 'Variabel tetap "{name}" tidak dapat diubah setelah inisialisasi';
+ERROR_MESSAGES[E3004] = 'Komponen "{name}" digunakan sebelum dideklarasi';
+
+// -- Analyzer --
+ERROR_MESSAGES[E4001] = 'Lifecycle hook hanya valid di dalam komponen';
+ERROR_MESSAGES[E4002] = 'Ekspresi turunan tidak boleh mengandung aksi side-effect';
+ERROR_MESSAGES[E4003] = 'Tipe data tidak kompatibel';
+ERROR_MESSAGES[E4004] = 'Data turunan "{name}" bersifat read-only dan tidak boleh diubah';
+ERROR_MESSAGES[E4005] = 'Parameter duplikat dalam komponen';
+ERROR_MESSAGES[E4006] = 'Parameter tanpa default tidak boleh setelah parameter dengan default';
+ERROR_MESSAGES[E4007] = 'Mode tampilkan tidak valid';
+ERROR_MESSAGES[E4008] = 'Properti perbarui tidak didukung';
+ERROR_MESSAGES[E4009] = 'Event name tidak dikenali';
+ERROR_MESSAGES[E4010] = 'Penggunaan "gunakan" untuk non-komponen';
+
+// -- Compiler --
+ERROR_MESSAGES[E5001] = 'Node AST bertipe "{type}" tidak didukung oleh compiler';
+ERROR_MESSAGES[E5002] = 'Gagal menurunkan ekspresi ke JavaScript';
+ERROR_MESSAGES[E5003] = 'Selector tidak dapat dikompilasi';
+
+// -- Runtime --
+ERROR_MESSAGES[E6001] = '"berhenti" tidak valid di luar loop atau handler';
+ERROR_MESSAGES[E6002] = '"lewati" tidak valid di luar loop';
+ERROR_MESSAGES[E6003] = '"kembalikan" tidak valid di luar fungsi atau komponen';
+ERROR_MESSAGES[E6004] = 'Pipeline gagal';
+
+// -- System --
+ERROR_MESSAGES[E0000] = 'System error';
+
+// ═══════════════════════════════════════════════════════════════
+// SUGGESTIONS (unified registry)
+// ═══════════════════════════════════════════════════════════════
+
 var ERROR_SUGGESTIONS = {};
+
+// -- Lexer --
+ERROR_SUGGESTIONS[E1001] = 'Gunakan 2, 4, 6, atau 8 spasi (kelipatan 2)';
+ERROR_SUGGESTIONS[E1002] = 'Ganti semua tab menjadi spasi (2, 4, 6, ...)';
+ERROR_SUGGESTIONS[E1003] = 'Periksa baris di atasnya dan gunakan indentasi yang konsisten';
+ERROR_SUGGESTIONS[E1004] = 'Tambahkan tanda kutip penutup yang sesuai';
+ERROR_SUGGESTIONS[E1005] = 'Periksa karakter dan pastikan sesuai dengan spesifikasi KARSA';
+ERROR_SUGGESTIONS[E1006] = 'Tambahkan "]]" untuk menutup komentar blok';
+ERROR_SUGGESTIONS[E1007] = 'Tambahkan "]]" untuk menutup blok DocString';
+ERROR_SUGGESTIONS[E1008] = 'Periksa format angka (desimal, heksadesimal, dll.)';
+ERROR_SUGGESTIONS[E1009] = 'Pastikan selector CSS valid (#id, .class, tag)';
+
+// -- Parser --
 ERROR_SUGGESTIONS[E2001] = 'Periksa sintaksis pada lokasi yang ditunjuk';
 ERROR_SUGGESTIONS[E2002] = 'Pastikan selector diawali nama tag HTML atau identifier';
 ERROR_SUGGESTIONS[E2003] = 'Gunakan PascalCase untuk nama komponen';
@@ -88,29 +241,93 @@ ERROR_SUGGESTIONS[E2017] = 'Periksa target dan nama event';
 ERROR_SUGGESTIONS[E2018] = 'Periksa nama event (diklik, diketik, dsb.)';
 ERROR_SUGGESTIONS[E2019] = 'Pastikan "jika tidak" mengikuti "jika" atau "kalau"';
 ERROR_SUGGESTIONS[E2020] = 'Periksa indentasi (2 spasi per level)';
-ERROR_SUGGESTIONS[E2021] = 'Gunakan: ulangi <nama> dari <sumber>:, ulangi <N> kali:, atau ulangi <nama> dari <A> sampai <B>:';
+ERROR_SUGGESTIONS[E2021] = 'Gunakan: ulangi <nama> dari <sumber>: / ulangi <N> kali: / ulangi <nama> dari <A> sampai <B>:';
 ERROR_SUGGESTIONS[E2022] = 'Periksa target tampilkan';
 ERROR_SUGGESTIONS[E2023] = 'Ini menandakan bug Lexer; laporkan ke tim';
 ERROR_SUGGESTIONS[E2024] = 'Gunakan: ambil <jenis> dari <sumber> -> simpan ke <nama> atau ambil dari <url>:';
 ERROR_SUGGESTIONS[E2025] = 'Gunakan: gunakan <Komponen> dengan <prop>: <nilai>';
+ERROR_SUGGESTIONS[E2026] = 'Tambahkan ekspresi yang valid';
+ERROR_SUGGESTIONS[E2027] = 'Gunakan properti yang didukung: teks, html, kelas, src, href, dll.';
+ERROR_SUGGESTIONS[E2028] = 'Tambahkan setidaknya satu statement di dalam body';
+
+// -- Resolver --
+ERROR_SUGGESTIONS[E3001] = 'Periksa ejaan identifier atau deklarasikan variabel terlebih dahulu';
+ERROR_SUGGESTIONS[E3002] = 'Gunakan nama yang berbeda atau hapus deklarasi duplikat';
+ERROR_SUGGESTIONS[E3003] = 'Gunakan "ubah" jika variabel perlu diubah, bukan "tetap"';
+ERROR_SUGGESTIONS[E3004] = 'Pindahkan deklarasi komponen sebelum penggunaannya';
+
+// -- Analyzer --
+ERROR_SUGGESTIONS[E4001] = 'Pindahkan lifecycle hook ke dalam definisi komponen';
+ERROR_SUGGESTIONS[E4002] = 'Hapus aksi simpan/tambahkan/kurangi dari ekspresi turunan';
+ERROR_SUGGESTIONS[E4003] = 'Pastikan tipe data operan kompatibel';
+ERROR_SUGGESTIONS[E4004] = 'Gunakan data (var) biasa jika perlu mengubah nilainya';
+ERROR_SUGGESTIONS[E4005] = 'Hapus salah satu deklarasi parameter';
+ERROR_SUGGESTIONS[E4006] = 'Pindahkan parameter dengan default ke akhir daftar';
+ERROR_SUGGESTIONS[E4007] = 'Mode yang valid: tambahkan, ganti, awalan, sebelum, sesudah';
+ERROR_SUGGESTIONS[E4008] = 'Gunakan properti yang didukung oleh perbarui';
+ERROR_SUGGESTIONS[E4009] = 'Gunakan nama event yang valid: diklik, diketik, ditekan, dll.';
+ERROR_SUGGESTIONS[E4010] = 'Pastikan nama yang direferensikan adalah komponen (PascalCase)';
+
+// -- Compiler --
+ERROR_SUGGESTIONS[E5001] = 'Periksa apakah node type sudah didukung oleh compiler';
+ERROR_SUGGESTIONS[E5002] = 'Sederhanakan ekspresi atau gunakan "langsung:" untuk JS interop';
+ERROR_SUGGESTIONS[E5003] = 'Periksa format selector CSS';
+
+// -- Runtime --
+ERROR_SUGGESTIONS[E6001] = '"berhenti" hanya valid di dalam loop atau event handler';
+ERROR_SUGGESTIONS[E6002] = 'Gunakan "lewati" hanya di dalam "ulangi" atau "selama"';
+ERROR_SUGGESTIONS[E6003] = 'Gunakan "kembalikan" hanya di dalam fungsi atau komponen';
+ERROR_SUGGESTIONS[E6004] = 'Lihat detail error pada tahap yang gagal';
+
+// ═══════════════════════════════════════════════════════════════
+// SEVERITY HELPER
+// ═══════════════════════════════════════════════════════════════
 
 /**
- * Membuat objek ParseError.
- *
- * @param {string} code - Kode error (E2xxx)
+ * Mendapatkan severity berdasarkan kode error.
+ * @param {string} code - Kode error (Exxxx atau Wxxxx)
+ * @returns {string} 'error' atau 'warning'
+ */
+function getSeverity(code) {
+  if (!code) return 'error';
+  return code.charAt(0) === 'W' ? 'warning' : 'error';
+}
+
+/**
+ * Mendapatkan tahap pipeline berdasarkan kode error.
+ * @param {string} code - Kode error
+ * @returns {string} Nama tahap: 'Lexer', 'Parser', 'Resolver', 'Analyzer', 'Compiler', 'Runtime', 'System'
+ */
+function getStage(code) {
+  if (!code || code.length < 2) return 'System';
+  var stageNum = code.charAt(1);
+  switch (stageNum) {
+    case '1': return 'Lexer';
+    case '2': return 'Parser';
+    case '3': return 'Resolver';
+    case '4': return 'Analyzer';
+    case '5': return 'Compiler';
+    case '6': return 'Runtime';
+    default: return 'System';
+  }
+}
+
+/**
+ * Membuat objek error terformat dari kode error.
+ * @param {string} code - Kode error
  * @param {object} loc - SourceLocation { start, end }
  * @param {object} [overrides] - Properti opsional untuk override
- * @returns {object} ParseError
+ * @returns {object} Objek error terformat
  */
-function buatParseError(code, loc, overrides) {
-  var severity = code.charAt(0) === 'W' ? 'warning' : 'error';
+function createError(code, loc, overrides) {
+  var severity = getSeverity(code);
   var err = {
     code: code,
+    severity: severity,
+    stage: getStage(code),
     message: ERROR_MESSAGES[code] || 'Error tidak dikenal',
-    explanation: '',
     suggestion: ERROR_SUGGESTIONS[code] || '',
-    loc: loc,
-    severity: severity
+    loc: loc
   };
   if (overrides) {
     for (var key in overrides) {
@@ -124,30 +341,70 @@ function buatParseError(code, loc, overrides) {
 
 /**
  * Format error untuk tampilan pengguna.
- *
- * @param {object} err - ParseError
+ * @param {object} err - Objek error
  * @returns {string} Pesan yang diformat
  */
 function formatError(err) {
-  var baris = err.loc.start.line;
-  var kolom = err.loc.start.column;
+  var locStr = '';
+  if (err.loc && err.loc.start) {
+    locStr = 'Baris ' + err.loc.start.line + ', Kolom ' + err.loc.start.column;
+  } else if (err.baris !== undefined) {
+    locStr = 'Baris ' + err.baris + ', Kolom ' + err.kolom;
+  }
   var prefix = err.severity === 'warning' ? '⚠' : '✗';
-  return prefix + ' Baris ' + baris + ', Kolom ' + kolom + ' [' + err.code + ']\n' +
+  var stageStr = err.stage ? ' [' + err.stage + ']' : '';
+  return prefix + ' ' + locStr + stageStr + ' [' + err.code + ']\n' +
     err.message + '\n' +
-    (err.suggestion ? 'Saran: ' + err.suggestion : '');
+    (err.suggestion || err.saran ? 'Saran: ' + (err.suggestion || err.saran) : '');
 }
 
+// ═══════════════════════════════════════════════════════════════
+// EXPORTS
+// ═══════════════════════════════════════════════════════════════
+
 module.exports = {
+  // Lexer errors
+  E1001: E1001, E1002: E1002, E1003: E1003, E1004: E1004,
+  E1005: E1005, E1006: E1006, E1007: E1007, E1008: E1008, E1009: E1009,
+  W1001: W1001,
+
+  // Parser errors
   E2001: E2001, E2002: E2002, E2003: E2003, E2004: E2004,
   E2005: E2005, E2006: E2006, E2007: E2007, E2008: E2008,
   E2009: E2009, E2010: E2010, E2011: E2011, E2012: E2012,
   E2013: E2013, E2014: E2014, E2015: E2015, E2016: E2016,
   E2017: E2017, E2018: E2018, E2019: E2019, E2020: E2020,
   E2021: E2021, E2022: E2022, E2023: E2023, E2024: E2024,
-  E2025: E2025,
+  E2025: E2025, E2026: E2026, E2027: E2027, E2028: E2028,
   W2001: W2001, W2002: W2002, W2003: W2003, W2004: W2004,
+
+  // Resolver errors
+  E3001: E3001, E3002: E3002, E3003: E3003, E3004: E3004,
+  W3001: W3001, W3002: W3002,
+
+  // Analyzer errors
+  E4001: E4001, E4002: E4002, E4003: E4003, E4004: E4004,
+  E4005: E4005, E4006: E4006, E4007: E4007, E4008: E4008,
+  E4009: E4009, E4010: E4010,
+  W4001: W4001, W4002: W4002, W4003: W4003, W4004: W4004,
+
+  // Compiler errors
+  E5001: E5001, E5002: E5002, E5003: E5003,
+  W5001: W5001, W5002: W5002,
+
+  // Runtime errors
+  E6001: E6001, E6002: E6002, E6003: E6003, E6004: E6004,
+
+  // System errors
+  E0000: E0000,
+
+  // Registries
   ERROR_MESSAGES: ERROR_MESSAGES,
   ERROR_SUGGESTIONS: ERROR_SUGGESTIONS,
-  buatParseError: buatParseError,
+
+  // Utility functions
+  getSeverity: getSeverity,
+  getStage: getStage,
+  createError: createError,
   formatError: formatError
 };
