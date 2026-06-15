@@ -989,7 +989,7 @@ function parseKurangiStatement(parser) {
     value = Expr.parseExpression(parser, 0);
   }
 
-  var endLoc = value ? value.loc.end : { line: targetToken.baris, column: targetToken.kolom + target.length };
+  var endLoc = value ? value.loc.end : (targetToken ? { line: targetToken.baris, column: targetToken.kolom + target.length } : null);
   return AST.buatKurangiStatement(target,
     AST.buatLoc({ line: startToken.baris, column: startToken.kolom }, endLoc),
     docstring, value);
