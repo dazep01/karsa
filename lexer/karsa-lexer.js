@@ -339,9 +339,14 @@
     this.baris = baris;
     this.kolom = kolom;
     this.kode = kode;
+    this.code = kode;
     this.pesan = pesan;
+    this.message = pesan;
     this.penjelasan = penjelasan || "";
     this.saran = saran || "";
+    this.suggestion = saran || "";
+    this.severity = kode.charAt(0) === 'W' ? 'warning' : 'error';
+    this.loc = { start: { line: baris, column: kolom }, end: { line: baris, column: kolom } };
   }
   LexerError.prototype.toString = function () {
     return formatError(this);
@@ -406,7 +411,14 @@
   };
 
   Lexer.prototype.warning = function (baris, kolom, kode, pesan) {
-    this.warnings.push({ baris: baris, kolom: kolom, kode: kode, pesan: pesan });
+    this.warnings.push({
+      baris: baris, kolom: kolom,
+      kode: kode, code: kode,
+      pesan: pesan, message: pesan,
+      saran: '', suggestion: '',
+      severity: 'warning',
+      loc: { start: { line: baris, column: kolom }, end: { line: baris, column: kolom } }
+    });
   };
 
   /* ---------- util gerak kursor ---------- */
