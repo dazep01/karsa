@@ -623,7 +623,8 @@ KarsaCompiler.prototype.visitTambahkanStatement = function(node) {
 
 KarsaCompiler.prototype.visitKurangiStatement = function(node) {
   const target = node.target;
-  const jumlah = this.lowerExpression(node.value);
+  // [C6 FIX] Default ke 1 jika tidak ada value (kurangi counter → counter - 1)
+  const jumlah = node.value ? this.lowerExpression(node.value) : '1';
   this.emit(`__setState(${target}, ${target}.value - ${jumlah});`);
 };
 
