@@ -334,12 +334,17 @@ function getStage(code) {
  */
 function createError(code, loc, overrides) {
   var severity = getSeverity(code);
+  var msg = ERROR_MESSAGES[code] || 'Error tidak dikenal';
+  var saran = ERROR_SUGGESTIONS[code] || '';
   var err = {
     code: code,
+    kode: code,
     severity: severity,
     stage: getStage(code),
-    message: ERROR_MESSAGES[code] || 'Error tidak dikenal',
-    suggestion: ERROR_SUGGESTIONS[code] || '',
+    message: msg,
+    pesan: msg,
+    suggestion: saran,
+    saran: saran,
     loc: loc
   };
   if (overrides) {
@@ -349,6 +354,9 @@ function createError(code, loc, overrides) {
       }
     }
   }
+  // Sinkronkan alias jika overrides mengubah field utama
+  if (err.message !== msg) err.pesan = err.message;
+  if (err.suggestion !== saran) err.saran = err.suggestion;
   return err;
 }
 
@@ -356,18 +364,16 @@ function createError(code, loc, overrides) {
  * Alias untuk createError — kompatibilitas mundur dengan parser.
  * Parser menggunakan Err.buatParseError(code, loc, overrides).
  *
+ * Sejak v0.3.1-patch: createError() sudah menghasilkan field kode/pesan/saran
+ * secara otomatis, sehingga fungsi ini hanya menjadi wrapper langsung.
+ *
  * @param {string} code - Kode error
  * @param {object} loc - SourceLocation { start, end }
  * @param {object} [overrides] - Properti opsional untuk override
  * @returns {object} Objek error terformat (format: kode/pesan/saran/loc/severity)
  */
 function buatParseError(code, loc, overrides) {
-  var err = createError(code, loc, overrides);
-  // Menambahkan field alias Indonesia untuk kompatibilitas dengan resolver/analyzer
-  err.kode = err.code;
-  err.pesan = err.message;
-  err.saran = err.suggestion;
-  return err;
+  return createError(code, loc, overrides);
 }
 
 /**
