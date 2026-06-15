@@ -2,13 +2,34 @@
  * KARSA v0.3.1 — AST Node Factory
  *
  * Fungsi pembuatan node AST yang menjamin:
- * - Setiap node memiliki `type` dan `loc`
+ * - Setiap node memiliki `type` dan `loc` (TIDAK PERNAH null/undefined)
  * - `loc` mengikuti format SourceLocation { start: Position, end: Position }
  * - Properti anak berupa array, bukan null
  * - ErrorNode digunakan sebagai pengganti null pada posisi anak
+ * - Jika loc tidak disediakan, digunakan UNKNOWN_LOC (0:0-0:0)
  *
  * Berdasarkan: AST Specification v1.0.0
  */
+
+/**
+ * Lokasi default untuk node yang tidak memiliki informasi posisi.
+ * Digunakan sebagai fallback ketika parser tidak menyediakan loc.
+ */
+var UNKNOWN_LOC = {
+  start: { line: 0, column: 0 },
+  end: { line: 0, column: 0 }
+};
+
+/**
+ * Memastikan loc selalu valid. Jika loc null/undefined, kembalikan UNKNOWN_LOC.
+ * @param {object|null|undefined} loc
+ * @returns {object} SourceLocation yang valid
+ */
+function ensureLoc(loc) {
+  if (!loc) return UNKNOWN_LOC;
+  if (!loc.start) return UNKNOWN_LOC;
+  return loc;
+}
 
 /**
  * Membuat SourceLocation dari token atau dua posisi.
@@ -17,6 +38,9 @@
  * @returns {object} SourceLocation
  */
 function buatLoc(start, end) {
+  // Jika keduanya tidak ada, kembalikan UNKNOWN_LOC
+  if (!start && !end) return UNKNOWN_LOC;
+
   var s = start;
   var e = end;
   // Jika start adalah token, ambil posisinya
@@ -30,6 +54,8 @@ function buatLoc(start, end) {
   if (!e) {
     e = s;
   }
+  // Jika start masih tidak valid, kembalikan UNKNOWN_LOC
+  if (!s) return UNKNOWN_LOC;
   return {
     start: { line: s.line, column: s.column },
     end: { line: e.line, column: e.column }
@@ -69,7 +95,7 @@ function gabungLoc(locA, locB) {
 function buatProgramNode(body, loc, source) {
   return {
     type: 'Program',
-    loc: loc || buatLoc({ line: 1, column: 1 }, { line: 1, column: 1 }),
+    loc: ensureLoc(loc) || buatLoc({ line: 1, column: 1 }, { line: 1, column: 1 }),
     body: body || [],
     source: source || undefined
   };
@@ -80,7 +106,7 @@ function buatProgramNode(body, loc, source) {
 function buatDataDeclaration(name, typeHint, init, loc, docstring) {
   return {
     type: 'DataDeclaration',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     name: name,
     typeHint: typeHint || undefined,
@@ -91,7 +117,7 @@ function buatDataDeclaration(name, typeHint, init, loc, docstring) {
 function buatTetapDeclaration(name, typeHint, init, loc, docstring) {
   return {
     type: 'TetapDeclaration',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     name: name,
     typeHint: typeHint || undefined,
@@ -102,7 +128,7 @@ function buatTetapDeclaration(name, typeHint, init, loc, docstring) {
 function buatUbahDeclaration(name, typeHint, init, loc, docstring) {
   return {
     type: 'UbahDeclaration',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     name: name,
     typeHint: typeHint || undefined,
@@ -113,7 +139,7 @@ function buatUbahDeclaration(name, typeHint, init, loc, docstring) {
 function buatTurunanDeclaration(name, typeHint, init, loc, docstring) {
   return {
     type: 'TurunanDeclaration',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     name: name,
     typeHint: typeHint || undefined,
@@ -124,7 +150,7 @@ function buatTurunanDeclaration(name, typeHint, init, loc, docstring) {
 function buatKomponenDeclaration(name, params, body, loc, docstring, returnType) {
   return {
     type: 'KomponenDeclaration',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     name: name,
     params: params || [],
@@ -136,7 +162,7 @@ function buatKomponenDeclaration(name, params, body, loc, docstring, returnType)
 function buatFungsiDeclaration(name, params, body, loc, docstring, returnType) {
   return {
     type: 'FungsiDeclaration',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     name: name,
     params: params || [],
@@ -150,7 +176,7 @@ function buatFungsiDeclaration(name, params, body, loc, docstring, returnType) {
 function buatBlockStatement(body, loc) {
   return {
     type: 'BlockStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     body: body || []
   };
 }
@@ -158,7 +184,7 @@ function buatBlockStatement(body, loc) {
 function buatBuatStatement(selector, loc, docstring, properties, body, action) {
   var node = {
     type: 'BuatStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     selector: selector
   };
@@ -177,7 +203,7 @@ function buatBuatStatement(selector, loc, docstring, properties, body, action) {
 function buatTampilkanStatement(target, loc, docstring, mountTarget, mode, messageKind) {
   var node = {
     type: 'TampilkanStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     target: target
   };
@@ -190,7 +216,7 @@ function buatTampilkanStatement(target, loc, docstring, mountTarget, mode, messa
 function buatSembunyikanStatement(target, loc, docstring) {
   return {
     type: 'SembunyikanStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     target: target
   };
@@ -199,7 +225,7 @@ function buatSembunyikanStatement(target, loc, docstring) {
 function buatHapusStatement(target, loc, docstring) {
   return {
     type: 'HapusStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     target: target
   };
@@ -208,7 +234,7 @@ function buatHapusStatement(target, loc, docstring) {
 function buatKosongkanStatement(target, loc, docstring) {
   return {
     type: 'KosongkanStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     target: target
   };
@@ -217,7 +243,7 @@ function buatKosongkanStatement(target, loc, docstring) {
 function buatPerbaruiStatement(property, target, value, loc, docstring) {
   return {
     type: 'PerbaruiStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     property: property,
     target: target,
@@ -228,7 +254,7 @@ function buatPerbaruiStatement(property, target, value, loc, docstring) {
 function buatKetikaStatement(event, loc, docstring, target, body, action) {
   var node = {
     type: 'KetikaStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     event: event
   };
@@ -241,7 +267,7 @@ function buatKetikaStatement(event, loc, docstring, target, body, action) {
 function buatSaatStatement(target, body, loc, docstring) {
   return {
     type: 'SaatStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     target: target,
     body: body
@@ -251,7 +277,7 @@ function buatSaatStatement(target, body, loc, docstring) {
 function buatLifecycleStatement(kind, body, loc, docstring) {
   return {
     type: 'LifecycleStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     kind: kind,
     body: body
@@ -261,7 +287,7 @@ function buatLifecycleStatement(kind, body, loc, docstring) {
 function buatSetelahStatement(target, loc, docstring, body, action) {
   var node = {
     type: 'SetelahStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     target: target
   };
@@ -273,7 +299,7 @@ function buatSetelahStatement(target, loc, docstring, body, action) {
 function buatJikaStatement(condition, consequent, loc, docstring, alternate) {
   var node = {
     type: 'JikaStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     condition: condition,
     consequent: consequent
@@ -285,7 +311,7 @@ function buatJikaStatement(condition, consequent, loc, docstring, alternate) {
 function buatUlangiStatement(iteratorName, source, body, kind, loc, docstring, rangeEnd) {
   var node = {
     type: 'UlangiStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     iteratorName: iteratorName,
     source: source,
@@ -299,7 +325,7 @@ function buatUlangiStatement(iteratorName, source, body, kind, loc, docstring, r
 function buatSelamaStatement(condition, body, loc, docstring) {
   return {
     type: 'SelamaStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     condition: condition,
     body: body
@@ -307,15 +333,15 @@ function buatSelamaStatement(condition, body, loc, docstring) {
 }
 
 function buatBerhentiStatement(loc) {
-  return { type: 'BerhentiStatement', loc: loc };
+  return { type: 'BerhentiStatement', loc: ensureLoc(loc) };
 }
 
 function buatLewatiStatement(loc) {
-  return { type: 'LewatiStatement', loc: loc };
+  return { type: 'LewatiStatement', loc: ensureLoc(loc) };
 }
 
 function buatKembalikanStatement(loc, value) {
-  var node = { type: 'KembalikanStatement', loc: loc };
+  var node = { type: 'KembalikanStatement', loc: ensureLoc(loc) };
   if (value) node.value = value;
   return node;
 }
@@ -323,7 +349,7 @@ function buatKembalikanStatement(loc, value) {
 function buatSimpanStatement(value, target, kind, loc, docstring) {
   return {
     type: 'SimpanStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     value: value,
     target: target,
@@ -334,7 +360,7 @@ function buatSimpanStatement(value, target, kind, loc, docstring) {
 function buatTambahkanStatement(value, target, loc, docstring) {
   return {
     type: 'TambahkanStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     value: value,
     target: target
@@ -344,7 +370,7 @@ function buatTambahkanStatement(value, target, loc, docstring) {
 function buatKurangiStatement(target, loc, docstring, value) {
   var node = {
     type: 'KurangiStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     target: target
   };
@@ -355,7 +381,7 @@ function buatKurangiStatement(target, loc, docstring, value) {
 function buatSisipkanStatement(value, target, loc, docstring) {
   return {
     type: 'SisipkanStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     value: value,
     target: target
@@ -365,7 +391,7 @@ function buatSisipkanStatement(value, target, loc, docstring) {
 function buatAmbilDomStatement(kind, source, target, loc, docstring, attributeName) {
   var node = {
     type: 'AmbilDomStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     kind: kind,
     source: source,
@@ -378,7 +404,7 @@ function buatAmbilDomStatement(kind, source, target, loc, docstring, attributeNa
 function buatAmbilLuarStatement(url, branches, loc, docstring, options) {
   var node = {
     type: 'AmbilLuarStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     url: url,
     branches: branches || []
@@ -390,7 +416,7 @@ function buatAmbilLuarStatement(url, branches, loc, docstring, options) {
 function buatGunakanStatement(componentName, loc, docstring, props, mountTarget) {
   var node = {
     type: 'GunakanStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     componentName: componentName
   };
@@ -402,24 +428,24 @@ function buatGunakanStatement(componentName, loc, docstring, props, mountTarget)
 function buatArahkanStatement(url, loc, docstring) {
   return {
     type: 'ArahkanStatement',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     url: url
   };
 }
 
 function buatMuatUlangStatement(loc) {
-  return { type: 'MuatUlangStatement', loc: loc };
+  return { type: 'MuatUlangStatement', loc: ensureLoc(loc) };
 }
 
 function buatKembaliStatement(loc) {
-  return { type: 'KembaliStatement', loc: loc };
+  return { type: 'KembaliStatement', loc: ensureLoc(loc) };
 }
 
 function buatLangsungBlock(content, loc) {
   return {
     type: 'LangsungBlock',
-    loc: loc,
+    loc: ensureLoc(loc),
     content: content
   };
 }
@@ -427,7 +453,7 @@ function buatLangsungBlock(content, loc) {
 function buatJalankanExpression(callee, kind, loc, docstring, arguments_, withArgs) {
   var node = {
     type: 'JalankanExpression',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     callee: callee,
     kind: kind
@@ -440,7 +466,7 @@ function buatJalankanExpression(callee, kind, loc, docstring, arguments_, withAr
 function buatPanggilNativeExpression(callee, arguments_, loc, docstring) {
   return {
     type: 'PanggilNativeExpression',
-    loc: loc,
+    loc: ensureLoc(loc),
     docstring: docstring || undefined,
     callee: callee,
     arguments: arguments_ || []
@@ -450,7 +476,7 @@ function buatPanggilNativeExpression(callee, arguments_, loc, docstring) {
 function buatRantaiAksi(first, chain, loc) {
   return {
     type: 'RantaiAksi',
-    loc: loc,
+    loc: ensureLoc(loc),
     first: first,
     chain: chain
   };
@@ -461,7 +487,7 @@ function buatRantaiAksi(first, chain, loc) {
 function buatLiteral(value, kind, loc) {
   return {
     type: 'Literal',
-    loc: loc,
+    loc: ensureLoc(loc),
     value: value,
     kind: kind
   };
@@ -470,7 +496,7 @@ function buatLiteral(value, kind, loc) {
 function buatIdentifier(name, loc) {
   return {
     type: 'Identifier',
-    loc: loc,
+    loc: ensureLoc(loc),
     name: name
   };
 }
@@ -478,7 +504,7 @@ function buatIdentifier(name, loc) {
 function buatBinaryExpression(operator, left, right, loc) {
   return {
     type: 'BinaryExpression',
-    loc: loc,
+    loc: ensureLoc(loc),
     operator: operator,
     left: left,
     right: right
@@ -488,7 +514,7 @@ function buatBinaryExpression(operator, left, right, loc) {
 function buatUnaryExpression(operator, operand, loc, prefix) {
   return {
     type: 'UnaryExpression',
-    loc: loc,
+    loc: ensureLoc(loc),
     operator: operator,
     operand: operand,
     prefix: prefix !== false
@@ -498,7 +524,7 @@ function buatUnaryExpression(operator, operand, loc, prefix) {
 function buatMemberExpression(object, property, loc) {
   return {
     type: 'MemberExpression',
-    loc: loc,
+    loc: ensureLoc(loc),
     object: object,
     property: property
   };
@@ -507,7 +533,7 @@ function buatMemberExpression(object, property, loc) {
 function buatCallExpression(callee, arguments_, loc) {
   return {
     type: 'CallExpression',
-    loc: loc,
+    loc: ensureLoc(loc),
     callee: callee,
     arguments: arguments_ || []
   };
@@ -516,7 +542,7 @@ function buatCallExpression(callee, arguments_, loc) {
 function buatObjectLiteral(properties, loc) {
   return {
     type: 'ObjectLiteral',
-    loc: loc,
+    loc: ensureLoc(loc),
     properties: properties || []
   };
 }
@@ -524,7 +550,7 @@ function buatObjectLiteral(properties, loc) {
 function buatArrayLiteral(elements, loc) {
   return {
     type: 'ArrayLiteral',
-    loc: loc,
+    loc: ensureLoc(loc),
     elements: elements || []
   };
 }
@@ -534,7 +560,7 @@ function buatArrayLiteral(elements, loc) {
 function buatSelector(tag, loc, id, classes, attributes) {
   return {
     type: 'Selector',
-    loc: loc,
+    loc: ensureLoc(loc),
     tag: tag,
     id: id || undefined,
     classes: classes || [],
@@ -545,7 +571,7 @@ function buatSelector(tag, loc, id, classes, attributes) {
 function buatPropertyNode(key, value, loc, shorthand) {
   return {
     type: 'PropertyNode',
-    loc: loc,
+    loc: ensureLoc(loc),
     key: key,
     value: value,
     shorthand: !!shorthand
@@ -555,7 +581,7 @@ function buatPropertyNode(key, value, loc, shorthand) {
 function buatAttributeNode(key, value, loc) {
   return {
     type: 'AttributeNode',
-    loc: loc,
+    loc: ensureLoc(loc),
     key: key,
     value: value
   };
@@ -566,7 +592,7 @@ function buatAttributeNode(key, value, loc) {
 function buatErrorNode(code, message, loc, originalToken) {
   var node = {
     type: 'ErrorNode',
-    loc: loc,
+    loc: ensureLoc(loc),
     code: code,
     message: message
   };
@@ -579,7 +605,7 @@ function buatErrorNode(code, message, loc, originalToken) {
 function buatParameter(name, loc, typeHint, defaultValue) {
   var param = {
     type: 'Parameter',
-    loc: loc,
+    loc: ensureLoc(loc),
     name: name
   };
   if (typeHint) param.typeHint = typeHint;
@@ -590,7 +616,7 @@ function buatParameter(name, loc, typeHint, defaultValue) {
 function buatFetchBranch(kind, action, loc) {
   return {
     type: 'FetchBranch',
-    loc: loc,
+    loc: ensureLoc(loc),
     kind: kind,
     action: action
   };
@@ -601,11 +627,13 @@ function buatFetchOption(key, value, loc) {
     type: 'FetchOption',
     key: key,
     value: value,
-    loc: loc
+    loc: ensureLoc(loc)
   };
 }
 
 module.exports = {
+  UNKNOWN_LOC: UNKNOWN_LOC,
+  ensureLoc: ensureLoc,
   buatLoc: buatLoc,
   locFromTokens: locFromTokens,
   gabungLoc: gabungLoc,
