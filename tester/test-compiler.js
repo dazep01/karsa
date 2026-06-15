@@ -468,7 +468,7 @@ console.log('\n[31] Runtime Helpers Present');
 // ═══════════════════════════════════════════════════════════════
 console.log('\n[32] Error Code Registry (R5)');
 (function() {
-  var EC = require('../parser/karsa-error-codes');
+  var EC = require('../parser/error-codes');
   assert('E1001 exists', EC.E1001 === 'E1001');
   assert('E2001 exists', EC.E2001 === 'E2001');
   assert('E3001 exists', EC.E3001 === 'E3001');
