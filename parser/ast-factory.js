@@ -594,7 +594,9 @@ function buatErrorNode(code, message, loc, originalToken) {
     type: 'ErrorNode',
     loc: ensureLoc(loc),
     code: code,
-    message: message
+    kode: code,
+    message: message,
+    pesan: message
   };
   if (originalToken) node.originalToken = originalToken;
   return node;
