@@ -39,8 +39,17 @@ KarsaCompiler.prototype.compile = function(ast) {
   this.emit("(function() {");
   this.indent++;
   
-  // Start visit
-  this.genericVisit(ast);
+  // Start visit — emit return values dari top-level expressions
+  // (contoh: JalankanExpression mengembalikan string kode, bukan emit langsung)
+  if (ast.body && ast.body.length > 0) {
+    for (var i = 0; i < ast.body.length; i++) {
+      var result = accept(ast.body[i], this);
+      // Jika visitor mengembalikan string kode (expression-style), emit sebagai statement
+      if (typeof result === 'string' && result.length > 0) {
+        this.emit(result + ';');
+      }
+    }
+  }
   
   this.indent--;
   this.emit("})();");
@@ -515,16 +524,22 @@ KarsaCompiler.prototype.visitSetelahStatement = function(node) {
   // "setelah X selesai" — X adalah nama operasi/fungsi async
   // Lower to: X().then(() => { ... }) atau callback setelah pemanggilan
   const target = node.target;
-  
+
+  // [Bug 3 FIX] Cek apakah target adalah fungsi KARSA yang sudah di-resolve.
+  // Jika ya, panggil langsung tanpa typeof check (fungsi KARSA selalu lokal).
+  // Jika tidak, gunakan typeof check untuk keamanan (external/async).
+  const isKarsaFunction = node.targetSymbol && node.targetSymbol.isFunction;
+  const callExpr = isKarsaFunction ? `${target}()` : `(typeof ${target} === 'function' ? ${target}() : ${target})`;
+
   this.emit(`// setelah ${target} selesai`);
   if (node.body) {
-    this.emit(`Promise.resolve(typeof ${target} === 'function' ? ${target}() : ${target}).then((__result) => {`);
+    this.emit(`Promise.resolve(${callExpr}).then((__result) => {`);
     this.indent++;
     accept(node.body, this);
     this.indent--;
     this.emit(`});`);
   } else if (node.action) {
-    this.emit(`Promise.resolve(typeof ${target} === 'function' ? ${target}() : ${target}).then((__result) => {`);
+    this.emit(`Promise.resolve(${callExpr}).then((__result) => {`);
     this.indent++;
     accept(node.action, this);
     this.indent--;
@@ -609,29 +624,70 @@ KarsaCompiler.prototype.visitKembalikanStatement = function(node) {
 // VISITOR IMPLEMENTATIONS — DATA & REACTIVITY
 // ═══════════════════════════════════════════════════════════
 
+/**
+ * [Bug 1 FIX] Cek apakah target variabel bersifat reaktif (data/turunan)
+ * atau biasa (ubah/tetap). Menentukan cara assign yang benar.
+ *
+ * - Reaktif (data, turunan) → Proxy punya .value → gunakan __setState()
+ * - Biasa (ubah) → plain variable → gunakan assignment langsung
+ * - Tidak diketahui → fallback ke __setState (aman untuk Proxy)
+ */
+KarsaCompiler.prototype._isTargetReactive = function(node) {
+  if (node.targetSymbol) {
+    return node.targetSymbol.isReactive === true;
+  }
+  // Fallback: jika tidak ada metadata resolver, anggap reaktif
+  // (lebih aman karena __setState bekerja dengan Proxy)
+  return true;
+};
+
 KarsaCompiler.prototype.visitSimpanStatement = function(node) {
+  const target = node.target;
   const val = this.lowerExpression(node.value);
-  // node.target adalah string nama variabel
-  this.emit(`__setState(${node.target}, ${val});`);
+  if (this._isTargetReactive(node)) {
+    // data/turunan → Proxy, gunakan __setState
+    this.emit(`__setState(${target}, ${val});`);
+  } else {
+    // ubah → plain variable, assignment langsung
+    this.emit(`${target} = ${val};`);
+  }
 };
 
 KarsaCompiler.prototype.visitTambahkanStatement = function(node) {
-  const target = node.target; // string nama variabel
+  const target = node.target;
   const jumlah = this.lowerExpression(node.value);
-  this.emit(`__setState(${target}, ${target}.value + ${jumlah});`);
+  if (this._isTargetReactive(node)) {
+    // data/turunan → Proxy, akses via .value
+    this.emit(`__setState(${target}, ${target}.value + ${jumlah});`);
+  } else {
+    // ubah → plain variable, assignment langsung
+    this.emit(`${target} = ${target} + ${jumlah};`);
+  }
 };
 
 KarsaCompiler.prototype.visitKurangiStatement = function(node) {
   const target = node.target;
-  // [C6 FIX] Default ke 1 jika tidak ada value (kurangi counter → counter - 1)
+  // Default ke 1 jika tidak ada value (kurangi counter → counter - 1)
   const jumlah = node.value ? this.lowerExpression(node.value) : '1';
-  this.emit(`__setState(${target}, ${target}.value - ${jumlah});`);
+  if (this._isTargetReactive(node)) {
+    // data/turunan → Proxy, akses via .value
+    this.emit(`__setState(${target}, ${target}.value - ${jumlah});`);
+  } else {
+    // ubah → plain variable, assignment langsung
+    this.emit(`${target} = ${target} - ${jumlah};`);
+  }
 };
 
 KarsaCompiler.prototype.visitSisipkanStatement = function(node) {
   const val = this.lowerExpression(node.value);
-  const target = node.target; // string nama variabel (array reaktif)
-  this.emit(`${target}.value.push(${val});`);
+  const target = node.target;
+  if (this._isTargetReactive(node)) {
+    // data/turunan → Proxy, akses via .value
+    this.emit(`${target}.value.push(${val});`);
+  } else {
+    // ubah → plain array, push langsung
+    this.emit(`${target}.push(${val});`);
+  }
 };
 
 KarsaCompiler.prototype.visitAmbilDomStatement = function(node) {
@@ -774,7 +830,10 @@ KarsaCompiler.prototype.visitLangsungBlock = function(node) {
 
 KarsaCompiler.prototype.visitPanggilNativeExpression = function(node) {
   const args = node.arguments.map(a => this.lowerExpression(a)).join(', ');
-  const code = `${node.callee.name}(${args})`;
+  // [Bug 2 FIX] Gunakan lowerExpression untuk callee, bukan .name langsung
+  // Ini mendukung MemberExpression seperti console.log, document.querySelector
+  const calleeCode = this.lowerExpression(node.callee);
+  const code = `${calleeCode}(${args})`;
   
   if (this.currentParent) {
       // Jika dipanggil sebagai statement di dalam blok 'buat'
