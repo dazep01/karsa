@@ -429,9 +429,16 @@ KarsaResolver.prototype.visitArahkanStatement = function(node) {
   this.genericVisit(node);
 };
 
-// ─── SetelahStatement (H3 FIX) ─────────────────────────────
+// ─── SetelahStatement (H3 FIX + Bug 3 FIX) ─────────────────
 KarsaResolver.prototype.visitSetelahStatement = function(node) {
-  // Setelah (after-render hook) — body bisa berisi statement biasa
+  // [Bug 3 FIX] Resolve target symbol dan lampirkan ke node,
+  // supaya compiler bisa membedakan fungsi KARSA vs external variable.
+  if (node.target) {
+    const symbol = this.currentScope.lookup(node.target);
+    if (symbol) {
+      node.targetSymbol = symbol;
+    }
+  }
   this.genericVisit(node);
 };
 
