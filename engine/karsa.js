@@ -34,48 +34,137 @@
      * Memproses kode sumber Karsa menjadi JavaScript
      */
     compile: function (source, options = {}) {
-      try {
+      if (options.recover) {
+        var allErrors = [];
+        var stages = {};
+        var ast = null;
+        
         // 1. Lexer
-        const lexResult = Lexer.tokenize(source);
-        if (lexResult.errors.length > 0) return { success: false, errors: lexResult.errors, stage: 'Lexer' };
-
-        // 2. Parser
-        const parseResult = Parser.parse(lexResult.tokens);
-        if (parseResult.errors.length > 0) return { success: false, errors: parseResult.errors, stage: 'Parser' };
-
+        var lexResult = Lexer.tokenize(source);
+        stages.lexer = { ran: true, errors: lexResult.errors.length };
+        if (lexResult.errors.length > 0) {
+          allErrors = allErrors.concat(lexResult.errors);
+        }
+        
+        // 2. Parser - only if we have tokens
+        var parseResult = null;
+        if (lexResult.tokens && lexResult.tokens.length > 0) {
+          parseResult = Parser.parse(lexResult.tokens);
+          stages.parser = { ran: true, errors: parseResult.errors.length };
+          if (parseResult.errors.length > 0) {
+            allErrors = allErrors.concat(parseResult.errors);
+          }
+          ast = parseResult.ast;
+        } else {
+          stages.parser = { ran: false, reason: 'lexer failed' };
+        }
+        
         // 3. Resolver
-        const resolver = new Resolver();
-        const resolveResult = resolver.resolve(parseResult.ast);
-        if (resolveResult.errors.length > 0) return { success: false, errors: resolveResult.errors, stage: 'Resolver' };
-
+        if (ast && parseResult && parseResult.errors.length === 0) {
+          var resolver = new Resolver();
+          var resolveResult = resolver.resolve(ast);
+          stages.resolver = { ran: true, errors: resolveResult.errors.length };
+          if (resolveResult.errors.length > 0) {
+            allErrors = allErrors.concat(resolveResult.errors);
+          }
+          ast = resolveResult.ast;
+        } else if (ast) {
+          // Try resolver even with parse errors if AST exists
+          try {
+            var resolver = new Resolver();
+            var resolveResult = resolver.resolve(ast);
+            stages.resolver = { ran: true, errors: resolveResult.errors.length };
+            if (resolveResult.errors.length > 0) {
+              allErrors = allErrors.concat(resolveResult.errors);
+            }
+            ast = resolveResult.ast;
+          } catch(e) {
+            stages.resolver = { ran: false, error: e.message };
+          }
+        } else {
+          stages.resolver = { ran: false, reason: 'no AST' };
+        }
+        
         // 4. Analyzer
-        const analyzer = new Analyzer();
-        const analyzeResult = analyzer.analyze(resolveResult.ast);
-        if (analyzeResult.errors.length > 0) return { success: false, errors: analyzeResult.errors, stage: 'Analyzer' };
-
-        // 5. Compiler
-        const compiler = new Compiler();
-        const javascript = compiler.compile(analyzeResult.ast);
-
+        if (ast) {
+          try {
+            var analyzer = new Analyzer();
+            var analyzeResult = analyzer.analyze(ast);
+            stages.analyzer = { ran: true, errors: analyzeResult.errors.length, warnings: analyzeResult.warnings.length };
+            if (analyzeResult.errors.length > 0) {
+              allErrors = allErrors.concat(analyzeResult.errors);
+            }
+            ast = analyzeResult.ast;
+          } catch(e) {
+            stages.analyzer = { ran: false, error: e.message };
+          }
+        }
+        
+        // 5. Compiler - only if no critical errors
+        var javascript = null;
+        if (ast && allErrors.filter(function(e) { return e.severity !== 'warning'; }).length === 0) {
+          try {
+            var compiler = new Compiler();
+            javascript = compiler.compile(ast);
+            stages.compiler = { ran: true };
+          } catch(e) {
+            stages.compiler = { ran: false, error: e.message };
+            allErrors.push({ kode: 'E0000', pesan: 'Compiler error: ' + e.message });
+          }
+        }
+        
         return {
-          success: true,
+          success: allErrors.filter(function(e) { return e.severity !== 'warning'; }).length === 0,
           js: javascript,
-          warnings: analyzeResult.warnings,
-          ast: analyzeResult.ast
+          errors: allErrors,
+          warnings: allErrors.filter(function(e) { return e.severity === 'warning'; }),
+          stages: stages,
+          ast: ast
         };
-      } catch (err) {
-        console.error('=== SYSTEM ERROR STACK ===');
-        console.error(err.stack);
-        console.error('=========================');
-        return { 
-            success: false, 
-            errors: [{ 
-                kode: 'E0000',
-                pesan: err.message,
-                saran: 'Terjadi kesalahan sistem. Lihat stack trace di atas.'
-            }], 
-            stage: 'System' 
-        };
+      } else {
+        try {
+          // 1. Lexer
+          const lexResult = Lexer.tokenize(source);
+          if (lexResult.errors.length > 0) return { success: false, errors: lexResult.errors, stage: 'Lexer' };
+
+          // 2. Parser
+          const parseResult = Parser.parse(lexResult.tokens);
+          if (parseResult.errors.length > 0) return { success: false, errors: parseResult.errors, stage: 'Parser' };
+
+          // 3. Resolver
+          const resolver = new Resolver();
+          const resolveResult = resolver.resolve(parseResult.ast);
+          if (resolveResult.errors.length > 0) return { success: false, errors: resolveResult.errors, stage: 'Resolver' };
+
+          // 4. Analyzer
+          const analyzer = new Analyzer();
+          const analyzeResult = analyzer.analyze(resolveResult.ast);
+          if (analyzeResult.errors.length > 0) return { success: false, errors: analyzeResult.errors, stage: 'Analyzer' };
+
+          // 5. Compiler
+          const compiler = new Compiler();
+          const javascript = compiler.compile(analyzeResult.ast);
+
+          return {
+            success: true,
+            js: javascript,
+            warnings: analyzeResult.warnings,
+            ast: analyzeResult.ast
+          };
+        } catch (err) {
+          console.error('=== SYSTEM ERROR STACK ===');
+          console.error(err.stack);
+          console.error('=========================');
+          return { 
+              success: false, 
+              errors: [{ 
+                  kode: 'E0000',
+                  pesan: err.message,
+                  saran: 'Terjadi kesalahan sistem. Lihat stack trace di atas.'
+              }], 
+              stage: 'System' 
+          };
+        }
       }
     },
 
