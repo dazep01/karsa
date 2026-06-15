@@ -12,6 +12,12 @@ var TT = require('./token-types');
 var AST = require('./ast-factory');
 var BP = require('./binding-powers');
 
+var _stmtParser = null;
+function getStmtParser() {
+  if (!_stmtParser) _stmtParser = require('./statement-parser');
+  return _stmtParser;
+}
+
 /**
  * Memparse ekspresi dengan Pratt parser.
  *
@@ -125,7 +131,7 @@ function parsePrefix(parser) {
 
   // ─── Jalankan (JS Interop) ─────────────────────────
   if (tok.tipe === TT.TK_JALANKAN) {
-    var stmtParser = require('./statement-parser');
+    var stmtParser = getStmtParser();
     var jalankanNode = stmtParser.parseJalankanExpression(parser);
     // parseJalankanExpression mengembalikan node JalankanExpression (ekspresi)
     return jalankanNode;
