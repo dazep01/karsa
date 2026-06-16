@@ -77,15 +77,10 @@ const VALID_PERBARUI_PROPERTIES = new Set([
 function SemanticSymbol(name, kind, node, scope, metadata = {}) {
   this.name = name;
   this.kind = kind;          // 'data','tetap','ubah','turunan','fungsi','komponen','parameter'
-<<<<<<< HEAD
   this.id = metadata.id || null;
   this.declarationNode = node;
   this.scope = scope;
   this.scopeId = metadata.scopeId || null;
-=======
-  this.declarationNode = node;
-  this.scope = scope;
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
   // Properti dari Tim B
   this.isReactive  = metadata.isReactive  || false;
@@ -108,18 +103,12 @@ function SemanticSymbol(name, kind, node, scope, metadata = {}) {
 // SCOPE (dari Tim B, sedikit penyesuaian)
 // ============================================================================
 function Scope(type, parent) {
-<<<<<<< HEAD
   this.id = 'scope_' + (++Scope._nextId);
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   this.type = type;   // 'global','blok','komponen','iterasi','watcher'
   this.parent = parent;
   this.symbols = new Map();
 }
-<<<<<<< HEAD
 Scope._nextId = 0;
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
 Scope.prototype.define = function(name, symbol) {
   this.symbols.set(name, symbol);
@@ -142,10 +131,7 @@ function KarsaResolver() {
   this.buatStack = [];
   this.allSymbols = [];
   this.currentJalankanCallee = null;
-<<<<<<< HEAD
   this._symbolIdCounter = 0;
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 }
 
 KarsaResolver.prototype = Object.create(BaseVisitor.prototype);
@@ -155,11 +141,8 @@ KarsaResolver.prototype.constructor = KarsaResolver;
 KarsaResolver.prototype.resolve = function(ast) {
   this.errors = [];
   this.warnings = [];
-<<<<<<< HEAD
   Scope._nextId = 0;
   this._symbolIdCounter = 0;
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   this.currentScope = new Scope('global', null);
   this.allSymbols = [];
 
@@ -198,25 +181,18 @@ KarsaResolver.prototype.addSymbol = function(name, kind, node, metadata = {}) {
   if (shadowed) {
     this.warnings.push(Err.createError('W3002', node.loc, {
       message: `Variabel "${name}" menyembunyikan variabel dengan nama sama di scope luar.`,
-<<<<<<< HEAD
       suggestion: 'Gunakan nama yang berbeda untuk menghindari kebingungan.',
       relatedInformation: [{
         message: `Deklarasi yang disembunyikan: "${name}" (${shadowed.kind}).`,
         loc: shadowed.declarationNode && shadowed.declarationNode.loc ? shadowed.declarationNode.loc : null
       }]
-=======
-      suggestion: 'Gunakan nama yang berbeda untuk menghindari kebingungan.'
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     }));
   }
 
   const symbol = new SemanticSymbol(name, kind, node, this.currentScope.type, {
     ...metadata,
-<<<<<<< HEAD
     id: 'sym_' + (++this._symbolIdCounter),
     scopeId: this.currentScope.id,
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     shadowedSymbol: shadowed
   });
 
