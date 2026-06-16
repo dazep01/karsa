@@ -8,10 +8,13 @@
  */
 
 const { BaseVisitor, accept } = require('../utils/visitor');
+<<<<<<< HEAD
 const RuntimeEmitter = require('./emitters/runtime');
 const Codegen = require('./utils/codegen');
 const ExpressionLowering = require('./lower/expression');
 const StatementEmitters = require('./emitters/statements');
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
 function KarsaCompiler() {
   BaseVisitor.call(this);
@@ -47,11 +50,15 @@ KarsaCompiler.prototype.compile = function(ast) {
   // (contoh: JalankanExpression mengembalikan string kode, bukan emit langsung)
   if (ast.body && ast.body.length > 0) {
     for (var i = 0; i < ast.body.length; i++) {
+<<<<<<< HEAD
       var node = ast.body[i];
       if (node && node.loc && node.loc.start) {
         this.emit(`// @karsa-source ${node.loc.start.line}:${node.loc.start.column} ${node.type}`);
       }
       var result = accept(node, this);
+=======
+      var result = accept(ast.body[i], this);
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
       // Jika visitor mengembalikan string kode (expression-style), emit sebagai statement
       if (typeof result === 'string' && result.length > 0) {
         this.emit(result + ';');
@@ -68,11 +75,20 @@ KarsaCompiler.prototype.compile = function(ast) {
 // --- Emitter Helpers ---
 
 KarsaCompiler.prototype.emit = function(code) {
+<<<<<<< HEAD
   return Codegen.emit(this, code);
 };
 
 KarsaCompiler.prototype.genVar = function(prefix = 'v') {
   return Codegen.genVar(this, prefix);
+=======
+  const spacing = "  ".repeat(this.indent);
+  this.output.push(spacing + code);
+};
+
+KarsaCompiler.prototype.genVar = function(prefix = 'v') {
+  return `__${prefix}_${++this.varCounter}`;
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 };
 
 /**
@@ -112,6 +128,7 @@ KarsaCompiler.prototype.resolveTarget = function(targetNode) {
 
 /**
  * Runtime Helpers (Self-contained)
+<<<<<<< HEAD
  * Refinement lvl.4C: implementasi emitter dipindah ke compiler/emitters/runtime.js.
  */
 KarsaCompiler.prototype.emitRuntimeHelpers = function() {
@@ -119,12 +136,809 @@ KarsaCompiler.prototype.emitRuntimeHelpers = function() {
 };
 
 // Statement emitters dipasang dari compiler/emitters/statements.js (Refinement lvl.4F).
+=======
+ */
+KarsaCompiler.prototype.emitRuntimeHelpers = function() {
+  this.emit("// === Runtime Helpers ===");
+  const runtime = `
+const __subscribers = new WeakMap();
+const __effectMap = new WeakMap();
+let __activeEffect = null;
+let __effectId = 0;
+
+function __createReactive(val) {
+  const obj = { value: val, __id: ++__effectId };
+  return new Proxy(obj, {
+    get(target, prop) {
+      if (__activeEffect && prop === 'value') {
+        let subs = __subscribers.get(target) || new Set();
+        subs.add(__activeEffect);
+        __subscribers.set(target, subs);
+        if (__activeEffect.__deps) __activeEffect.__deps.add(target);
+      }
+      return target[prop];
+    },
+    set(target, prop, newVal) {
+      const oldVal = target[prop];
+      target[prop] = newVal;
+      if (prop === 'value' && oldVal !== newVal) {
+        const subs = __subscribers.get(target);
+        if (subs) {
+          const subsCopy = Array.from(subs);
+          for (let i = 0; i < subsCopy.length; i++) subsCopy[i](newVal, oldVal);
+        }
+      }
+      return true;
+    }
+  });
+}
+
+function __createComputed(fn) {
+  const reactive = __createReactive(null);
+  const effect = function computedEffect() {
+    __activeEffect = effect;
+    try { reactive.value = fn(); } catch(e) { /* defer if deps not ready */ }
+    __activeEffect = null;
+  };
+  effect.__deps = new Set();
+  effect.__isComputed = true;
+  effect();
+  __effectMap.set(reactive, effect);
+  return reactive;
+}
+
+function __watch(reactive, cb) {
+  const effect = function watchEffect(n, o) { cb(n, o); };
+  effect.__deps = new Set();
+  let subs = __subscribers.get(reactive) || new Set();
+  subs.add(effect);
+  __subscribers.set(reactive, subs);
+  const unsub = function unsubscribe() {
+    const subs = __subscribers.get(reactive);
+    if (subs) subs.delete(effect);
+  };
+  return unsub;
+}
+
+function __setState(reactive, val) {
+  reactive.value = val;
+}
+
+function __createElement(tag, props, children) {
+  if (!props) props = {};
+  if (!children) children = [];
+  const el = document.createElement(tag === 'fragmen' ? 'div' : tag);
+  if (props.id) el.id = props.id;
+  if (props.className) el.className = props.className;
+  if (props.innerText) el.innerText = props.innerText;
+  if (props.src) el.src = props.src;
+  if (props.href) el.href = props.href;
+  children.forEach(function(child) { el.appendChild(child); });
+  return el;
+}
+
+function __mount(target, parent) {
+  const el = typeof target === 'string' ? document.querySelector(target) : target;
+  if (el) {
+    if (parent) {
+      const parentEl = typeof parent === 'string' ? document.querySelector(parent) : parent;
+      if (parentEl) parentEl.appendChild(el);
+    } else {
+      document.body.appendChild(el);
+    }
+  }
+}
+
+function __cleanup(reactive) {
+  const effect = __effectMap.get(reactive);
+  if (effect && effect.__deps) {
+    effect.__deps.forEach(function(dep) {
+      const subs = __subscribers.get(dep);
+      if (subs) subs.delete(effect);
+    });
+    effect.__deps.clear();
+  }
+  const subs = __subscribers.get(reactive);
+  if (subs) subs.clear();
+}
+`;
+  this.output.push(runtime.trim());
+  this.emit("");
+};
+
+// ═══════════════════════════════════════════════════════════
+// VISITOR IMPLEMENTATIONS — DECLARATIONS
+// ═══════════════════════════════════════════════════════════
+
+KarsaCompiler.prototype.visitDataDeclaration = function(node) {
+  const initVal = this.lowerExpression(node.init);
+  this.emit(`const ${node.name} = __createReactive(${initVal});`);
+};
+
+KarsaCompiler.prototype.visitTetapDeclaration = function(node) {
+  const initVal = this.lowerExpression(node.init);
+  this.emit(`const ${node.name} = ${initVal};`);
+};
+
+KarsaCompiler.prototype.visitUbahDeclaration = function(node) {
+  const initVal = this.lowerExpression(node.init);
+  this.emit(`let ${node.name} = ${initVal};`);
+};
+
+KarsaCompiler.prototype.visitTurunanDeclaration = function(node) {
+  const expr = this.lowerExpression(node.init);
+  this.emit(`const ${node.name} = __createComputed(() => ${expr});`);
+};
+
+KarsaCompiler.prototype.visitKomponenDeclaration = function(node) {
+  // Component = factory function yang mengembalikan DOM element
+  const params = node.params.map(p => p.name).join(', ');
+  const componentVar = `__komp_${node.name}`;
+  
+  this.emit(`function ${componentVar}(${params}) {`);
+  this.indent++;
+  this.emit(`// Component: ${node.name}`);
+  this.emit(`const __root = document.createElement("div");`);
+  
+  // Set currentParent agar child elements di-append ke __root
+  const prevParent = this.currentParent;
+  this.currentParent = '__root';
+  
+  // Visit body (berisi buat, ketika, dll)
+  if (node.body) accept(node.body, this);
+  
+  this.currentParent = prevParent;
+  
+  // Register lifecycle hooks jika ada
+  this.emit(`return __root;`);
+  this.indent--;
+  this.emit(`}`);
+  
+  // Expose component factory globally
+  this.emit(`window.${node.name} = ${componentVar};`);
+};
+
+KarsaCompiler.prototype.visitFungsiDeclaration = function(node) {
+  const params = node.params.map(p => p.name).join(', ');
+  this.emit(`function ${node.name}(${params}) {`);
+  this.indent++;
+  accept(node.body, this);
+  this.indent--;
+  this.emit("}");
+};
+
+// ═══════════════════════════════════════════════════════════
+// VISITOR IMPLEMENTATIONS — DOM STRUCTURE
+// ═══════════════════════════════════════════════════════════
+
+KarsaCompiler.prototype.visitBuatStatement = function(node) {
+  const varName = this.genVar('el');
+  node.compiledVarName = varName; // Simpan untuk child reference
+  
+  // Tag alias mapping
+  const tagAliases = {
+    'tombol': 'button',
+    'ruang': 'div',
+    'judul': 'h1',
+    'subjudul': 'h2',
+    'paragraf': 'p',
+    'gambar': 'img',
+    'tautan': 'a',
+    'masukan': 'input',
+    'pilihan': 'select',
+    'kolom': 'textarea',
+    'tabel': 'table',
+    'artikel': 'article',
+    'kanvas': 'canvas',
+    'opsi': 'option',
+    'fragmen': 'fragment',
+    'wadjud': 'h1',
+    'wadah': 'div',
+    'kotak': 'div',
+    'frm': 'form',
+    'frmMasuk': 'form'
+  };
+  
+  const tag = tagAliases[node.selector.tag] || node.selector.tag;
+  this.emit(`const ${varName} = document.createElement("${tag}");`);
+  
+  if (node.selector.id) {
+    this.emit(`${varName}.id = "${node.selector.id}";`);
+  }
+  if (node.selector.classes && node.selector.classes.length > 0) {
+    this.emit(`${varName}.className = "${node.selector.classes.join(' ')}";`);
+  }
+  
+  // Attributes dari selector
+  if (node.selector.attributes && node.selector.attributes.length > 0) {
+    node.selector.attributes.forEach(attr => {
+      const attrVal = attr.value ? this.lowerExpression(attr.value) : '""';
+      this.emit(`${varName}.setAttribute("${attr.key}", ${attrVal});`);
+    });
+  }
+  
+  // Properti
+  if (node.properties) {
+    node.properties.forEach(p => {
+      const val = this.lowerExpression(p.value);
+      if (p.key === 'teks') this.emit(`${varName}.innerText = ${val};`);
+      else if (p.key === 'html') this.emit(`${varName}.innerHTML = ${val};`);
+      else if (p.key === 'nilai') this.emit(`${varName}.value = ${val};`);
+      else this.emit(`${varName}.setAttribute("${p.key}", ${val});`);
+    });
+  }
+
+  // Simpan parent current untuk append
+  const prevParent = this.currentParent;
+  this.currentParent = varName;
+  
+  if (node.body) accept(node.body, this);
+  if (node.action) accept(node.action, this);
+  
+  this.currentParent = prevParent;
+  
+  if (!this.currentParent) {
+    this.emit(`document.body.appendChild(${varName});`);
+  } else {
+    this.emit(`${this.currentParent}.appendChild(${varName});`);
+  }
+};
+
+KarsaCompiler.prototype.visitTampilkanStatement = function(node) {
+  // Handle message kinds: pesan, pesan-error, notifikasi
+  if (node.messageKind) {
+    const msgVal = this.lowerExpression(node.target);
+    if (node.messageKind === 'pesan') {
+      this.emit(`alert(${msgVal});`);
+    } else if (node.messageKind === 'pesan-error') {
+      this.emit(`console.error(${msgVal});`);
+    } else if (node.messageKind === 'notifikasi') {
+      this.emit(`if (typeof Notification !== 'undefined' && Notification.permission === 'granted') { new Notification(${msgVal}); } else { alert(${msgVal}); };`);
+    }
+    return;
+  }
+  
+  // Normal element show/mount
+  const target = this.resolveTarget(node.target);
+  const mountTarget = node.mountTarget ? this.resolveTarget(node.mountTarget) : null;
+  
+  if (mountTarget) {
+    this.emit(`__mount(${target}, ${mountTarget});`);
+  } else {
+    // Show element (remove display:none if hidden)
+    this.emit(`{ const __el = ${target}; if (__el) __el.style.display = ''; };`);
+  }
+};
+
+KarsaCompiler.prototype.visitSembunyikanStatement = function(node) {
+  const target = this.resolveTarget(node.target);
+  this.emit(`{ const __el = ${target}; if (__el) __el.style.display = 'none'; };`);
+};
+
+KarsaCompiler.prototype.visitHapusStatement = function(node) {
+  const target = this.resolveTarget(node.target);
+  this.emit(`{ const __el = ${target}; if (__el && __el.parentElement) __el.parentElement.removeChild(__el); };`);
+};
+
+KarsaCompiler.prototype.visitKosongkanStatement = function(node) {
+  const target = this.resolveTarget(node.target);
+  this.emit(`{ const __el = ${target}; if (__el) __el.innerHTML = ''; };`);
+};
+
+KarsaCompiler.prototype.visitPerbaruiStatement = function(node) {
+  const val = this.lowerExpression(node.value);
+  const target = this.resolveTarget(node.target);
+  
+  const propertyMap = {
+    'teks': 'innerText',
+    'html': 'innerHTML',
+    'nilai': 'value',
+    'kelas': 'className',
+    'gaya': 'style.cssText',
+    'sumber': 'src',
+    'src': 'src',
+    'tautan': 'href',
+    'href': 'href',
+    'tipe': 'type',
+    'nama': 'name',
+    'ditandai': 'checked',
+    'nonaktif': 'disabled',
+    'placeholder': 'placeholder',
+    'atribut': 'setAttribute'
+  };
+  
+  const jsProp = propertyMap[node.property];
+  if (jsProp) {
+    this.emit(`${target}.${jsProp} = ${val};`);
+  } else {
+    this.emit(`${target}.setAttribute("${node.property}", ${val});`);
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// VISITOR IMPLEMENTATIONS — BEHAVIOR & EVENTS
+// ═══════════════════════════════════════════════════════════
+
+KarsaCompiler.prototype.visitKetikaStatement = function(node) {
+  const eventMap = {
+    'diklik': 'click',
+    'diketik': 'input',
+    'disubmit': 'submit',
+    'diubah': 'change',
+    'ditekan': 'keydown',
+    'dilepas': 'keyup',
+    'dimuat': 'DOMContentLoaded',
+    'difokus': 'focus',
+    'diblur': 'blur',
+    'ditinggal': 'blur',
+    'diarahkan': 'mouseover',
+    'ditinggal-kursor': 'mouseout',
+    'digulir': 'scroll',
+    'diseret': 'dragstart',
+    'diubahukuran': 'resize',
+    'dipindah': 'drag',
+    'dikirim': 'submit',
+    'direset': 'reset',
+    'dikonteks': 'contextmenu',
+    'dilewat': 'paste',
+    'masuk': 'mouseenter',
+    'keluar': 'mouseleave',
+    'aktif': 'focus',
+    'nonaktif': 'blur',
+    'muat': 'load',
+    'salah': 'error',
+    'dipasang': '__karsa_mounted',
+    'dilepas-dari-dom': '__karsa_unmounted'
+  };
+  
+  const eventName = eventMap[node.event] || node.event;
+  let target = 'document';
+  
+  if (node.target) {
+    if (node.target.type === 'SelfReference') {
+      target = node.target.referencedNode.compiledVarName || 'null';
+    } else if (node.target.type === 'Identifier') {
+      if (node.target.name === 'halaman') {
+        target = 'document';
+      } else {
+        target = node.target.name;
+      }
+    } else if (node.target.type === 'Selector') {
+      target = this.resolveTarget(node.target);
+    } else if (node.target.type === 'Literal') {
+      target = `document.querySelector("${node.target.value}")`;
+    }
+  }
+
+  // Custom events (mounted/unmounted) need MutationObserver
+  if (eventName === '__karsa_mounted' || eventName === '__karsa_unmounted') {
+    const domEvent = eventName === '__karsa_mounted' ? 'DOMNodeInserted' : 'DOMNodeRemoved';
+    this.emit(`${target}.addEventListener("${domEvent}", (event) => {`);
+  } else if (eventName === 'DOMContentLoaded') {
+    this.emit(`document.addEventListener("DOMContentLoaded", (event) => {`);
+  } else {
+    this.emit(`${target}.addEventListener("${eventName}", (event) => {`);
+  }
+  
+  this.indent++;
+  if (node.event === 'disubmit') this.emit("event.preventDefault();");
+  
+  if (node.body) accept(node.body, this);
+  if (node.action) accept(node.action, this);
+  
+  this.indent--;
+  this.emit("});");
+};
+
+KarsaCompiler.prototype.visitSaatStatement = function(node) {
+  this.emit(`__watch(${node.target}, (nilaiBaru, nilaiLama) => {`);
+  this.indent++;
+  accept(node.body, this);
+  this.indent--;
+  this.emit("});");
+};
+
+KarsaCompiler.prototype.visitLifecycleStatement = function(node) {
+  // Lifecycle hooks: dipasang, dilepas, diperbarui
+  const lifecycleMap = {
+    'dipasang': '__karsa_mounted',
+    'dilepas': '__karsa_unmounted',
+    'diperbarui': '__karsa_updated'
+  };
+  const hookName = lifecycleMap[node.kind] || node.kind;
+  
+  // Emit as custom event dispatch or callback registration
+  this.emit(`// Lifecycle: saat komponen ${node.kind}`);
+  if (node.kind === 'dipasang') {
+    // mounted — schedule to run after DOM is ready
+    this.emit(`if (document.readyState === 'loading') {`);
+    this.indent++;
+    this.emit(`document.addEventListener('DOMContentLoaded', () => {`);
+    this.indent++;
+    accept(node.body, this);
+    this.indent--;
+    this.emit(`});`);
+    this.indent--;
+    this.emit(`} else {`);
+    this.indent++;
+    accept(node.body, this);
+    this.indent--;
+    this.emit(`}`);
+  } else if (node.kind === 'dilepas') {
+    // unmounted — use beforeunload as approximation
+    this.emit(`window.addEventListener('beforeunload', () => {`);
+    this.indent++;
+    accept(node.body, this);
+    this.indent--;
+    this.emit(`});`);
+  } else {
+    // Generic lifecycle — just emit the body
+    accept(node.body, this);
+  }
+};
+
+KarsaCompiler.prototype.visitSetelahStatement = function(node) {
+  // "setelah X selesai" — X adalah nama operasi/fungsi async
+  // Lower to: X().then(() => { ... }) atau callback setelah pemanggilan
+  const target = node.target;
+
+  // [Bug 3 FIX] Cek apakah target adalah fungsi KARSA yang sudah di-resolve.
+  // Jika ya, panggil langsung tanpa typeof check (fungsi KARSA selalu lokal).
+  // Jika tidak, gunakan typeof check untuk keamanan (external/async).
+  const isKarsaFunction = node.targetSymbol && node.targetSymbol.isFunction;
+  const callExpr = isKarsaFunction ? `${target}()` : `(typeof ${target} === 'function' ? ${target}() : ${target})`;
+
+  this.emit(`// setelah ${target} selesai`);
+  if (node.body) {
+    this.emit(`Promise.resolve(${callExpr}).then((__result) => {`);
+    this.indent++;
+    accept(node.body, this);
+    this.indent--;
+    this.emit(`});`);
+  } else if (node.action) {
+    this.emit(`Promise.resolve(${callExpr}).then((__result) => {`);
+    this.indent++;
+    accept(node.action, this);
+    this.indent--;
+    this.emit(`});`);
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// VISITOR IMPLEMENTATIONS — LOGIC & CONTROL FLOW
+// ═══════════════════════════════════════════════════════════
+
+KarsaCompiler.prototype.visitJikaStatement = function(node) {
+  const cond = this.lowerExpression(node.condition);
+  this.emit(`if (${cond}) {`);
+  this.indent++;
+  accept(node.consequent, this);
+  this.indent--;
+  if (node.alternate) {
+    this.emit("} else {");
+    this.indent++;
+    accept(node.alternate, this);
+    this.indent--;
+  }
+  this.emit("}");
+};
+
+KarsaCompiler.prototype.visitUlangiStatement = function(node) {
+  const source = this.lowerExpression(node.source);
+  
+  if (node.kind === 'kali') {
+    // "ulangi N kali:" → for loop
+    this.emit(`for (let __i = 0; __i < ${source}; __i++) {`);
+    this.indent++;
+    accept(node.body, this);
+    this.indent--;
+    this.emit(`}`);
+  } else if (node.kind === 'rentang') {
+    // "ulangi item dari A sampai B:" → for range
+    const rangeEnd = node.rangeEnd ? this.lowerExpression(node.rangeEnd) : source;
+    this.emit(`for (let ${node.iteratorName} = ${source}; ${node.iteratorName} <= ${rangeEnd}; ${node.iteratorName}++) {`);
+    this.indent++;
+    accept(node.body, this);
+    this.indent--;
+    this.emit(`}`);
+  } else {
+    // "ulangi item dari sumber:" → forEach
+    this.emit(`${source}.forEach((${node.iteratorName}, indeks) => {`);
+    this.indent++;
+    accept(node.body, this);
+    this.indent--;
+    this.emit("});");
+  }
+};
+
+KarsaCompiler.prototype.visitSelamaStatement = function(node) {
+  const cond = this.lowerExpression(node.condition);
+  this.emit(`while (${cond}) {`);
+  this.indent++;
+  accept(node.body, this);
+  this.indent--;
+  this.emit("}");
+};
+
+KarsaCompiler.prototype.visitBerhentiStatement = function(node) {
+  this.emit(`break;`);
+};
+
+KarsaCompiler.prototype.visitLewatiStatement = function(node) {
+  this.emit(`continue;`);
+};
+
+KarsaCompiler.prototype.visitKembalikanStatement = function(node) {
+  if (node.value) {
+    const val = this.lowerExpression(node.value);
+    this.emit(`return ${val};`);
+  } else {
+    this.emit(`return;`);
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// VISITOR IMPLEMENTATIONS — DATA & REACTIVITY
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * [Bug 1 FIX] Cek apakah target variabel bersifat reaktif (data/turunan)
+ * atau biasa (ubah/tetap). Menentukan cara assign yang benar.
+ *
+ * - Reaktif (data, turunan) → Proxy punya .value → gunakan __setState()
+ * - Biasa (ubah) → plain variable → gunakan assignment langsung
+ * - Tidak diketahui → fallback ke __setState (aman untuk Proxy)
+ */
+KarsaCompiler.prototype._isTargetReactive = function(node) {
+  if (node.targetSymbol) {
+    return node.targetSymbol.isReactive === true;
+  }
+  // Fallback: jika tidak ada metadata resolver, anggap reaktif
+  // (lebih aman karena __setState bekerja dengan Proxy)
+  return true;
+};
+
+KarsaCompiler.prototype.visitSimpanStatement = function(node) {
+  const target = node.target;
+  const val = this.lowerExpression(node.value);
+  if (this._isTargetReactive(node)) {
+    // data/turunan → Proxy, gunakan __setState
+    this.emit(`__setState(${target}, ${val});`);
+  } else {
+    // ubah → plain variable, assignment langsung
+    this.emit(`${target} = ${val};`);
+  }
+};
+
+KarsaCompiler.prototype.visitTambahkanStatement = function(node) {
+  const target = node.target;
+  const jumlah = this.lowerExpression(node.value);
+  if (this._isTargetReactive(node)) {
+    // data/turunan → Proxy, akses via .value
+    this.emit(`__setState(${target}, ${target}.value + ${jumlah});`);
+  } else {
+    // ubah → plain variable, assignment langsung
+    this.emit(`${target} = ${target} + ${jumlah};`);
+  }
+};
+
+KarsaCompiler.prototype.visitKurangiStatement = function(node) {
+  const target = node.target;
+  // Default ke 1 jika tidak ada value (kurangi counter → counter - 1)
+  const jumlah = node.value ? this.lowerExpression(node.value) : '1';
+  if (this._isTargetReactive(node)) {
+    // data/turunan → Proxy, akses via .value
+    this.emit(`__setState(${target}, ${target}.value - ${jumlah});`);
+  } else {
+    // ubah → plain variable, assignment langsung
+    this.emit(`${target} = ${target} - ${jumlah};`);
+  }
+};
+
+KarsaCompiler.prototype.visitSisipkanStatement = function(node) {
+  const val = this.lowerExpression(node.value);
+  const target = node.target;
+  if (this._isTargetReactive(node)) {
+    // data/turunan → Proxy, akses via .value
+    this.emit(`${target}.value.push(${val});`);
+  } else {
+    // ubah → plain array, push langsung
+    this.emit(`${target}.push(${val});`);
+  }
+};
+
+KarsaCompiler.prototype.visitAmbilDomStatement = function(node) {
+  // "ambil nilai/teks/html/dll dari sumber -> simpan ke target"
+  const source = this.resolveTarget(node.source);
+  const targetVar = node.target; // string nama variabel
+  
+  const kindMap = {
+    'nilai': 'value',
+    'teks': 'innerText',
+    'html': 'innerHTML',
+    'tinggi': 'offsetHeight',
+    'lebar': 'offsetWidth',
+    'atribut': null  // khusus — pakai getAttribute
+  };
+  
+  if (node.kind === 'atribut') {
+    const attrName = node.attributeName || '';
+    this.emit(`__setState(${targetVar}, ${source}.getAttribute("${attrName}"));`);
+  } else {
+    const jsProp = kindMap[node.kind] || node.kind;
+    this.emit(`__setState(${targetVar}, ${source}.${jsProp});`);
+  }
+};
+
+KarsaCompiler.prototype.visitAmbilLuarStatement = function(node) {
+  // "ambil dari URL" → fetch API
+  const url = this.lowerExpression(node.url);
+  
+  // Build fetch options
+  let fetchOptions = '{}';
+  if (node.options && node.options.length > 0) {
+    const optPairs = node.options.map(opt => {
+      const val = this.lowerExpression(opt.value);
+      return `"${opt.key}": ${val}`;
+    });
+    fetchOptions = `{ ${optPairs.join(', ')} }`;
+  }
+  
+  this.emit(`fetch(${url}, ${fetchOptions})`);
+  this.indent++;
+  
+  // Process branches (berhasil, gagal, selalu)
+  if (node.branches && node.branches.length > 0) {
+    node.branches.forEach(branch => {
+      if (branch.kind === 'berhasil') {
+        this.emit(`.then((__response) => {`);
+        this.indent++;
+        this.emit(`if (!__response.ok) throw new Error("HTTP " + __response.status);`);
+        this.emit(`return __response.json();`);
+        this.indent--;
+        this.emit(`})`);
+        this.emit(`.then((__data) => {`);
+        this.indent++;
+        if (branch.action) accept(branch.action, this);
+        this.indent--;
+        this.emit(`})`);
+      } else if (branch.kind === 'gagal') {
+        this.emit(`.catch((__error) => {`);
+        this.indent++;
+        this.emit(`console.error("AmbilLuar gagal:", __error);`);
+        if (branch.action) accept(branch.action, this);
+        this.indent--;
+        this.emit(`})`);
+      } else if (branch.kind === 'selalu') {
+        this.emit(`.finally(() => {`);
+        this.indent++;
+        if (branch.action) accept(branch.action, this);
+        this.indent--;
+        this.emit(`})`);
+      }
+    });
+  } else {
+    // No branches — just log
+    this.emit(`.then(r => r.json())`);
+    this.emit(`.catch(e => console.error(e))`);
+  }
+  
+  this.emit(`;`);
+  this.indent--;
+};
+
+// ═══════════════════════════════════════════════════════════
+// VISITOR IMPLEMENTATIONS — KOMPONEN & GUNAKAN
+// ═══════════════════════════════════════════════════════════
+
+KarsaCompiler.prototype.visitGunakanStatement = function(node) {
+  // "gunakan NamaKomponen dengan props di target"
+  const componentFactory = `__komp_${node.componentName}`;
+  
+  // Build props object
+  let propsArg = '';
+  if (node.props && node.props.length > 0) {
+    const propPairs = node.props.map(p => {
+      const val = this.lowerExpression(p.value);
+      return `"${p.key}": ${val}`;
+    });
+    propsArg = `{ ${propPairs.join(', ')} }`;
+  }
+  
+  const instanceVar = this.genVar('komp');
+  this.emit(`const ${instanceVar} = ${componentFactory}(${propsArg});`);
+  
+  // Mount ke target
+  if (node.mountTarget) {
+    const mountTarget = this.resolveTarget(node.mountTarget);
+    this.emit(`${mountTarget}.appendChild(${instanceVar});`);
+  } else if (this.currentParent) {
+    this.emit(`${this.currentParent}.appendChild(${instanceVar});`);
+  } else {
+    this.emit(`document.body.appendChild(${instanceVar});`);
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// VISITOR IMPLEMENTATIONS — NAVIGASI
+// ═══════════════════════════════════════════════════════════
+
+KarsaCompiler.prototype.visitArahkanStatement = function(node) {
+  // "arahkan ke URL" → window.location.href
+  const url = this.lowerExpression(node.url);
+  this.emit(`window.location.href = ${url};`);
+};
+
+KarsaCompiler.prototype.visitMuatUlangStatement = function(node) {
+  this.emit(`window.location.reload();`);
+};
+
+KarsaCompiler.prototype.visitKembaliStatement = function(node) {
+  this.emit(`window.history.back();`);
+};
+
+// ═══════════════════════════════════════════════════════════
+// VISITOR IMPLEMENTATIONS — INTEROP & RANTAI AKSI
+// ═══════════════════════════════════════════════════════════
+
+KarsaCompiler.prototype.visitLangsungBlock = function(node) {
+  this.emit(node.content);
+};
+
+KarsaCompiler.prototype.visitPanggilNativeExpression = function(node) {
+  const args = node.arguments.map(a => this.lowerExpression(a)).join(', ');
+  // [Bug 2 FIX] Gunakan lowerExpression untuk callee, bukan .name langsung
+  // Ini mendukung MemberExpression seperti console.log, document.querySelector
+  const calleeCode = this.lowerExpression(node.callee);
+  const code = `${calleeCode}(${args})`;
+  
+  if (this.currentParent) {
+      // Jika dipanggil sebagai statement di dalam blok 'buat'
+      this.emit(`${code};`);
+  } else {
+      return code;
+  }
+};
+
+KarsaCompiler.prototype.visitJalankanExpression = function(node) {
+  // [Bug 5 FIX] Hapus node.args fallback — sudah deprecated di resolver (C2 fix).
+  // Hanya gunakan node.arguments atau node.withArgs.
+  const args = (node.arguments || node.withArgs || [])
+    .map(a => this.lowerExpression(a));
+  const code = `${node.callee}(${args.join(', ')})`;
+  
+  // Jika dipakai sebagai statement di dalam blok 'buat' (ada currentParent),
+  // emit langsung; jika tidak, kembalikan sebagai ekspresi.
+  if (this.currentParent) {
+    this.emit(`${code};`);
+  } else {
+    return code;
+  }
+};
+
+KarsaCompiler.prototype.visitRantaiAksi = function(node) {
+  // RantaiAksi: first statement diikuti chain of actions
+  // "aksi1 lalu aksi2 lalu aksi3"
+  // Lower: jalankan first, lalu chain secara berurutan
+  
+  // Visit the first action
+  if (node.first) accept(node.first, this);
+  
+  // Visit each chained action
+  if (node.chain && node.chain.length > 0) {
+    node.chain.forEach(chainedAction => {
+      accept(chainedAction, this);
+    });
+  }
+};
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
 // ═══════════════════════════════════════════════════════════
 // EXPRESSION LOWERING
 // ═══════════════════════════════════════════════════════════
 
 KarsaCompiler.prototype.lowerExpression = function(node) {
+<<<<<<< HEAD
   return ExpressionLowering.lowerExpression(this, node);
 };
 
@@ -132,4 +946,86 @@ KarsaCompiler.prototype.lowerExpression = function(node) {
 StatementEmitters.install(KarsaCompiler, accept);
 
 
+=======
+  if (!node) return 'undefined';
+  
+  switch(node.type) {
+    case 'Literal':
+      return JSON.stringify(node.value);
+    case 'Identifier':
+      if (node.resolved && (node.resolved.kind === 'data' || node.resolved.kind === 'turunan')) {
+        return `${node.name}.value`;
+      }
+      return node.name;
+    case 'BinaryExpression':
+      const ops = { 
+        'sama dengan': '===', 
+        'tidak sama dengan': '!==', 
+        'dan': '&&', 
+        'atau': '||',
+        'paling sedikit': '>=',   
+        'paling banyak': '<=',      
+        'lebih dari': '>',       
+        'kurang dari': '<',
+        'tambah': '+',
+        'kurang': '-',
+        'kali': '*',
+        'bagi': '/',
+        'mod': '%',
+        'pangkat': '**'
+      };
+      const op = ops[node.operator] || node.operator;
+      return `(${this.lowerExpression(node.left)} ${op} ${this.lowerExpression(node.right)})`;
+    case 'UnaryExpression':
+      const unaryOps = {
+        'tidak': '!',
+        'negatif': '-'
+      };
+      const uop = unaryOps[node.operator] || node.operator;
+      if (node.prefix !== false) {
+        return `(${uop}${this.lowerExpression(node.operand)})`;
+      }
+      return `(${this.lowerExpression(node.operand)}${uop})`;
+    case 'MemberExpression':
+      let prop = node.property.name;
+      return `${this.lowerExpression(node.object)}.${prop}`;
+    case 'CallExpression':
+      const callArgs = node.arguments.map(a => this.lowerExpression(a)).join(', ');
+      return `${this.lowerExpression(node.callee)}(${callArgs})`;
+    case 'ObjectLiteral':
+      if (node.properties && node.properties.length > 0) {
+        const pairs = node.properties.map(p => {
+          const val = this.lowerExpression(p.value);
+          return `"${p.key}": ${val}`;
+        });
+        return `{ ${pairs.join(', ')} }`;
+      }
+      return '{}';
+    case 'ArrayLiteral':
+      if (node.elements && node.elements.length > 0) {
+        const elems = node.elements.map(e => this.lowerExpression(e));
+        return `[${elems.join(', ')}]`;
+      }
+      return '[]';
+    case 'JalankanExpression':
+      return this.visitJalankanExpression(node);
+    case 'PanggilNativeExpression':
+      return this.visitPanggilNativeExpression(node);
+    case 'Selector':
+      return this.resolveTarget(node);
+    case 'PropertyNode':
+      return this.lowerExpression(node.value);
+    case 'FetchBranch':
+    case 'FetchOption':
+      return 'undefined';
+    case 'ErrorNode':
+      return 'undefined';
+    default:
+      // Unknown node type — emit warning comment
+      console.warn(`[KARSA Compiler] Unknown expression type: ${node.type}`);
+      return 'undefined';
+  }
+};
+
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 module.exports = KarsaCompiler;

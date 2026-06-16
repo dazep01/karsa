@@ -54,8 +54,11 @@ function printHelp() {
   console.log('  karsa watch [dir] [-o dir]           Watch & auto-rebuild');
   console.log('  karsa format <file.ks> [-w]          Format/beautify kode KARSA');
   console.log('  karsa check <file.ks>                Cek sintaks tanpa compile');
+<<<<<<< HEAD
   console.log('  karsa inspect <file.ks> [--json]     Tampilkan semantic symbols');
   console.log('  karsa graph <file.ks> [--json]       Tampilkan dependency graph');
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   console.log('  karsa init [nama]                    Buat project KARSA baru');
   console.log('  karsa version                        Tampilkan versi');
   console.log('  karsa help                           Tampilkan bantuan');
@@ -67,9 +70,12 @@ function printHelp() {
   console.log('  --sourcemap             Sertakan source map');
   console.log('  --verbose               Output detail untuk debugging');
   console.log('  --minify                Minify output JavaScript');
+<<<<<<< HEAD
   console.log('  --json                  Output JSON untuk command check/inspect');
   console.log('  --quiet                 Kurangi output non-JSON');
   console.log('  --strict-usage          Warning unused untuk fungsi/komponen juga');
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   console.log('');
 }
 
@@ -95,7 +101,11 @@ function parseArgs(argv) {
         if (nextArg && !nextArg.startsWith('-')) {
           // Bisa jadi value untuk flag ini
           // Tapi jika flag boolean, jangan konsumsi next
+<<<<<<< HEAD
           const booleanFlags = ['recover', 'verbose', 'sourcemap', 'minify', 'write', 'json', 'quiet', 'strict-usage'];
+=======
+          const booleanFlags = ['recover', 'verbose', 'sourcemap', 'minify', 'write'];
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
           if (booleanFlags.indexOf(flagName) !== -1) {
             flags[flagName] = true;
           } else {
@@ -174,7 +184,10 @@ function compileFile(filePath, options) {
     source: path.basename(filePath)
   };
   if (options.recover) compileOpts.recover = true;
+<<<<<<< HEAD
   if (options['strict-usage']) compileOpts.usageWarnings = 'strict';
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   
   const startTime = Date.now();
   const result = Karsa.compile(source, compileOpts);
@@ -237,6 +250,7 @@ function printErrors(result) {
   }
 }
 
+<<<<<<< HEAD
 
 /**
  * Normalisasi diagnostics untuk output JSON publik.
@@ -292,6 +306,8 @@ function printCheckJson(filePath, result) {
   console.log(JSON.stringify(payload, null, 2));
 }
 
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 /**
  * Minify JavaScript sederhana (hapus komentar, whitespace berlebih).
  * Ini minifier dasar tanpa dependensi tambahan.
@@ -312,6 +328,7 @@ function simpleMinify(js) {
  * Format: Mappings antara source KARSA dan output JS.
  */
 function generateSourceMap(sourceFilePath, source, generated) {
+<<<<<<< HEAD
   // Source map v3 minimal + x_karsaMappings extension.
   // mappings VLQ masih dikosongkan, tetapi compiler menulis komentar
   // `// @karsa-source line:column NodeType` yang dapat dibaca tooling.
@@ -331,14 +348,26 @@ function generateSourceMap(sourceFilePath, source, generated) {
     }
   });
 
+=======
+  // Source map v3 minimal
+  const sourceLines = source.split('\n').length;
+  const generatedLines = generated.split('\n').length;
+  
+  // Buat mapping dasar: baris 1 source → baris pertama user code di output
+  // Runtime helpers biasanya ~50 baris pertama, user code mulai setelahnya
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   const map = {
     version: 3,
     file: path.basename(sourceFilePath, '.ks') + '.js',
     sources: [path.basename(sourceFilePath)],
     sourcesContent: [source],
     names: [],
+<<<<<<< HEAD
     mappings: '',
     x_karsaMappings: karsaMappings
+=======
+    mappings: ''  // Base64 VLQ encoding — untuk implementasi sederhana, kosong dulu
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   };
   
   return JSON.stringify(map, null, 2);
@@ -628,6 +657,7 @@ function cmdFormat(parsed) {
 function cmdCheck(parsed) {
   const filePath = parsed.args[0];
   if (!filePath) {
+<<<<<<< HEAD
     if (parsed.flags.json) {
       console.log(JSON.stringify({
         version: getVersion(),
@@ -648,10 +678,15 @@ function cmdCheck(parsed) {
       console.error('Error: Tentukan file .ks untuk dicek.');
       console.error('Penggunaan: karsa check <file.ks> [--json]');
     }
+=======
+    console.error('Error: Tentukan file .ks untuk dicek.');
+    console.error('Penggunaan: karsa check <file.ks>');
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     process.exit(1);
   }
   
   const absPath = path.resolve(filePath);
+<<<<<<< HEAD
   if (!fs.existsSync(absPath)) {
     const missingResult = {
       success: false,
@@ -698,6 +733,22 @@ function cmdCheck(parsed) {
         const kode = w.kode || w.code || 'W0000';
         const pesan = w.pesan || w.message || '';
         if (!parsed.flags.quiet) console.log('  [' + kode + '] ' + pesan);
+=======
+  const result = compileFile(absPath, parsed.flags);
+  
+  if (!result) {
+    process.exit(1);
+  }
+  
+  if (result.success) {
+    console.log('✓ Tidak ditemukan error: ' + filePath);
+    if (result.warnings && result.warnings.length > 0) {
+      console.log('⚠ ' + result.warnings.length + ' peringatan:');
+      result.warnings.forEach(function (w) {
+        const kode = w.kode || w.code || 'W0000';
+        const pesan = w.pesan || w.message || '';
+        console.log('  [' + kode + '] ' + pesan);
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
       });
     }
   } else {
@@ -706,6 +757,7 @@ function cmdCheck(parsed) {
   }
 }
 
+<<<<<<< HEAD
 
 /**
  * Baca file source untuk command tooling.
@@ -815,6 +867,8 @@ function cmdGraph(parsed) {
   process.exit(payload.success ? 0 : 1);
 }
 
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 /**
  * `karsa init [nama]` — Buat project KARSA baru
  */
@@ -1073,7 +1127,11 @@ function main() {
   let cmdArgs = [];
   
   // Jika argumen pertama adalah command yang dikenal
+<<<<<<< HEAD
   const commands = ['compile', 'build', 'watch', 'format', 'check', 'inspect', 'graph', 'init', 'version', 'help'];
+=======
+  const commands = ['compile', 'build', 'watch', 'format', 'check', 'init', 'version', 'help'];
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   if (commands.indexOf(firstArg) !== -1) {
     command = firstArg;
     cmdArgs = parsed.args.slice(1);
@@ -1116,12 +1174,15 @@ function main() {
     case 'check':
       cmdCheck(parsed);
       break;
+<<<<<<< HEAD
     case 'inspect':
       cmdInspect(parsed);
       break;
     case 'graph':
       cmdGraph(parsed);
       break;
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     case 'init':
       cmdInit(parsed);
       break;

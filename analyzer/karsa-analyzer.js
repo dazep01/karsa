@@ -19,14 +19,20 @@
 
 const { BaseVisitor, accept } = require('../utils/visitor');
 const Err = require('../parser/error-codes');
+<<<<<<< HEAD
 const DependencyGraph = require('./dependency-graph');
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
 function KarsaAnalyzer() {
   BaseVisitor.call(this);
   this.errors = [];
   this.warnings = [];
   this._currentAst = null;
+<<<<<<< HEAD
   this.options = {};
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   
   // Context stacks
   this.context = {
@@ -41,6 +47,7 @@ function KarsaAnalyzer() {
 KarsaAnalyzer.prototype = Object.create(BaseVisitor.prototype);
 KarsaAnalyzer.prototype.constructor = KarsaAnalyzer;
 
+<<<<<<< HEAD
 KarsaAnalyzer.prototype.analyze = function(ast, options) {
   this.errors = [];
   this.warnings = [];
@@ -62,6 +69,21 @@ KarsaAnalyzer.prototype.analyze = function(ast, options) {
   accept(ast, this);
   this.buildSemanticGraph();
   this.emitUsageWarnings();
+=======
+KarsaAnalyzer.prototype.analyze = function(ast) {
+  this.errors = [];
+  this.warnings = [];
+  this._currentAst = ast;
+  // [Bug 4 FIX] Build Map sekali untuk lookup O(1)
+  this._symbolMap = null;
+  if (ast && ast.semantic && ast.semantic.symbols) {
+    this._symbolMap = new Map();
+    ast.semantic.symbols.forEach(function(sym) {
+      this._symbolMap.set(sym.name, sym);
+    }.bind(this));
+  }
+  accept(ast, this);
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   return {
     ast: ast,
     errors: this.errors,
@@ -170,12 +192,17 @@ KarsaAnalyzer.prototype.checkWriteToTurunan = function(node) {
   if (!node.target) return;
   var targetName = (typeof node.target === 'string') ? node.target : (node.target.name || null);
   if (!targetName) return;
+<<<<<<< HEAD
   var symbol = node.targetSymbol || this.lookupSymbol(targetName);
+=======
+  var symbol = this.lookupSymbol(targetName);
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   if (symbol && symbol.kind === 'turunan') {
     this.addError('E4004', 
       `Data turunan "${targetName}" bersifat read-only dan tidak boleh diubah.`, 
       node.loc, 
       'Gunakan data (var) biasa jika perlu mengubah nilainya.');
+<<<<<<< HEAD
     return;
   }
   if (symbol && symbol.isWritable === false) {
@@ -183,6 +210,8 @@ KarsaAnalyzer.prototype.checkWriteToTurunan = function(node) {
       `Target "${targetName}" tidak dapat ditulis berdasarkan metadata semantic.`,
       node.loc,
       'Gunakan target yang writable atau ubah deklarasi menjadi data/ubah sesuai kebutuhan.');
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   }
 };
 
@@ -198,6 +227,7 @@ KarsaAnalyzer.prototype.checkSideEffectInTurunan = function(node) {
   }
 };
 
+<<<<<<< HEAD
 
 
 /**
@@ -291,6 +321,8 @@ KarsaAnalyzer.prototype.emitUsageWarnings = function() {
   }
 };
 
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 // --- Visitor Methods ---
 
 /**
@@ -535,6 +567,7 @@ KarsaAnalyzer.prototype.visitFungsiDeclaration = function(node) {
  * Validasi Watcher (Section 7.6)
  */
 KarsaAnalyzer.prototype.visitSaatStatement = function(node) {
+<<<<<<< HEAD
   var symbol = node.targetSymbol || this.lookupSymbol(node.target);
   if (symbol && symbol.isReactive === false) {
     this.addWarning('W4104',
@@ -542,6 +575,8 @@ KarsaAnalyzer.prototype.visitSaatStatement = function(node) {
       node.loc,
       'Gunakan data/turunan reaktif sebagai target watcher.');
   }
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   this.genericVisit(node);
 };
 

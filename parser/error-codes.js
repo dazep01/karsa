@@ -102,12 +102,15 @@ var W4001 = 'W4001'; // Type hint tidak cocok dengan nilai
 var W4002 = 'W4002'; // Lifecycle hook di dalam loop/handler
 var W4003 = 'W4003'; // Deklarasi tetap tanpa nilai awal
 var W4004 = 'W4004'; // Potensi bug: perbandingan assignment
+<<<<<<< HEAD
 var W4101 = 'W4101'; // Simbol dideklarasikan tetapi tidak pernah digunakan
 var W4102 = 'W4102'; // Simbol ditulis tetapi tidak pernah dibaca
 var E4101 = 'E4101'; // Target tidak dapat ditulis berdasarkan metadata isWritable
 var W4103 = 'W4103'; // Data reaktif dimutasi tetapi tidak pernah dibaca
 var W4104 = 'W4104'; // Watcher target bukan data reaktif menurut analyzer
 var E4201 = 'E4201'; // Dependency cycle pada data turunan
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
 // ═══════════════════════════════════════════════════════════════
 // COMPILER (E5xxx / W5xxx)
@@ -203,12 +206,15 @@ ERROR_MESSAGES[E4010] = 'Penggunaan "gunakan" untuk non-komponen';
 ERROR_MESSAGES[E4011] = '"berhenti" tidak valid di luar loop atau event handler';
 ERROR_MESSAGES[E4012] = '"lewati" tidak valid di luar loop';
 ERROR_MESSAGES[E4013] = '"kembalikan" tidak valid di luar fungsi atau komponen';
+<<<<<<< HEAD
 ERROR_MESSAGES[W4101] = 'Simbol "{name}" dideklarasikan tetapi tidak pernah digunakan';
 ERROR_MESSAGES[W4102] = 'Simbol "{name}" ditulis tetapi tidak pernah dibaca';
 ERROR_MESSAGES[E4101] = 'Target tidak dapat ditulis';
 ERROR_MESSAGES[W4103] = 'Data reaktif dimutasi tetapi tidak pernah dibaca';
 ERROR_MESSAGES[W4104] = 'Watcher target bukan data reaktif';
 ERROR_MESSAGES[E4201] = 'Dependency cycle pada data turunan';
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
 // -- Compiler --
 ERROR_MESSAGES[E5001] = 'Node AST bertipe "{type}" tidak didukung oleh compiler';
@@ -292,12 +298,15 @@ ERROR_SUGGESTIONS[E4010] = 'Pastikan nama yang direferensikan adalah komponen (P
 ERROR_SUGGESTIONS[E4011] = '"berhenti" hanya valid di dalam loop atau event handler';
 ERROR_SUGGESTIONS[E4012] = 'Gunakan "lewati" hanya di dalam "ulangi" atau "selama"';
 ERROR_SUGGESTIONS[E4013] = 'Gunakan "kembalikan" hanya di dalam fungsi atau komponen';
+<<<<<<< HEAD
 ERROR_SUGGESTIONS[W4101] = 'Hapus deklarasi jika tidak diperlukan, atau gunakan simbol tersebut.';
 ERROR_SUGGESTIONS[W4102] = 'Pastikan nilai yang ditulis benar-benar dibaca, atau hapus penulisan yang tidak perlu.';
 ERROR_SUGGESTIONS[E4101] = 'Gunakan target yang writable atau ubah deklarasi menjadi data/ubah sesuai kebutuhan.';
 ERROR_SUGGESTIONS[W4103] = 'Jika state reaktif tidak pernah dibaca, pertimbangkan ubah biasa atau hapus mutasinya.';
 ERROR_SUGGESTIONS[W4104] = 'Gunakan data/turunan reaktif sebagai target watcher.';
 ERROR_SUGGESTIONS[E4201] = 'Ubah salah satu ekspresi turunan agar tidak saling bergantung secara melingkar.';
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
 // -- Compiler --
 ERROR_SUGGESTIONS[E5001] = 'Periksa apakah node type sudah didukung oleh compiler';
@@ -442,7 +451,10 @@ module.exports = {
   E4005: E4005, E4006: E4006, E4007: E4007, E4008: E4008,
   E4009: E4009, E4010: E4010, E4011: E4011, E4012: E4012, E4013: E4013,
   W4001: W4001, W4002: W4002, W4003: W4003, W4004: W4004,
+<<<<<<< HEAD
   W4101: W4101, W4102: W4102, E4101: E4101, W4103: W4103, W4104: W4104, E4201: E4201,
+=======
+>>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
   // Compiler errors
   E5001: E5001, E5002: E5002, E5003: E5003,
