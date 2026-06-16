@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Counter Reaktif KARSA</title>
+  <style>
+    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f3f4f6; }
+    .app-container { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 100%; }
+    .text-bold { font-weight: bold; font-size: 1.2rem; }
+    button { padding: 0.5rem 1rem; margin: 0.5rem; border: none; border-radius: 0.375rem; cursor: pointer; font-size: 1rem; }
+    #btn-tambah { background: #3b82f6; color: white; }
+    #btn-tambah:hover { background: #2563eb; }
+    #btn-reset { background: #6b7280; color: white; }
+    #btn-reset:hover { background: #4b5563; }
+  </style>
+</head>
+<body>
+
+<script>
+// ═══════════════════════════════════════════
+// KARSA Runtime
+// ═══════════════════════════════════════════
+const __subscribers = new WeakMap();
+let __activeEffect = null;
+
+function __createReactive(val) {
+  const obj = { value: val };
+  return new Proxy(obj, {
+    get(target, prop) {
+      if (__activeEffect && prop === 'value') {
+        let subs = __subscribers.get(target) || new Set();
+        subs.add(__activeEffect);
+        __subscribers.set(target, subs);
+      }
+      return target[prop];
+    },
+    set(target, prop, newVal) {
+      const oldVal = target[prop];
+      target[prop] = newVal;
+      if (prop === 'value' && oldVal !== newVal) {
+        const subs = __subscribers.get(target);
+        if (subs) subs.forEach(fn => fn(newVal, oldVal));
+      }
+      return true;
+    }
+  });
+}
+
+function __createComputed(fn) {
+  const reactive = __createReactive(null);
+  const effect = () => {
+    __activeEffect = effect;
+    reactive.value = fn();
+    __activeEffect = null;
+  };
+  effect();
+  return reactive;
+}
+
+function __watch(reactive, cb) {
+  const effect = (n, o) => cb(n, o);
+  let subs = __subscribers.get(reactive) || new Set();
+  subs.add(effect);
+  __subscribers.set(reactive, subs);
+  return () => subs.delete(effect);
+}
+
+function __setState(reactive, val) {
+  reactive.value = val;
+}
+
+// ═══════════════════════════════════════════
+// Hasil Kompilasi index.ks
+// ═══════════════════════════════════════════
+(function() {
+  function cekGenap(n) {
+    return n % 2 === 0 ? "Genap" : "Ganjil";
+  }
+
+  const counter = __createReactive(0);
+  const nama_pengguna = __createReactive("Kawan");
+  const status_counter = __createComputed(() => cekGenap(counter.value));
+  const pesan_selamat = __createComputed(() => ("Halo, " + (nama_pengguna.value + "!")));
+
+  const __el_1 = document.createElement("div");
+  __el_1.className = "app-container";
+  const __el_2 = document.createElement("h1");
+  __el_2.id = "judul";
+  __el_2.innerText = pesan_selamat.value;
+  __el_1.appendChild(__el_2);
+  const __el_3 = document.createElement("div");
+  __el_3.className = "counter-box";
+  const __el_4 = document.createElement("p");
+  __el_4.id = "nilai-text";
+  __el_4.className = "text-bold";
+  __el_4.innerText = ("Nilai saat ini: " + counter.value);
+  __el_3.appendChild(__el_4);
+  const __el_5 = document.createElement("p");
+  __el_5.id = "status-text";
+  __el_5.innerText = ("Status angka: " + status_counter.value);
+  __el_3.appendChild(__el_5);
+  const __el_6 = document.createElement("button");
+  __el_6.id = "btn-tambah";
+  __el_6.innerText = "Tambah Angka";
+  __el_6.addEventListener("click", (event) => {
+    __setState(counter, counter.value + 1);
+  });
+  __el_3.appendChild(__el_6);
+  const __el_7 = document.createElement("button");
+  __el_7.id = "btn-reset";
+  __el_7.innerText = "Reset";
+  __el_7.addEventListener("click", (event) => {
+    __setState(counter, 0);
+  });
+  __el_3.appendChild(__el_7);
+  __el_1.appendChild(__el_3);
+  document.body.appendChild(__el_1);
+
+  __watch(counter, (nilaiBaru) => {
+    document.querySelector("#nilai-text").innerText = ("Nilai saat ini: " + counter.value);
+    document.querySelector("#status-text").innerText = ("Status angka: " + status_counter.value);
+  });
+
+  __watch(pesan_selamat, (nilaiBaru) => {
+    document.querySelector("#judul").innerText = pesan_selamat.value;
+  });
+})();
+</script>
+</body>
+</html>

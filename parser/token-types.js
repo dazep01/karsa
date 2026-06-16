@@ -1,0 +1,201 @@
+/**
+ * KARSA v0.3.1 — Konstanta Tipe Token
+ *
+ * Daftar lengkap tipe token yang dikenali Parser KARSA.
+ * Konstanta ini wajib digunakan alih-alih string literal hard-coded.
+ * Berdasarkan: RFC-PARSER-001 §2.3 dan KARSA-grammar-spec_v0.3.1 §14
+ */
+
+// ─── Struktur ──────────────────────────────────────────────
+var TK_BUAT = 'TK_BUAT';
+var TK_TAMPILKAN = 'TK_TAMPILKAN';
+var TK_SEMBUNYIKAN = 'TK_SEMBUNYIKAN';
+var TK_HAPUS = 'TK_HAPUS';
+var TK_KOSONGKAN = 'TK_KOSONGKAN';
+var TK_PERBARUI = 'TK_PERBARUI';
+
+// ─── Event / Perilaku ──────────────────────────────────────
+var TK_KETIKA = 'TK_KETIKA';
+var TK_DIKLIK = 'TK_DIKLIK';
+var TK_DIKETIK = 'TK_DIKETIK';
+var TK_DISUBMIT = 'TK_DISUBMIT';
+var TK_DIMUAT = 'TK_DIMUAT';
+var TK_DIUBAH = 'TK_DIUBAH';
+var TK_DIFOKUS = 'TK_DIFOKUS';
+var TK_DITINGGAL = 'TK_DITINGGAL';
+var TK_DITEKAN = 'TK_DITEKAN';
+var TK_DILEPAS = 'TK_DILEPAS';
+var TK_DIARAHKAN = 'TK_DIARAHKAN';
+var TK_DITINGGAL_KURSOR = 'TK_DITINGGAL_KURSOR';
+var TK_DIGULIR = 'TK_DIGULIR';
+var TK_DIPASANG = 'TK_DIPASANG';
+var TK_DILEPAS_DARI_DOM = 'TK_DILEPAS_DARI_DOM';
+
+// ─── Alur ──────────────────────────────────────────────────
+var TK_LALU = 'TK_LALU';
+var TK_SETELAH = 'TK_SETELAH';
+
+// ─── Logika ────────────────────────────────────────────────
+var TK_JIKA = 'TK_JIKA';
+var TK_KALAU = 'TK_KALAU';
+var TK_JIKA_TIDAK = 'TK_JIKA_TIDAK';
+var TK_ULANGI = 'TK_ULANGI';
+var TK_SELAMA = 'TK_SELAMA';
+var TK_BERHENTI = 'TK_BERHENTI';
+var TK_LEWATI = 'TK_LEWATI';
+var TK_KEMBALIKAN = 'TK_KEMBALIKAN';
+
+// ─── Data / Reaktif ────────────────────────────────────────
+var TK_DATA = 'TK_DATA';
+var TK_TURUNAN = 'TK_TURUNAN';
+var TK_SIMPAN = 'TK_SIMPAN';
+var TK_AMBIL = 'TK_AMBIL';
+var TK_TETAP = 'TK_TETAP';
+var TK_UBAH = 'TK_UBAH';
+var TK_TAMBAHKAN = 'TK_TAMBAHKAN';
+var TK_SISIPKAN = 'TK_SISIPKAN';
+var TK_KURANGI = 'TK_KURANGI';
+var TK_SAAT = 'TK_SAAT';
+var TK_BERUBAH = 'TK_BERUBAH';
+
+// ─── Komponen / Fungsi ─────────────────────────────────────
+var TK_KOMPONEN = 'TK_KOMPONEN';
+var TK_GUNAKAN = 'TK_GUNAKAN';
+var TK_DENGAN = 'TK_DENGAN';
+var TK_DI = 'TK_DI';
+var TK_DARI = 'TK_DARI';
+var TK_KE = 'TK_KE';
+var TK_FUNGSI = 'TK_FUNGSI';
+var TK_JALANKAN = 'TK_JALANKAN';
+
+// ─── Jaringan / Navigasi ───────────────────────────────────
+var TK_BERHASIL = 'TK_BERHASIL';
+var TK_GAGAL = 'TK_GAGAL';
+var TK_SELALU = 'TK_SELALU';
+var TK_ARAHKAN = 'TK_ARAHKAN';
+var TK_MUAT_ULANG = 'TK_MUAT_ULANG';
+var TK_KEMBALI = 'TK_KEMBALI';
+
+// ─── Literal ───────────────────────────────────────────────
+var TK_BENAR = 'TK_BENAR';
+var TK_SALAH = 'TK_SALAH';
+var TK_KOSONG = 'TK_KOSONG';
+var TK_LITERAL_TEKS = 'TK_LITERAL_TEKS';
+var TK_LITERAL_ANGKA = 'TK_LITERAL_ANGKA';
+
+// ─── Operator Kata ─────────────────────────────────────────
+var TK_DAN = 'TK_DAN';
+var TK_ATAU = 'TK_ATAU';
+var TK_BUKAN = 'TK_BUKAN';
+var TK_SAMA_DENGAN = 'TK_SAMA_DENGAN';
+var TK_TIDAK_SAMA_DENGAN = 'TK_TIDAK_SAMA_DENGAN';
+var TK_LEBIH_DARI = 'TK_LEBIH_DARI';
+var TK_KURANG_DARI = 'TK_KURANG_DARI';
+var TK_PALING_SEDIKIT = 'TK_PALING_SEDIKIT';
+var TK_PALING_BANYAK = 'TK_PALING_BANYAK';
+var TK_ADA_DI = 'TK_ADA_DI';
+var TK_TIDAK_ADA_DI = 'TK_TIDAK_ADA_DI';
+
+// ─── Operator Simbol ───────────────────────────────────────
+var TK_PANAH = 'TK_PANAH';
+var TK_TITIK_DUA = 'TK_TITIK_DUA';
+var TK_KOMA = 'TK_KOMA';
+var TK_TITIK = 'TK_TITIK';
+var TK_PLUS = 'TK_PLUS';
+var TK_MINUS = 'TK_MINUS';
+var TK_BINTANG = 'TK_BINTANG';
+var TK_GARIS_MIRING = 'TK_GARIS_MIRING';
+var TK_TANDA_SAMA = 'TK_TANDA_SAMA';
+
+// ─── Kurung ────────────────────────────────────────────────
+var TK_KURUNG_BUKA = 'TK_KURUNG_BUKA';
+var TK_KURUNG_TUTUP = 'TK_KURUNG_TUTUP';
+var TK_KURAWAL_BUKA = 'TK_KURAWAL_BUKA';
+var TK_KURAWAL_TUTUP = 'TK_KURAWAL_TUTUP';
+var TK_KURUNG_SIKU_BUKA = 'TK_KURUNG_SIKU_BUKA';
+var TK_KURUNG_SIKU_TUTUP = 'TK_KURUNG_SIKU_TUTUP';
+
+// ─── Selektor ──────────────────────────────────────────────
+var TK_ID = 'TK_ID';
+var TK_CLASS = 'TK_CLASS';
+var TK_ATRIBUT = 'TK_ATRIBUT';
+
+// ─── Identifier ────────────────────────────────────────────
+var TK_IDENTIFIER = 'TK_IDENTIFIER';
+
+// ─── Komentar ──────────────────────────────────────────────
+var TK_KOMENTAR_BIASA = 'TK_KOMENTAR_BIASA';
+var TK_KOMENTAR_DOC = 'TK_KOMENTAR_DOC';
+
+// ─── Interop / Node ────────────────────────────────────────
+var TK_LANGSUNG = 'TK_LANGSUNG';
+var TK_BLOK_LANGSUNG = 'TK_BLOK_LANGSUNG';
+var TK_FRAGMEN = 'TK_FRAGMEN';
+
+// ─── Kontrol Whitespace & EOF ──────────────────────────────
+var TK_INDENT = 'TK_INDENT';
+var TK_DEDENT = 'TK_DEDENT';
+var TK_BARIS_BARU = 'TK_BARIS_BARU';
+var TK_EOF = 'TK_EOF';
+
+// ─── Event Token Set ───────────────────────────────────────
+var EVENT_TOKENS = [
+  TK_DIKLIK, TK_DIKETIK, TK_DISUBMIT, TK_DIMUAT,
+  TK_DIUBAH, TK_DIFOKUS, TK_DITINGGAL, TK_DITEKAN,
+  TK_DILEPAS, TK_DIARAHKAN, TK_DITINGGAL_KURSOR,
+  TK_DIGULIR, TK_DIPASANG, TK_DILEPAS_DARI_DOM
+];
+
+// ─── Keyword Statement Dispatch Map ────────────────────────
+var STATEMENT_KEYWORD_TOKENS = [
+  TK_BUAT, TK_TAMPILKAN, TK_SEMBUNYIKAN, TK_HAPUS,
+  TK_KOSONGKAN, TK_PERBARUI, TK_KETIKA, TK_SAAT,
+  TK_SETELAH, TK_JIKA, TK_ULANGI, TK_SELAMA,
+  TK_BERHENTI, TK_LEWATI, TK_KEMBALIKAN, TK_DATA,
+  TK_TETAP, TK_UBAH, TK_TURUNAN, TK_SIMPAN,
+  TK_TAMBAHKAN, TK_KURANGI, TK_SISIPKAN, TK_AMBIL,
+  TK_KOMPONEN, TK_GUNAKAN, TK_FUNGSI, TK_JALANKAN,
+  TK_ARAHKAN, TK_MUAT_ULANG, TK_KEMBALI, TK_LANGSUNG
+];
+
+// ─── Sinkronisasi Kontekstual ──────────────────────────────
+var SYNC_STATEMENT_TOKENS = STATEMENT_KEYWORD_TOKENS.slice();
+
+// Ekspresi infix operator tokens
+var INFIX_OPERATOR_TOKENS = [
+  TK_PLUS, TK_MINUS, TK_BINTANG, TK_GARIS_MIRING,
+  TK_DAN, TK_ATAU,
+  TK_SAMA_DENGAN, TK_TIDAK_SAMA_DENGAN,
+  TK_LEBIH_DARI, TK_KURANG_DARI,
+  TK_PALING_SEDIKIT, TK_PALING_BANYAK,
+  TK_ADA_DI, TK_TIDAK_ADA_DI
+];
+
+module.exports = {
+  TK_BUAT, TK_TAMPILKAN, TK_SEMBUNYIKAN, TK_HAPUS, TK_KOSONGKAN, TK_PERBARUI,
+  TK_KETIKA, TK_DIKLIK, TK_DIKETIK, TK_DISUBMIT, TK_DIMUAT, TK_DIUBAH,
+  TK_DIFOKUS, TK_DITINGGAL, TK_DITEKAN, TK_DILEPAS, TK_DIARAHKAN,
+  TK_DITINGGAL_KURSOR, TK_DIGULIR, TK_DIPASANG, TK_DILEPAS_DARI_DOM,
+  TK_LALU, TK_SETELAH,
+  TK_JIKA, TK_KALAU, TK_JIKA_TIDAK, TK_ULANGI, TK_SELAMA,
+  TK_BERHENTI, TK_LEWATI, TK_KEMBALIKAN,
+  TK_DATA, TK_TURUNAN, TK_SIMPAN, TK_AMBIL, TK_TETAP, TK_UBAH,
+  TK_TAMBAHKAN, TK_SISIPKAN, TK_KURANGI, TK_SAAT, TK_BERUBAH,
+  TK_KOMPONEN, TK_GUNAKAN, TK_DENGAN, TK_DI, TK_DARI, TK_KE,
+  TK_FUNGSI, TK_JALANKAN,
+  TK_BERHASIL, TK_GAGAL, TK_SELALU, TK_ARAHKAN, TK_MUAT_ULANG, TK_KEMBALI,
+  TK_BENAR, TK_SALAH, TK_KOSONG, TK_LITERAL_TEKS, TK_LITERAL_ANGKA,
+  TK_DAN, TK_ATAU, TK_BUKAN, TK_SAMA_DENGAN, TK_TIDAK_SAMA_DENGAN,
+  TK_LEBIH_DARI, TK_KURANG_DARI, TK_PALING_SEDIKIT, TK_PALING_BANYAK,
+  TK_ADA_DI, TK_TIDAK_ADA_DI,
+  TK_PANAH, TK_TITIK_DUA, TK_KOMA, TK_TITIK, TK_PLUS, TK_MINUS,
+  TK_BINTANG, TK_GARIS_MIRING, TK_TANDA_SAMA,
+  TK_KURUNG_BUKA, TK_KURUNG_TUTUP, TK_KURAWAL_BUKA, TK_KURAWAL_TUTUP,
+  TK_KURUNG_SIKU_BUKA, TK_KURUNG_SIKU_TUTUP,
+  TK_ID, TK_CLASS, TK_ATRIBUT, TK_IDENTIFIER,
+  TK_KOMENTAR_BIASA, TK_KOMENTAR_DOC,
+  TK_LANGSUNG, TK_BLOK_LANGSUNG, TK_FRAGMEN,
+  TK_INDENT, TK_DEDENT, TK_BARIS_BARU, TK_EOF,
+  EVENT_TOKENS, STATEMENT_KEYWORD_TOKENS, SYNC_STATEMENT_TOKENS,
+  INFIX_OPERATOR_TOKENS
+};

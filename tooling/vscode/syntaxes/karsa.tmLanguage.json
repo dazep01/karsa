@@ -1,0 +1,55 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "KARSA",
+  "scopeName": "source.karsa",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#selectors" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        { "name": "comment.line.double-dash.karsa", "match": "--.*$" },
+        { "name": "comment.block.karsa", "begin": "\\[\\[", "end": "\\]\\]" }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        { "name": "string.quoted.double.karsa", "begin": "\"", "end": "\"", "patterns": [ { "name": "constant.character.escape.karsa", "match": "\\\\." } ] }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        { "name": "constant.numeric.karsa", "match": "\\b[0-9]+(?:\\.[0-9]+)?\\b" }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.karsa",
+          "match": "\\b(data|tetap|ubah|turunan|buat|ketika|saat|jika|kalau|maka|jika tidak|ulangi|selama|berhenti|lewati|kembalikan|fungsi|komponen|gunakan|tampilkan|sembunyikan|hapus|kosongkan|perbarui|simpan|tambahkan|kurangi|sisipkan|ambil|jalankan|langsung|arahkan|setelah)\\b"
+        },
+        {
+          "name": "constant.language.boolean.karsa",
+          "match": "\\b(benar|salah|kosong)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        { "name": "storage.type.karsa", "match": "\\b(angka|teks|benar-salah|objek|array)\\b" }
+      ]
+    },
+    "selectors": {
+      "patterns": [
+        { "name": "entity.name.tag.selector.karsa", "match": "\\b(div|span|h1|h2|h3|p|button|input|form|ul|li|img|a|section|main|header|footer|fragmen)(?=[#\\.\\s]|$)" },
+        { "name": "entity.other.attribute-name.id.karsa", "match": "#[A-Za-z_][A-Za-z0-9_-]*" },
+        { "name": "entity.other.attribute-name.class.karsa", "match": "\\.[A-Za-z_][A-Za-z0-9_-]*" }
+      ]
+    }
+  }
+}

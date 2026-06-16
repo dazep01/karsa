@@ -1,0 +1,55 @@
+{
+  "name": "karsa-vscode",
+  "displayName": "KARSA Language Support",
+  "description": "VS Code extension MVP untuk KARSA v0.3.1 Refinement lvl.3C.",
+  "version": "0.3.1",
+  "publisher": "karsa",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:karsa"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "karsa",
+        "aliases": [
+          "KARSA",
+          "karsa"
+        ],
+        "extensions": [
+          ".ks"
+        ],
+        "configuration": "./language-configuration/karsa-language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "karsa",
+        "scopeName": "source.karsa",
+        "path": "./syntaxes/karsa.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "title": "KARSA",
+      "properties": {
+        "karsa.languageServer.path": {
+          "type": "string",
+          "default": "",
+          "description": "Path opsional ke server KARSA. Jika kosong, extension memakai tooling/language-server/server.js dari repo/extension."
+        },
+        "karsa.languageServer.trace": {
+          "type": "boolean",
+          "default": false,
+          "description": "Tampilkan log komunikasi language server di output channel."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KARSA v0.3.1 — Bahasa Pemrograman UI Indonesia</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>KARSA v0.3.1</h1>
+            <p>Bahasa DSL berbasis teks untuk membuat UI reaktif dengan JavaScript murni.</p>
+        </header>
+
+        <main>
+            <section id="demo">
+                <h2>Demo Reaktif</h2>
+                <div id="counter-box" class="card">
+                    <p>Hitungan saat ini:</p>
+                    <h1 id="angka">0</h1>
+                    <div class="controls">
+                        <button id="kurang">−</button>
+                        <button id="tambah">+</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="code-preview">
+                <h2>Kode Sumber Karsa</h2>
+                <pre><code>
+data hitungan = 0
+
+ketika tombol#tambah diklik:
+  tambahkan 1 ke hitungan
+
+ketika tombol#kurang diklik:
+  kurangi hitungan dengan 1
+
+saat hitungan berubah:
+  perbarui teks #angka -> hitungan
+                </code></pre>
+            </section>
+        </main>
+    </div>
+
+    <!-- Panggil Engine Karsa -->
+    <script src="engine/karsa.js"></script>
+
+    <!-- Script Karsa -->
+    <script type="text/karsa">
+        data hitungan = 0
+
+        ketika tombol#tambah diklik:
+            tambahkan 1 ke hitungan
+
+        ketika tombol#kurang diklik:
+            kurangi hitungan dengan 1
+
+        saat hitungan berubah:
+            perbarui teks "#angka" -> hitungan
+    </script>
+</body>
+</html>

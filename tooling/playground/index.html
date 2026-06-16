@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KARSA Playground & Semantic Visualizer</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --err: #ef4444;
+      --border: #334155;
+      --code: #020617;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0f172a 0%, #111827 55%, #0b1120 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+    header {
+      padding: 22px 28px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.92);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      backdrop-filter: blur(10px);
+    }
+    h1 { margin: 0 0 6px; font-size: 22px; letter-spacing: .2px; }
+    header p { margin: 0; color: var(--muted); font-size: 13px; }
+    main {
+      display: grid;
+      grid-template-columns: minmax(360px, 42%) 1fr;
+      gap: 16px;
+      padding: 16px;
+    }
+    .panel {
+      background: rgba(17, 24, 39, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0,0,0,.22);
+    }
+    .panel h2 {
+      margin: 0;
+      padding: 12px 14px;
+      font-size: 14px;
+      background: rgba(31, 41, 55, .88);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .panel-body { padding: 12px; }
+    textarea {
+      width: 100%;
+      min-height: 520px;
+      resize: vertical;
+      background: var(--code);
+      color: #dbeafe;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      outline: none;
+    }
+    textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56,189,248,.18); }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    button {
+      border: 1px solid var(--border);
+      background: #172033;
+      color: var(--text);
+      padding: 8px 11px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    button.primary { background: #0369a1; border-color: #0ea5e9; }
+    button:hover { filter: brightness(1.13); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    pre {
+      margin: 0;
+      padding: 12px;
+      background: var(--code);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: auto;
+      max-height: 320px;
+      color: #c4d7ff;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .list { display: grid; gap: 8px; }
+    .item {
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, .72);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .item strong { color: #f8fafc; }
+    .meta { color: var(--muted); font-size: 12px; margin-top: 5px; }
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid var(--border);
+      background: #0b1220;
+      color: var(--muted);
+      margin-right: 4px;
+    }
+    .badge.ok { color: var(--ok); border-color: rgba(34,197,94,.42); }
+    .badge.warn { color: var(--warn); border-color: rgba(245,158,11,.45); }
+    .badge.err { color: var(--err); border-color: rgba(239,68,68,.45); }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .tab { opacity: .72; }
+    .tab.active { opacity: 1; background: #0f766e; border-color: #14b8a6; }
+    .hidden { display: none; }
+    .status { font-size: 12px; color: var(--muted); }
+    .empty { color: var(--muted); font-style: italic; padding: 8px 2px; }
+    svg { width: 100%; min-height: 260px; background: var(--code); border-radius: 10px; border: 1px solid var(--border); }
+    @media (max-width: 980px) {
+      main { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>KARSA Playground & Semantic Visualizer</h1>
+    <p>[v0.3.1] Refinement lvl.3D — AST, semantic symbols, dependency graph, diagnostics, export JSON.</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Source <span class="status" id="runtimeStatus">loading runtime...</span></h2>
+      <div class="panel-body">
+        <div class="toolbar">
+          <button class="primary" id="btnAnalyze">Analyze</button>
+          <button id="btnCompile">Compile JS</button>
+          <button id="btnSample">Load Sample</button>
+          <button id="btnExport">Export JSON</button>
+        </div>
+        <textarea id="source" spellcheck="false"></textarea>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Visualizer <span class="status" id="summary">Belum dianalisis</span></h2>
+      <div class="panel-body">
+        <div class="tabs">
+          <button class="tab active" data-tab="diagnostics">Diagnostics</button>
+          <button class="tab" data-tab="symbols">Symbols</button>
+          <button class="tab" data-tab="graph">Graph</button>
+          <button class="tab" data-tab="ast">AST</button>
+          <button class="tab" data-tab="json">JSON</button>
+          <button class="tab" data-tab="js">JS</button>
+        </div>
+
+        <div id="tab-diagnostics" class="tab-pane"><div id="diagnostics" class="list"></div></div>
+        <div id="tab-symbols" class="tab-pane hidden"><div id="symbols" class="list"></div></div>
+        <div id="tab-graph" class="tab-pane hidden">
+          <svg id="graphSvg" viewBox="0 0 900 360" role="img" aria-label="Dependency graph"></svg>
+          <div id="dependencies" class="list" style="margin-top:10px"></div>
+        </div>
+        <div id="tab-ast" class="tab-pane hidden"><pre id="astOutput">{}</pre></div>
+        <div id="tab-json" class="tab-pane hidden"><pre id="jsonOutput">{}</pre></div>
+        <div id="tab-js" class="tab-pane hidden"><pre id="jsOutput">// compile output</pre></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../../engine/karsa.standalone.js"></script>
+  <script>
+    const sample = `--! Contoh KARSA semantic graph\n\ndata harga = 10\ndata jumlah = 2\nturunan total = harga * jumlah\n\nbuat div#app\n  buat h1 -> teks: "Total"\n  buat p#nilai -> teks: total\n\nsaat total berubah:\n  perbarui teks "#nilai" -> total\n`;
+
+    const els = {
+      source: document.getElementById('source'),
+      runtimeStatus: document.getElementById('runtimeStatus'),
+      summary: document.getElementById('summary'),
+      diagnostics: document.getElementById('diagnostics'),
+      symbols: document.getElementById('symbols'),
+      dependencies: document.getElementById('dependencies'),
+      graphSvg: document.getElementById('graphSvg'),
+      astOutput: document.getElementById('astOutput'),
+      jsonOutput: document.getElementById('jsonOutput'),
+      jsOutput: document.getElementById('jsOutput')
+    };
+
+    let lastResult = null;
+
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+    }
+
+    function safeAst(node, seen = new WeakSet()) {
+      if (!node || typeof node !== 'object') return node;
+      if (seen.has(node)) return '[Circular]';
+      seen.add(node);
+      if (Array.isArray(node)) return node.map(item => safeAst(item, seen));
+      const out = {};
+      Object.keys(node).forEach(key => {
+        if (['symbol', 'resolved', 'semantic', 'targetSymbol', 'declarationNode', 'shadowedSymbol', 'references', 'scope', 'parent'].includes(key)) return;
+        out[key] = safeAst(node[key], seen);
+      });
+      return out;
+    }
+
+    function renderDiagnostics(diags) {
+      if (!diags || diags.length === 0) {
+        els.diagnostics.innerHTML = '<div class="empty">Tidak ada diagnostics.</div>';
+        return;
+      }
+      els.diagnostics.innerHTML = diags.map(d => {
+        const sev = d.severity === 'warning' ? 'warn' : d.severity === 'info' ? '' : 'err';
+        const loc = d.loc && d.loc.start ? `Baris ${d.loc.start.line}:${d.loc.start.column}` : 'tanpa lokasi';
+        return `<div class="item"><span class="badge ${sev}">${escapeHtml(d.code || d.kode)}</span><strong>${escapeHtml(d.message || d.pesan)}</strong><div class="meta">${escapeHtml(d.stage || '')} · ${escapeHtml(loc)}</div>${d.suggestion || d.saran ? `<div class="meta">💡 ${escapeHtml(d.suggestion || d.saran)}</div>` : ''}</div>`;
+      }).join('');
+    }
+
+    function renderSymbols(symbols) {
+      if (!symbols || symbols.length === 0) {
+        els.symbols.innerHTML = '<div class="empty">Belum ada symbol.</div>';
+        return;
+      }
+      els.symbols.innerHTML = symbols.map(sym => {
+        const flags = [sym.isReactive && 'reactive', sym.isWritable && 'writable', sym.isComputed && 'computed', sym.isFunction && 'function', sym.isComponent && 'component'].filter(Boolean);
+        return `<div class="item"><strong>${escapeHtml(sym.name)}</strong> <span class="badge ok">${escapeHtml(sym.kind)}</span>${flags.map(f => `<span class="badge">${escapeHtml(f)}</span>`).join('')}<div class="meta">id=${escapeHtml(sym.id)} · scope=${escapeHtml(sym.scope)} · reads=${sym.readCount} · writes=${sym.writeCount}</div></div>`;
+      }).join('');
+    }
+
+    function renderDependencies(deps) {
+      if (!deps || deps.length === 0) {
+        els.dependencies.innerHTML = '<div class="empty">Tidak ada dependency.</div>';
+        renderGraph([], []);
+        return;
+      }
+      els.dependencies.innerHTML = deps.map(dep => `<div class="item"><strong>${escapeHtml(dep.from)}</strong> → <strong>${escapeHtml(dep.to)}</strong> <span class="badge">${escapeHtml(dep.kind)}</span></div>`).join('');
+      const symbols = lastResult && lastResult.semantic ? lastResult.semantic.symbols : [];
+      renderGraph(symbols, deps);
+    }
+
+    function renderGraph(symbols, deps) {
+      const names = Array.from(new Set((deps || []).flatMap(d => [d.from, d.to])));
+      const width = 900, height = 360;
+      const cx = width / 2, cy = height / 2, r = Math.min(280, 60 + names.length * 18);
+      const pos = new Map();
+      names.forEach((name, i) => {
+        const angle = names.length === 1 ? 0 : (Math.PI * 2 * i / names.length) - Math.PI / 2;
+        pos.set(name, { x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * Math.min(r, 130) });
+      });
+      const lines = deps.map(dep => {
+        const a = pos.get(dep.from), b = pos.get(dep.to);
+        if (!a || !b) return '';
+        return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" opacity="0.75" />`;
+      }).join('');
+      const nodes = names.map(name => {
+        const p = pos.get(name);
+        return `<g><circle cx="${p.x}" cy="${p.y}" r="28" fill="#0f172a" stroke="#14b8a6" stroke-width="2"/><text x="${p.x}" y="${p.y + 4}" text-anchor="middle" fill="#e5e7eb" font-size="12">${escapeHtml(name)}</text></g>`;
+      }).join('');
+      els.graphSvg.innerHTML = `<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#38bdf8" /></marker></defs>${lines}${nodes}`;
+    }
+
+    function analyze() {
+      if (!window.Karsa) {
+        els.runtimeStatus.textContent = 'runtime tidak ditemukan';
+        return;
+      }
+      const source = els.source.value;
+      const compileResult = Karsa.compile(source, { recover: true });
+      const inspectResult = Karsa.inspect(source);
+      const semantic = inspectResult.semantic || { symbols: [], references: [], dependencies: [], cycles: [] };
+      lastResult = { compileResult, inspectResult, semantic };
+
+      renderDiagnostics(inspectResult.diagnostics || compileResult.diagnostics || []);
+      renderSymbols(semantic.symbols || []);
+      renderDependencies(semantic.dependencies || []);
+      els.astOutput.textContent = JSON.stringify(safeAst(compileResult.ast || null), null, 2);
+      els.jsonOutput.textContent = JSON.stringify({ diagnostics: inspectResult.diagnostics || [], semantic }, null, 2);
+      els.jsOutput.textContent = compileResult.js || '// Tidak ada output JS karena ada error.';
+      const diagCount = (inspectResult.diagnostics || []).length;
+      els.summary.textContent = `${semantic.symbols.length} symbol · ${semantic.dependencies.length} dependency · ${diagCount} diagnostic`;
+    }
+
+    function exportJson() {
+      analyze();
+      const data = els.jsonOutput.textContent;
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'karsa-inspect.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
+      });
+    });
+
+    document.getElementById('btnAnalyze').addEventListener('click', analyze);
+    document.getElementById('btnCompile').addEventListener('click', () => { analyze(); document.querySelector('[data-tab="js"]').click(); });
+    document.getElementById('btnSample').addEventListener('click', () => { els.source.value = sample; analyze(); });
+    document.getElementById('btnExport').addEventListener('click', exportJson);
+
+    els.source.value = sample;
+    els.runtimeStatus.textContent = window.Karsa ? `KARSA ${Karsa.version} loaded` : 'KARSA runtime missing';
+    if (window.Karsa) analyze();
+  </script>
+</body>
+</html>
