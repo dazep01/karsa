@@ -9,21 +9,33 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)](package.json)
 [![Test](https://img.shields.io/badge/test-313%2B%20assertions%20%E2%9C%85-success.svg)](tester)
 
-*Belajar ngoding tanpa hambatan bahasa. Tulis dalam bahasa yang kau pahami, hasilkan kode yang dunia pahami.*
+*Belajar ngoding tanpa hambatan bahasa. Tulis dalam bahasa yang kamu mengerti, dan hasilkan kode yang dunia pahami.*
 
 </div>
 
 ---
 
+## 🔘 Apa Itu KARSA?
+
+**KARSA** adalah **bahasa pemrograman DSL** (_Domain Specific Language_) berbasis teks berbahasa Indonesia yang dikompilasi menjadi Vanilla JavaScript DOM API murni.
+
+### 🏛️ Filosofi
+* **Tanpa Virtual DOM**: Langsung ke DOM API.
+* **Tanpa Eval**: Aman dan deterministik.
+* **Reaktif**: Proxy-based reactivity.
+* **Lokalisasi**: Sintaksis menggunakan bahasa Indonesia yang intuitif.
+
 ## 🌋 Kenapa KARSA?
 
-Indonesia telah meresmikan mata pelajaran **coding sejak sekolah dasar**. Tetapi faktanya, mayoritas materi pembelajaran masih menggunakan istilah bahasa Inggris — `variable`, `function`, `if-else`, `while`, `return`. Bagi seorang anak kelas 4 SD di Madiun, kata-kata itu bukan sekadar "istilah asing" — itu adalah **tembok kognitif** yang harus dipecah sebelum ia bahkan mulai berpikir secara logis.
+Saat ini (per-2026), di Indonesia telah diresmikan mata pelajaran **coding** bahkan sejak tingkat sekolah dasar. Tetapi faktanya, seperti yang kita tahu mayoritas materi pembelajaran masih menggunakan istilah bahasa Inggris — `variable`, `function`, `if-else`, `while`, `return`. Bagi seorang anak bahkan sebagian khalayak umum, kata-kata itu bukan sekadar "istilah asing" — itu adalah **tembok kognitif** yang harus dipecah sebelum ia bahkan mulai berpikir secara logis.
 
 **KARSA hadir untuk memangkas tembok itu total.**
 
-Bukan sekadar "diterjemahkan" — KARSA didesain dari nol sebagai **Domain-Specific Language** dengan sintaksis berbahasa Indonesia yang utuh, konsisten, dan sengaja dibuat ketat agar membiasakan disiplin pemrograman industri. Setiap aturan di KARSA — indentasi 2 spasi wajib, deklarasi eksplisit, pengetatan logika — adalah cerminan langsung dari standar bahasa besar yang sudah ada. Sehingga saat murid KARSA bermigrasi ke JavaScript, TypeScript, Python, Vue, atau React, mereka **tidak memulai dari nol**. Mereka hanya perlu mempelajari kosakata baru — bukan cara berpikir baru.
+Bukan sekadar "diterjemahkan" — KARSA didesain dari nol sebagai **Domain-Specific Language** dengan sintaksis berbahasa Indonesia yang utuh, konsisten, dan sengaja dibuat ketat agar membiasakan disiplin pemrograman industri.
 
-> 💡 **KARSA bukan framework.** KARSA adalah DSL lokal Indonesia yang mengkompilasi menjadi Vanilla JavaScript DOM API murni — tanpa Virtual DOM, tanpa `eval`, tanpa `new Function`. Kode hasil kompilasi bisa dibaca, dipelajari, dan dimengerti siapa saja.
+Setiap aturan di KARSA — _indentasi 2 spasi wajib, deklarasi eksplisit, pengetatan logika_ — adalah cerminan langsung dari standar bahasa besar yang sudah ada. Sehingga saat pengguna KARSA bermigrasi ke JavaScript, TypeScript, Python, Vue, atau React, mereka **tidak memulai dari nol**. Mereka hanya perlu mempelajari kosakata baru — _bukan cara berpikir baru_.
+
+> 💡 **KARSA bukan framework !** — KARSA adalah DSL lokal Indonesia yang mengkompilasi menjadi Vanilla JavaScript DOM API murni — tanpa Virtual DOM, tanpa `eval`, tanpa `new Function`. Kode hasil kompilasi bisa dibaca, dipelajari, dan dimengerti siapa saja.
 
 ---
 
@@ -403,7 +415,7 @@ karsa/
 
 ## 🎓 Visi Pendidikan — Modul Ajar
 
-KARSA tidak hanya bahasa — ia dirancang sebagai **landasan belajar dan mengajar**. Enam modul ajar sedang dikembangkan untuk membentang kurva belajar dari nol hingga siap industri:
+KARSA tidak hanya bahasa — ia dirancang sebagai **landasan belajar dan mengajar**. Enam modul ajar (_sebagai pengenalan dna cara penggunaan KARSA_) sedang dikembangkan untuk membentang kurva belajar dari nol hingga siap industri:
 
 | Modul | Fokus | Status |
 |-------|-------|--------|
