@@ -175,6 +175,7 @@ function compileFile(filePath, options) {
   };
   if (options.recover) compileOpts.recover = true;
   if (options['strict-usage']) compileOpts.usageWarnings = 'strict';
+  if (options.verbose) compileOpts.verbose = true;
   
   const startTime = Date.now();
   const result = Karsa.compile(source, compileOpts);
@@ -635,10 +636,13 @@ function cmdCheck(parsed) {
         success: false,
         diagnostics: [{
           code: 'E0000',
+          kode: 'E0000',
           severity: 'error',
-          stage: 'system',
+          stage: 'System',
           message: 'Tentukan file .ks untuk dicek.',
+          pesan: 'Tentukan file .ks untuk dicek.',
           suggestion: 'Penggunaan: karsa check <file.ks> [--json]',
+          saran: 'Penggunaan: karsa check <file.ks> [--json]',
           loc: null
         }],
         errors: [],
@@ -680,7 +684,7 @@ function cmdCheck(parsed) {
   
   if (!result) {
     if (parsed.flags.json) {
-      printCheckJson(filePath, { success: false, errors: [{ code: 'E0000', severity: 'error', stage: 'system', message: 'File tidak ditemukan atau gagal dibaca.', suggestion: '', loc: null }] });
+      printCheckJson(filePath, { success: false, errors: [{ code: 'E0000', kode: 'E0000', severity: 'error', stage: 'System', message: 'File tidak ditemukan atau gagal dibaca.', pesan: 'File tidak ditemukan atau gagal dibaca.', suggestion: 'Periksa path file dan pastikan file ada.', saran: 'Periksa path file dan pastikan file ada.', loc: null }] });
     }
     process.exit(1);
   }
@@ -715,9 +719,11 @@ function readSourceForTooling(filePath, command, jsonMode) {
     var missingArg = {
       success: false,
       diagnostics: [{
-        code: 'E0000', severity: 'error', stage: 'system',
+        code: 'E0000', kode: 'E0000', severity: 'error', stage: 'System',
         message: 'Tentukan file .ks untuk command ' + command + '.',
+        pesan: 'Tentukan file .ks untuk command ' + command + '.',
         suggestion: 'Penggunaan: karsa ' + command + ' <file.ks> [--json]',
+        saran: 'Penggunaan: karsa ' + command + ' <file.ks> [--json]',
         loc: null
       }]
     };
@@ -731,9 +737,11 @@ function readSourceForTooling(filePath, command, jsonMode) {
     var notFound = {
       success: false,
       diagnostics: [{
-        code: 'E0000', severity: 'error', stage: 'system',
+        code: 'E0000', kode: 'E0000', severity: 'error', stage: 'System',
         message: 'File tidak ditemukan: ' + absPath,
+        pesan: 'File tidak ditemukan: ' + absPath,
         suggestion: 'Periksa path file .ks yang diberikan.',
+        saran: 'Periksa path file .ks yang diberikan.',
         loc: null
       }]
     };
