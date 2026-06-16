@@ -109,7 +109,7 @@
             stages.compiler = { ran: true };
           } catch(e) {
             stages.compiler = { ran: false, error: e.message };
-            allErrors.push({ kode: 'E0000', pesan: 'Compiler error: ' + e.message });
+            allErrors.push({ kode: 'E0000', code: 'E0000', pesan: 'Compiler error: ' + e.message, message: 'Compiler error: ' + e.message, severity: 'error', saran: '', suggestion: '' });
           }
         }
         
@@ -134,7 +134,7 @@
           } catch (parseErr) {
             return {
               success: false,
-              errors: [{ code: 'E0000', severity: 'error', message: 'Parser exception: ' + parseErr.message, suggestion: 'Terjadi kesalahan internal parser.' }],
+              errors: [{ code: 'E0000', kode: 'E0000', severity: 'error', message: 'Parser exception: ' + parseErr.message, pesan: 'Parser exception: ' + parseErr.message, suggestion: 'Terjadi kesalahan internal parser.', saran: 'Terjadi kesalahan internal parser.' }],
               stage: 'Parser'
             };
           }
@@ -148,7 +148,7 @@
           } catch (resolveErr) {
             return {
               success: false,
-              errors: [{ code: 'E0000', severity: 'error', message: 'Resolver exception: ' + resolveErr.message, suggestion: 'Terjadi kesalahan internal resolver.' }],
+              errors: [{ code: 'E0000', kode: 'E0000', severity: 'error', message: 'Resolver exception: ' + resolveErr.message, pesan: 'Resolver exception: ' + resolveErr.message, suggestion: 'Terjadi kesalahan internal resolver.', saran: 'Terjadi kesalahan internal resolver.' }],
               stage: 'Resolver'
             };
           }
@@ -162,7 +162,7 @@
           } catch (analyzeErr) {
             return {
               success: false,
-              errors: [{ code: 'E0000', severity: 'error', message: 'Analyzer exception: ' + analyzeErr.message, suggestion: 'Terjadi kesalahan internal analyzer.' }],
+              errors: [{ code: 'E0000', kode: 'E0000', severity: 'error', message: 'Analyzer exception: ' + analyzeErr.message, pesan: 'Analyzer exception: ' + analyzeErr.message, suggestion: 'Terjadi kesalahan internal analyzer.', saran: 'Terjadi kesalahan internal analyzer.' }],
               stage: 'Analyzer'
             };
           }
@@ -176,7 +176,7 @@
           } catch (compileErr) {
             return {
               success: false,
-              errors: [{ code: 'E0000', severity: 'error', message: 'Compiler exception: ' + compileErr.message, suggestion: 'Terjadi kesalahan internal compiler.' }],
+              errors: [{ code: 'E0000', kode: 'E0000', severity: 'error', message: 'Compiler exception: ' + compileErr.message, pesan: 'Compiler exception: ' + compileErr.message, suggestion: 'Terjadi kesalahan internal compiler.', saran: 'Terjadi kesalahan internal compiler.' }],
               stage: 'Compiler'
             };
           }
@@ -195,9 +195,12 @@
               success: false, 
               errors: [{ 
                   code: 'E0000',
+                  kode: 'E0000',
                   severity: 'error',
                   message: err.message,
-                  suggestion: 'Terjadi kesalahan sistem. Lihat stack trace di atas.'
+                  pesan: err.message,
+                  suggestion: 'Terjadi kesalahan sistem. Lihat stack trace di atas.',
+                  saran: 'Terjadi kesalahan sistem. Lihat stack trace di atas.'
               }], 
               stage: 'System' 
           };

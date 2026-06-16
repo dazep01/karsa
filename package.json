@@ -1,0 +1,62 @@
+{
+  "name": "karsa",
+  "version": "0.3.1",
+  "description": "KARSA — Domain Specific Language (DSL) berbahasa Indonesia untuk membangun antarmuka web reaktif. Proxy-based reactivity, tanpa Virtual DOM, tanpa eval, murni Vanilla JavaScript DOM API.",
+  "main": "engine/karsa.js",
+  "bin": {
+    "karsa": "engine/karsa-cli.js"
+  },
+  "files": [
+    "engine/",
+    "lexer/",
+    "parser/",
+    "resolver/",
+    "analyzer/",
+    "compiler/",
+    "utils/",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node tester/test-lexer.js && node tester/test-parser.js && node tester/test-analyzer.js && node tester/test-compiler.js && node tester/test-pipeline.js && node tester/full-compile-test.js",
+    "test:lexer": "node tester/test-lexer.js",
+    "test:parser": "node tester/test-parser.js",
+    "test:analyzer": "node tester/test-analyzer.js",
+    "test:compiler": "node tester/test-compiler.js",
+    "test:pipeline": "node tester/test-pipeline.js",
+    "test:full": "node tester/full-compile-test.js",
+    "build": "node engine/karsa-cli.js build",
+    "build:standalone": "node scripts/build-standalone.js",
+    "format": "node engine/karsa-cli.js format",
+    "lint": "node engine/karsa-cli.js check"
+  },
+  "keywords": [
+    "karsa",
+    "dsl",
+    "indonesian",
+    "bahasa-indonesia",
+    "reactive",
+    "dom",
+    "vanilla-js",
+    "compiler",
+    "no-virtual-dom",
+    "no-eval",
+    "proxy"
+  ],
+  "author": "dazep01",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dazep01/karsa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dazep01/karsa/issues"
+  },
+  "homepage": "https://github.com/dazep01/karsa#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0"
+  },
+  "preferGlobal": false
+}

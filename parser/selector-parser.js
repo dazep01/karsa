@@ -19,6 +19,9 @@ var HTML_TAGS = [
   'tabel', 'header', 'footer', 'main', 'section', 'artikel',
   'nav', 'aside', 'video', 'audio', 'kanvas', 'label',
   'textarea', 'pilihan', 'opsi', 'fragmen',
+  'ruang', 'judul', 'subjudul', 'paragraf', 'gambar',
+  'tautan', 'masukan', 'kolom', 'wadah', 'wadjud', 'kotak',
+  'frm', 'frmMasuk',
   'button', 'select', 'option', 'article', 'canvas',
   'table', 'fragment'
 ];

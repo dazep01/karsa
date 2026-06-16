@@ -43,7 +43,12 @@ const ALIAS_PROPERTI = {
   'anak': 'children',
   'induk': 'parentElement',
   'fokus': 'focus',
-  'atribut': 'getAttribute'
+  'atribut': 'getAttribute',
+  'sumber': 'src',
+  'tautan': 'href',
+  'kelas': 'className',
+  'gaya': 'style',
+  'placeholder': 'placeholder'
 };
 
 // ============================================================================
@@ -53,7 +58,9 @@ const VALID_EVENT_NAMES = new Set([
   'diklik', 'diketik', 'ditekan', 'dilepas', 'dilewat', 'ditinggal',
   'difokus', 'diblur', 'diubah', 'diseret', 'diubahukuran',
   'dipindah', 'dikirim', 'direset', 'digulir', 'dikonteks',
-  'masuk', 'keluar', 'aktif', 'nonaktif', 'muat', 'salah'
+  'masuk', 'keluar', 'aktif', 'nonaktif', 'muat', 'salah',
+  'disubmit', 'dimuat', 'diarahkan', 'ditinggal-kursor',
+  'dipasang', 'dilepas-dari-dom'
 ]);
 
 // ============================================================================
