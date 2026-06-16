@@ -210,9 +210,11 @@
             semantic: analyzeResult.ast ? analyzeResult.ast.semantic : null
           };
         } catch (err) {
-          console.error('=== SYSTEM ERROR STACK ===');
-          console.error(err.stack);
-          console.error('=========================');
+          if (options.verbose) {
+            console.error('=== SYSTEM ERROR STACK ===');
+            console.error(err.stack);
+            console.error('=========================');
+          }
           var systemException = { 
                   code: 'E0000',
                   kode: 'E0000',
@@ -220,8 +222,8 @@
                   stage: 'System',
                   message: err.message,
                   pesan: err.message,
-                  suggestion: 'Terjadi kesalahan sistem. Lihat stack trace di atas.',
-                  saran: 'Terjadi kesalahan sistem. Lihat stack trace di atas.',
+                  suggestion: 'Terjadi kesalahan sistem internal.',
+                  saran: 'Terjadi kesalahan sistem internal.',
                   loc: null
               };
           return { 

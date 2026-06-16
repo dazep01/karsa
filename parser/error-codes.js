@@ -134,6 +134,7 @@ var E6004 = 'E6004'; // Pipeline gagal (system error)
 // ═══════════════════════════════════════════════════════════════
 
 var E0000 = 'E0000'; // System error (unhandled exception)
+var W0000 = 'W0000'; // System warning (fallback untuk warning tanpa kode spesifik)
 
 // ═══════════════════════════════════════════════════════════════
 // ERROR MESSAGES (unified registry)
@@ -223,6 +224,7 @@ ERROR_MESSAGES[E6004] = 'Pipeline gagal';
 
 // -- System --
 ERROR_MESSAGES[E0000] = 'System error';
+ERROR_MESSAGES[W0000] = 'Peringatan sistem';
 
 // ═══════════════════════════════════════════════════════════════
 // SUGGESTIONS (unified registry)
@@ -309,6 +311,10 @@ ERROR_SUGGESTIONS[E6001] = '"berhenti" hanya valid di dalam loop atau event hand
 ERROR_SUGGESTIONS[E6002] = 'Gunakan "lewati" hanya di dalam "ulangi" atau "selama"';
 ERROR_SUGGESTIONS[E6003] = 'Gunakan "kembalikan" hanya di dalam fungsi atau komponen';
 ERROR_SUGGESTIONS[E6004] = 'Lihat detail error pada tahap yang gagal';
+
+// -- System --
+ERROR_SUGGESTIONS[E0000] = 'Periksa stack trace atau laporkan sebagai bug';
+ERROR_SUGGESTIONS[W0000] = 'Periksa detail peringatan untuk informasi lebih lanjut';
 
 // ═══════════════════════════════════════════════════════════════
 // SEVERITY HELPER
@@ -453,6 +459,7 @@ module.exports = {
 
   // System errors
   E0000: E0000,
+  W0000: W0000,
 
   // Registries
   ERROR_MESSAGES: ERROR_MESSAGES,
