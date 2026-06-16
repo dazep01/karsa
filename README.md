@@ -30,7 +30,6 @@ Cukup sertakan `engine/karsa.js` di file HTML Anda dan tulis kode dalam tag `<sc
 <script type="text/karsa" src="patch_ke_filemu.ks"></script>
 ```
 
-<<<<<<< HEAD
 ## CLI Singkat
 
 Compile file KARSA menjadi JavaScript:
@@ -106,7 +105,5 @@ tooling/playground/index.html
 
 Visualizer ini menyediakan panel diagnostics, symbols, dependency graph, AST, JSON export, dan compile output.
 
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 ---
 Dibuat dengan ❤️ oleh RaaRion.

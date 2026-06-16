@@ -17,7 +17,6 @@
     "README.md"
   ],
   "scripts": {
-<<<<<<< HEAD
     "test": "node tester/test-lexer.js && node tester/test-parser.js && node tester/test-resolver.js && node tester/test-analyzer.js && node tester/test-diagnostics-json.js && node tester/test-semantic-graph.js && node tester/test-compiler-snapshots.js && node tester/test-runtime-behavior.js && node tester/test-source-map-runtime.js && node tester/test-compiler.js && node tester/test-pipeline.js && node tester/test-standalone.js && node tester/test-language-server.js && node tester/test-vscode-extension.js && node tester/test-playground.js && node tester/full-compile-test.js",
     "test:lexer": "node tester/test-lexer.js",
     "test:parser": "node tester/test-parser.js",
@@ -33,13 +32,6 @@
     "test:snapshots": "node tester/test-compiler-snapshots.js",
     "test:runtime": "node tester/test-runtime-behavior.js",
     "test:sourcemap": "node tester/test-source-map-runtime.js",
-=======
-    "test": "node tester/test-lexer.js && node tester/test-parser.js && node tester/test-analyzer.js && node tester/test-compiler.js && node tester/test-pipeline.js && node tester/full-compile-test.js",
-    "test:lexer": "node tester/test-lexer.js",
-    "test:parser": "node tester/test-parser.js",
-    "test:analyzer": "node tester/test-analyzer.js",
-    "test:compiler": "node tester/test-compiler.js",
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     "test:pipeline": "node tester/test-pipeline.js",
     "test:full": "node tester/full-compile-test.js",
     "build": "node engine/karsa-cli.js build",

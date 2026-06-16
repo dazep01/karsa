@@ -2793,7 +2793,6 @@ saat hitungan berubah:
 ---
 
 *Akhir dokumen AST Specification v1.0.0*
-<<<<<<< HEAD
 
 ---
 
@@ -2971,5 +2970,3 @@ Untuk **[v0.3.1] Refinement lvl.2**:
 - Symbol table public akan dinormalisasi menggunakan `symbolId` dan `scopeId`.
 - Circular reference tidak boleh muncul pada output `inspect --json` atau `graph --json`.
 - Field internal seperti `declarationNode`, `resolved`, dan `symbol` tidak akan diekspos mentah ke tooling JSON.
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37

@@ -60,11 +60,7 @@ function buildStandalone() {
   
   // ===== LEXER =====
   // Lexer sudah dalam IIFE — langsung concat
-<<<<<<< HEAD
   console.log('  [1/12] Lexer...');
-=======
-  console.log('  [1/7] Lexer...');
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   parts.push('// ============================================================');
   parts.push('// LEXER (Tahap 1) — KarsaLexer');
   parts.push('// ============================================================');
@@ -73,11 +69,7 @@ function buildStandalone() {
   
   // ===== VISITOR UTILITY =====
   // Visitor pakai CommonJS — perlu dibungkus IIFE
-<<<<<<< HEAD
   console.log('  [2/12] Visitor utility...');
-=======
-  console.log('  [2/7] Visitor utility...');
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   parts.push('// ============================================================');
   parts.push('// VISITOR UTILITY — KarsaVisitor');
   parts.push('// ============================================================');
@@ -95,11 +87,7 @@ function buildStandalone() {
   // Parser paling kompleks: punya 8 sub-modul + index.js
   // Strategi: Satu IIFE besar yang mendaftarkan semua sub-modul
   // ke registry internal, lalu index.js resolve dari situ.
-<<<<<<< HEAD
   console.log('  [3/12] Parser (8 sub-modul + index)...');
-=======
-  console.log('  [3/7] Parser (8 sub-modul + index)...');
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   parts.push('// ============================================================');
   parts.push('// PARSER (Tahap 2) — KarsaParser');
   parts.push('// ============================================================');
@@ -107,17 +95,12 @@ function buildStandalone() {
   parts.push('');
   
   // ===== RESOLVER =====
-<<<<<<< HEAD
   console.log('  [4/12] Resolver...');
-=======
-  console.log('  [4/7] Resolver...');
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   parts.push('// ============================================================');
   parts.push('// RESOLVER (Tahap 3) — KarsaResolver');
   parts.push('// ============================================================');
   const resolverCode = readModule('resolver/karsa-resolver.js');
   parts.push(makeBrowserIIFE(resolverCode, 'KarsaResolver', {
-<<<<<<< HEAD
     '../utils/visitor': 'KarsaVisitor',
     '../parser/error-codes': 'KarsaParser.ErrorCodes'
   }));
@@ -134,20 +117,11 @@ function buildStandalone() {
   
   // ===== ANALYZER =====
   console.log('  [6/12] Analyzer...');
-=======
-    '../utils/visitor': 'KarsaVisitor'
-  }));
-  parts.push('');
-  
-  // ===== ANALYZER =====
-  console.log('  [5/7] Analyzer...');
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   parts.push('// ============================================================');
   parts.push('// ANALYZER (Tahap 4) — KarsaAnalyzer');
   parts.push('// ============================================================');
   const analyzerCode = readModule('analyzer/karsa-analyzer.js');
   parts.push(makeBrowserIIFE(analyzerCode, 'KarsaAnalyzer', {
-<<<<<<< HEAD
     '../utils/visitor': 'KarsaVisitor',
     '../parser/error-codes': 'KarsaParser.ErrorCodes',
     './dependency-graph': 'KarsaDependencyGraph'
@@ -189,38 +163,22 @@ function buildStandalone() {
 
   // ===== COMPILER =====
   console.log('  [11/12] Compiler...');
-=======
-    '../utils/visitor': 'KarsaVisitor'
-  }));
-  parts.push('');
-  
-  // ===== COMPILER =====
-  console.log('  [6/7] Compiler...');
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   parts.push('// ============================================================');
   parts.push('// COMPILER (Tahap 5) — KarsaCompiler');
   parts.push('// ============================================================');
   const compilerCode = readModule('compiler/karsa-compiler.js');
   parts.push(makeBrowserIIFE(compilerCode, 'KarsaCompiler', {
-<<<<<<< HEAD
     '../utils/visitor': 'KarsaVisitor',
     './emitters/runtime': 'KarsaRuntimeEmitter',
     './utils/codegen': 'KarsaCodegen',
     './lower/expression': 'KarsaExpressionLowering',
     './emitters/statements': 'KarsaStatementEmitters'
-=======
-    '../utils/visitor': 'KarsaVisitor'
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   }));
   parts.push('');
   
   // ===== ENGINE =====
   // Engine sudah dalam IIFE — langsung concat
-<<<<<<< HEAD
   console.log('  [12/12] Engine (main)...');
-=======
-  console.log('  [7/7] Engine (main)...');
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   parts.push('// ============================================================');
   parts.push('// ENGINE (Main Entry Point) — Karsa');
   parts.push('// ============================================================');

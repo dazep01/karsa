@@ -3,11 +3,7 @@
  *  KARSA v0.3.1 — STANDALONE BUNDLE
  * --------------------------------------------------------------------------
  *  Di-generate oleh scripts/build-standalone.js
-<<<<<<< HEAD
  *  Build time: 2026-06-16T13:06:07.443Z
-=======
- *  Build time: 2026-06-15T22:25:15.147Z
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
  *
  *  Seluruh modul KARSA dalam satu file untuk penggunaan di browser.
  *  Tanpa memerlukan Node.js, module bundler, atau dependensi lainnya.
@@ -1946,15 +1942,12 @@
     var W4002 = 'W4002'; // Lifecycle hook di dalam loop/handler
     var W4003 = 'W4003'; // Deklarasi tetap tanpa nilai awal
     var W4004 = 'W4004'; // Potensi bug: perbandingan assignment
-<<<<<<< HEAD
     var W4101 = 'W4101'; // Simbol dideklarasikan tetapi tidak pernah digunakan
     var W4102 = 'W4102'; // Simbol ditulis tetapi tidak pernah dibaca
     var E4101 = 'E4101'; // Target tidak dapat ditulis berdasarkan metadata isWritable
     var W4103 = 'W4103'; // Data reaktif dimutasi tetapi tidak pernah dibaca
     var W4104 = 'W4104'; // Watcher target bukan data reaktif menurut analyzer
     var E4201 = 'E4201'; // Dependency cycle pada data turunan
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     
     // ═══════════════════════════════════════════════════════════════
     // COMPILER (E5xxx / W5xxx)
@@ -2050,15 +2043,12 @@
     ERROR_MESSAGES[E4011] = '"berhenti" tidak valid di luar loop atau event handler';
     ERROR_MESSAGES[E4012] = '"lewati" tidak valid di luar loop';
     ERROR_MESSAGES[E4013] = '"kembalikan" tidak valid di luar fungsi atau komponen';
-<<<<<<< HEAD
     ERROR_MESSAGES[W4101] = 'Simbol "{name}" dideklarasikan tetapi tidak pernah digunakan';
     ERROR_MESSAGES[W4102] = 'Simbol "{name}" ditulis tetapi tidak pernah dibaca';
     ERROR_MESSAGES[E4101] = 'Target tidak dapat ditulis';
     ERROR_MESSAGES[W4103] = 'Data reaktif dimutasi tetapi tidak pernah dibaca';
     ERROR_MESSAGES[W4104] = 'Watcher target bukan data reaktif';
     ERROR_MESSAGES[E4201] = 'Dependency cycle pada data turunan';
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     
     // -- Compiler --
     ERROR_MESSAGES[E5001] = 'Node AST bertipe "{type}" tidak didukung oleh compiler';
@@ -2142,15 +2132,12 @@
     ERROR_SUGGESTIONS[E4011] = '"berhenti" hanya valid di dalam loop atau event handler';
     ERROR_SUGGESTIONS[E4012] = 'Gunakan "lewati" hanya di dalam "ulangi" atau "selama"';
     ERROR_SUGGESTIONS[E4013] = 'Gunakan "kembalikan" hanya di dalam fungsi atau komponen';
-<<<<<<< HEAD
     ERROR_SUGGESTIONS[W4101] = 'Hapus deklarasi jika tidak diperlukan, atau gunakan simbol tersebut.';
     ERROR_SUGGESTIONS[W4102] = 'Pastikan nilai yang ditulis benar-benar dibaca, atau hapus penulisan yang tidak perlu.';
     ERROR_SUGGESTIONS[E4101] = 'Gunakan target yang writable atau ubah deklarasi menjadi data/ubah sesuai kebutuhan.';
     ERROR_SUGGESTIONS[W4103] = 'Jika state reaktif tidak pernah dibaca, pertimbangkan ubah biasa atau hapus mutasinya.';
     ERROR_SUGGESTIONS[W4104] = 'Gunakan data/turunan reaktif sebagai target watcher.';
     ERROR_SUGGESTIONS[E4201] = 'Ubah salah satu ekspresi turunan agar tidak saling bergantung secara melingkar.';
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     
     // -- Compiler --
     ERROR_SUGGESTIONS[E5001] = 'Periksa apakah node type sudah didukung oleh compiler';
@@ -2295,10 +2282,7 @@
       E4005: E4005, E4006: E4006, E4007: E4007, E4008: E4008,
       E4009: E4009, E4010: E4010, E4011: E4011, E4012: E4012, E4013: E4013,
       W4001: W4001, W4002: W4002, W4003: W4003, W4004: W4004,
-<<<<<<< HEAD
       W4101: W4101, W4102: W4102, E4101: E4101, W4103: W4103, W4104: W4104, E4201: E4201,
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     
       // Compiler errors
       E5001: E5001, E5002: E5002, E5003: E5003,
@@ -5933,10 +5917,7 @@
 
   function require(name) {
     if (name === "../utils/visitor") return root.KarsaVisitor;
-<<<<<<< HEAD
     if (name === "../parser/error-codes") return root.KarsaParser.ErrorCodes;
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     return undefined;
   }
 
@@ -6021,15 +6002,10 @@
   function SemanticSymbol(name, kind, node, scope, metadata = {}) {
     this.name = name;
     this.kind = kind;          // 'data','tetap','ubah','turunan','fungsi','komponen','parameter'
-<<<<<<< HEAD
     this.id = metadata.id || null;
     this.declarationNode = node;
     this.scope = scope;
     this.scopeId = metadata.scopeId || null;
-=======
-    this.declarationNode = node;
-    this.scope = scope;
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   
     // Properti dari Tim B
     this.isReactive  = metadata.isReactive  || false;
@@ -6052,18 +6028,12 @@
   // SCOPE (dari Tim B, sedikit penyesuaian)
   // ============================================================================
   function Scope(type, parent) {
-<<<<<<< HEAD
     this.id = 'scope_' + (++Scope._nextId);
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     this.type = type;   // 'global','blok','komponen','iterasi','watcher'
     this.parent = parent;
     this.symbols = new Map();
   }
-<<<<<<< HEAD
   Scope._nextId = 0;
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   
   Scope.prototype.define = function(name, symbol) {
     this.symbols.set(name, symbol);
@@ -6086,10 +6056,7 @@
     this.buatStack = [];
     this.allSymbols = [];
     this.currentJalankanCallee = null;
-<<<<<<< HEAD
     this._symbolIdCounter = 0;
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   }
   
   KarsaResolver.prototype = Object.create(BaseVisitor.prototype);
@@ -6099,11 +6066,8 @@
   KarsaResolver.prototype.resolve = function(ast) {
     this.errors = [];
     this.warnings = [];
-<<<<<<< HEAD
     Scope._nextId = 0;
     this._symbolIdCounter = 0;
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     this.currentScope = new Scope('global', null);
     this.allSymbols = [];
   
@@ -6142,25 +6106,18 @@
     if (shadowed) {
       this.warnings.push(Err.createError('W3002', node.loc, {
         message: `Variabel "${name}" menyembunyikan variabel dengan nama sama di scope luar.`,
-<<<<<<< HEAD
         suggestion: 'Gunakan nama yang berbeda untuk menghindari kebingungan.',
         relatedInformation: [{
           message: `Deklarasi yang disembunyikan: "${name}" (${shadowed.kind}).`,
           loc: shadowed.declarationNode && shadowed.declarationNode.loc ? shadowed.declarationNode.loc : null
         }]
-=======
-        suggestion: 'Gunakan nama yang berbeda untuk menghindari kebingungan.'
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
       }));
     }
   
     const symbol = new SemanticSymbol(name, kind, node, this.currentScope.type, {
       ...metadata,
-<<<<<<< HEAD
       id: 'sym_' + (++this._symbolIdCounter),
       scopeId: this.currentScope.id,
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
       shadowedSymbol: shadowed
     });
   
@@ -6640,16 +6597,12 @@
   };
   
   module.exports = KarsaResolver;
-<<<<<<< HEAD
   
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
   root.KarsaResolver = module.exports;
 })(typeof self !== "undefined" ? self : this);
 
 // ============================================================
-<<<<<<< HEAD
 // DEPENDENCY GRAPH UTILITY — KarsaDependencyGraph
 // ============================================================
 (function(root) {
@@ -6910,8 +6863,6 @@
 })(typeof self !== "undefined" ? self : this);
 
 // ============================================================
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 // ANALYZER (Tahap 4) — KarsaAnalyzer
 // ============================================================
 (function(root) {
@@ -6919,11 +6870,8 @@
 
   function require(name) {
     if (name === "../utils/visitor") return root.KarsaVisitor;
-<<<<<<< HEAD
     if (name === "../parser/error-codes") return root.KarsaParser.ErrorCodes;
     if (name === "./dependency-graph") return root.KarsaDependencyGraph;
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     return undefined;
   }
 
@@ -6950,20 +6898,14 @@
   
   const { BaseVisitor, accept } = require('../utils/visitor');
   const Err = require('../parser/error-codes');
-<<<<<<< HEAD
   const DependencyGraph = require('./dependency-graph');
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   
   function KarsaAnalyzer() {
     BaseVisitor.call(this);
     this.errors = [];
     this.warnings = [];
     this._currentAst = null;
-<<<<<<< HEAD
     this.options = {};
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     
     // Context stacks
     this.context = {
@@ -6978,7 +6920,6 @@
   KarsaAnalyzer.prototype = Object.create(BaseVisitor.prototype);
   KarsaAnalyzer.prototype.constructor = KarsaAnalyzer;
   
-<<<<<<< HEAD
   KarsaAnalyzer.prototype.analyze = function(ast, options) {
     this.errors = [];
     this.warnings = [];
@@ -7000,21 +6941,6 @@
     accept(ast, this);
     this.buildSemanticGraph();
     this.emitUsageWarnings();
-=======
-  KarsaAnalyzer.prototype.analyze = function(ast) {
-    this.errors = [];
-    this.warnings = [];
-    this._currentAst = ast;
-    // [Bug 4 FIX] Build Map sekali untuk lookup O(1)
-    this._symbolMap = null;
-    if (ast && ast.semantic && ast.semantic.symbols) {
-      this._symbolMap = new Map();
-      ast.semantic.symbols.forEach(function(sym) {
-        this._symbolMap.set(sym.name, sym);
-      }.bind(this));
-    }
-    accept(ast, this);
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     return {
       ast: ast,
       errors: this.errors,
@@ -7123,17 +7049,12 @@
     if (!node.target) return;
     var targetName = (typeof node.target === 'string') ? node.target : (node.target.name || null);
     if (!targetName) return;
-<<<<<<< HEAD
     var symbol = node.targetSymbol || this.lookupSymbol(targetName);
-=======
-    var symbol = this.lookupSymbol(targetName);
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     if (symbol && symbol.kind === 'turunan') {
       this.addError('E4004', 
         `Data turunan "${targetName}" bersifat read-only dan tidak boleh diubah.`, 
         node.loc, 
         'Gunakan data (var) biasa jika perlu mengubah nilainya.');
-<<<<<<< HEAD
       return;
     }
     if (symbol && symbol.isWritable === false) {
@@ -7141,8 +7062,6 @@
         `Target "${targetName}" tidak dapat ditulis berdasarkan metadata semantic.`,
         node.loc,
         'Gunakan target yang writable atau ubah deklarasi menjadi data/ubah sesuai kebutuhan.');
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     }
   };
   
@@ -7158,7 +7077,6 @@
     }
   };
   
-<<<<<<< HEAD
   
   
   /**
@@ -7252,8 +7170,6 @@
     }
   };
   
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   // --- Visitor Methods ---
   
   /**
@@ -7498,7 +7414,6 @@
    * Validasi Watcher (Section 7.6)
    */
   KarsaAnalyzer.prototype.visitSaatStatement = function(node) {
-<<<<<<< HEAD
     var symbol = node.targetSymbol || this.lookupSymbol(node.target);
     if (symbol && symbol.isReactive === false) {
       this.addWarning('W4104',
@@ -7506,8 +7421,6 @@
         node.loc,
         'Gunakan data/turunan reaktif sebagai target watcher.');
     }
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     this.genericVisit(node);
   };
   
@@ -7517,16 +7430,11 @@
 })(typeof self !== "undefined" ? self : this);
 
 // ============================================================
-<<<<<<< HEAD
 // COMPILER RUNTIME EMITTER — KarsaRuntimeEmitter
-=======
-// COMPILER (Tahap 5) — KarsaCompiler
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 // ============================================================
 (function(root) {
   "use strict";
 
-<<<<<<< HEAD
   var module = { exports: {} };
 
   /**
@@ -7538,126 +7446,6 @@
   'use strict';
   
   const RUNTIME_HELPERS = `
-=======
-  function require(name) {
-    if (name === "../utils/visitor") return root.KarsaVisitor;
-    return undefined;
-  }
-
-  var module = { exports: {} };
-
-  /**
-   * KARSA v0.3.1 — COMPILER (Tahap 5)
-   * ----------------------------------------------------------------------------
-   * Melakukan lowering AST menjadi Vanilla JavaScript DOM API.
-   * Fitur: Proxy-based reactivity, lifecycle management, zero dependencies.
-   *
-   * Sesuai Spesifikasi: KARSA-grammar-spec_v0_3_1.md
-   */
-  
-  const { BaseVisitor, accept } = require('../utils/visitor');
-  
-  function KarsaCompiler() {
-    BaseVisitor.call(this);
-    this.output = [];
-    this.indent = 0;
-    this.varCounter = 0;
-    this.componentCount = 0;
-    this.helpers = new Set([
-      '__createReactive', '__createComputed', '__watch', 
-      '__setState', '__createElement', '__mount', '__cleanup'
-    ]);
-  }
-  
-  KarsaCompiler.prototype = Object.create(BaseVisitor.prototype);
-  KarsaCompiler.prototype.constructor = KarsaCompiler;
-  
-  KarsaCompiler.prototype.compile = function(ast) {
-    this.output = [];
-    this.varCounter = 0;
-    this.componentCount = 0;
-    
-    this.emit("// Generated by KARSA Compiler v0.3.1");
-    this.emit(`// Source: ${ast.source || 'program.ks'}`);
-    this.emit("");
-    
-    this.emitRuntimeHelpers();
-    
-    this.emit("// === User Code ===");
-    this.emit("(function() {");
-    this.indent++;
-    
-    // Start visit — emit return values dari top-level expressions
-    // (contoh: JalankanExpression mengembalikan string kode, bukan emit langsung)
-    if (ast.body && ast.body.length > 0) {
-      for (var i = 0; i < ast.body.length; i++) {
-        var result = accept(ast.body[i], this);
-        // Jika visitor mengembalikan string kode (expression-style), emit sebagai statement
-        if (typeof result === 'string' && result.length > 0) {
-          this.emit(result + ';');
-        }
-      }
-    }
-    
-    this.indent--;
-    this.emit("})();");
-    
-    return this.output.join("\n");
-  };
-  
-  // --- Emitter Helpers ---
-  
-  KarsaCompiler.prototype.emit = function(code) {
-    const spacing = "  ".repeat(this.indent);
-    this.output.push(spacing + code);
-  };
-  
-  KarsaCompiler.prototype.genVar = function(prefix = 'v') {
-    return `__${prefix}_${++this.varCounter}`;
-  };
-  
-  /**
-   * Resolve target element to a JS expression.
-   * Handles: Identifier, Selector, Literal, SelfReference
-   */
-  KarsaCompiler.prototype.resolveTarget = function(targetNode) {
-    if (!targetNode) return 'null';
-    
-    if (targetNode.type === 'Identifier') {
-      // Check if it's a compiled DOM variable (has compiledVarName)
-      if (targetNode.resolved && (targetNode.resolved.kind === 'data' || targetNode.resolved.kind === 'turunan')) {
-        return `${targetNode.name}.value`;
-      }
-      return targetNode.name;
-    }
-    if (targetNode.type === 'Selector') {
-      let selectorStr = targetNode.tag || '';
-      if (targetNode.id) selectorStr += '#' + targetNode.id;
-      if (targetNode.classes && targetNode.classes.length > 0) {
-        selectorStr += '.' + targetNode.classes.join('.');
-      }
-      return `document.querySelector("${selectorStr}")`;
-    }
-    if (targetNode.type === 'Literal') {
-      return `document.querySelector("${targetNode.value}")`;
-    }
-    if (targetNode.type === 'SelfReference') {
-      if (targetNode.referencedNode && targetNode.referencedNode.compiledVarName) {
-        return targetNode.referencedNode.compiledVarName;
-      }
-      return 'null';
-    }
-    // Fallback
-    return targetNode.name || 'null';
-  };
-  
-  /**
-   * Runtime Helpers (Self-contained)
-   */
-  KarsaCompiler.prototype.emitRuntimeHelpers = function() {
-    this.emit("// === Runtime Helpers ===");
-    const runtime = `
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   const __subscribers = new WeakMap();
   const __effectMap = new WeakMap();
   let __activeEffect = null;
@@ -7665,7 +7453,6 @@
   
   function __createReactive(val) {
     const obj = { value: val, __id: ++__effectId };
-<<<<<<< HEAD
     const proxy = new Proxy(obj, {
       get(target, prop) {
         if (__activeEffect && prop === 'value') {
@@ -7673,15 +7460,6 @@
           subs.add(__activeEffect);
           __subscribers.set(proxy, subs);
           if (__activeEffect.__deps) __activeEffect.__deps.add(proxy);
-=======
-    return new Proxy(obj, {
-      get(target, prop) {
-        if (__activeEffect && prop === 'value') {
-          let subs = __subscribers.get(target) || new Set();
-          subs.add(__activeEffect);
-          __subscribers.set(target, subs);
-          if (__activeEffect.__deps) __activeEffect.__deps.add(target);
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
         }
         return target[prop];
       },
@@ -7689,11 +7467,7 @@
         const oldVal = target[prop];
         target[prop] = newVal;
         if (prop === 'value' && oldVal !== newVal) {
-<<<<<<< HEAD
           const subs = __subscribers.get(proxy);
-=======
-          const subs = __subscribers.get(target);
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
           if (subs) {
             const subsCopy = Array.from(subs);
             for (let i = 0; i < subsCopy.length; i++) subsCopy[i](newVal, oldVal);
@@ -7702,10 +7476,7 @@
         return true;
       }
     });
-<<<<<<< HEAD
     return proxy;
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
   }
   
   function __createComputed(fn) {
@@ -7777,7 +7548,6 @@
     if (subs) subs.clear();
   }
   `;
-<<<<<<< HEAD
   
   function emitRuntimeHelpers(compiler) {
     compiler.emit("// === Runtime Helpers ===");
@@ -7852,703 +7622,6 @@
   'use strict';
   
   function lowerExpression(compiler, node) {
-=======
-    this.output.push(runtime.trim());
-    this.emit("");
-  };
-  
-  // ═══════════════════════════════════════════════════════════
-  // VISITOR IMPLEMENTATIONS — DECLARATIONS
-  // ═══════════════════════════════════════════════════════════
-  
-  KarsaCompiler.prototype.visitDataDeclaration = function(node) {
-    const initVal = this.lowerExpression(node.init);
-    this.emit(`const ${node.name} = __createReactive(${initVal});`);
-  };
-  
-  KarsaCompiler.prototype.visitTetapDeclaration = function(node) {
-    const initVal = this.lowerExpression(node.init);
-    this.emit(`const ${node.name} = ${initVal};`);
-  };
-  
-  KarsaCompiler.prototype.visitUbahDeclaration = function(node) {
-    const initVal = this.lowerExpression(node.init);
-    this.emit(`let ${node.name} = ${initVal};`);
-  };
-  
-  KarsaCompiler.prototype.visitTurunanDeclaration = function(node) {
-    const expr = this.lowerExpression(node.init);
-    this.emit(`const ${node.name} = __createComputed(() => ${expr});`);
-  };
-  
-  KarsaCompiler.prototype.visitKomponenDeclaration = function(node) {
-    // Component = factory function yang mengembalikan DOM element
-    const params = node.params.map(p => p.name).join(', ');
-    const componentVar = `__komp_${node.name}`;
-    
-    this.emit(`function ${componentVar}(${params}) {`);
-    this.indent++;
-    this.emit(`// Component: ${node.name}`);
-    this.emit(`const __root = document.createElement("div");`);
-    
-    // Set currentParent agar child elements di-append ke __root
-    const prevParent = this.currentParent;
-    this.currentParent = '__root';
-    
-    // Visit body (berisi buat, ketika, dll)
-    if (node.body) accept(node.body, this);
-    
-    this.currentParent = prevParent;
-    
-    // Register lifecycle hooks jika ada
-    this.emit(`return __root;`);
-    this.indent--;
-    this.emit(`}`);
-    
-    // Expose component factory globally
-    this.emit(`window.${node.name} = ${componentVar};`);
-  };
-  
-  KarsaCompiler.prototype.visitFungsiDeclaration = function(node) {
-    const params = node.params.map(p => p.name).join(', ');
-    this.emit(`function ${node.name}(${params}) {`);
-    this.indent++;
-    accept(node.body, this);
-    this.indent--;
-    this.emit("}");
-  };
-  
-  // ═══════════════════════════════════════════════════════════
-  // VISITOR IMPLEMENTATIONS — DOM STRUCTURE
-  // ═══════════════════════════════════════════════════════════
-  
-  KarsaCompiler.prototype.visitBuatStatement = function(node) {
-    const varName = this.genVar('el');
-    node.compiledVarName = varName; // Simpan untuk child reference
-    
-    // Tag alias mapping
-    const tagAliases = {
-      'tombol': 'button',
-      'ruang': 'div',
-      'judul': 'h1',
-      'subjudul': 'h2',
-      'paragraf': 'p',
-      'gambar': 'img',
-      'tautan': 'a',
-      'masukan': 'input',
-      'pilihan': 'select',
-      'kolom': 'textarea',
-      'tabel': 'table',
-      'artikel': 'article',
-      'kanvas': 'canvas',
-      'opsi': 'option',
-      'fragmen': 'fragment',
-      'wadjud': 'h1',
-      'wadah': 'div',
-      'kotak': 'div',
-      'frm': 'form',
-      'frmMasuk': 'form'
-    };
-    
-    const tag = tagAliases[node.selector.tag] || node.selector.tag;
-    this.emit(`const ${varName} = document.createElement("${tag}");`);
-    
-    if (node.selector.id) {
-      this.emit(`${varName}.id = "${node.selector.id}";`);
-    }
-    if (node.selector.classes && node.selector.classes.length > 0) {
-      this.emit(`${varName}.className = "${node.selector.classes.join(' ')}";`);
-    }
-    
-    // Attributes dari selector
-    if (node.selector.attributes && node.selector.attributes.length > 0) {
-      node.selector.attributes.forEach(attr => {
-        const attrVal = attr.value ? this.lowerExpression(attr.value) : '""';
-        this.emit(`${varName}.setAttribute("${attr.key}", ${attrVal});`);
-      });
-    }
-    
-    // Properti
-    if (node.properties) {
-      node.properties.forEach(p => {
-        const val = this.lowerExpression(p.value);
-        if (p.key === 'teks') this.emit(`${varName}.innerText = ${val};`);
-        else if (p.key === 'html') this.emit(`${varName}.innerHTML = ${val};`);
-        else if (p.key === 'nilai') this.emit(`${varName}.value = ${val};`);
-        else this.emit(`${varName}.setAttribute("${p.key}", ${val});`);
-      });
-    }
-  
-    // Simpan parent current untuk append
-    const prevParent = this.currentParent;
-    this.currentParent = varName;
-    
-    if (node.body) accept(node.body, this);
-    if (node.action) accept(node.action, this);
-    
-    this.currentParent = prevParent;
-    
-    if (!this.currentParent) {
-      this.emit(`document.body.appendChild(${varName});`);
-    } else {
-      this.emit(`${this.currentParent}.appendChild(${varName});`);
-    }
-  };
-  
-  KarsaCompiler.prototype.visitTampilkanStatement = function(node) {
-    // Handle message kinds: pesan, pesan-error, notifikasi
-    if (node.messageKind) {
-      const msgVal = this.lowerExpression(node.target);
-      if (node.messageKind === 'pesan') {
-        this.emit(`alert(${msgVal});`);
-      } else if (node.messageKind === 'pesan-error') {
-        this.emit(`console.error(${msgVal});`);
-      } else if (node.messageKind === 'notifikasi') {
-        this.emit(`if (typeof Notification !== 'undefined' && Notification.permission === 'granted') { new Notification(${msgVal}); } else { alert(${msgVal}); };`);
-      }
-      return;
-    }
-    
-    // Normal element show/mount
-    const target = this.resolveTarget(node.target);
-    const mountTarget = node.mountTarget ? this.resolveTarget(node.mountTarget) : null;
-    
-    if (mountTarget) {
-      this.emit(`__mount(${target}, ${mountTarget});`);
-    } else {
-      // Show element (remove display:none if hidden)
-      this.emit(`{ const __el = ${target}; if (__el) __el.style.display = ''; };`);
-    }
-  };
-  
-  KarsaCompiler.prototype.visitSembunyikanStatement = function(node) {
-    const target = this.resolveTarget(node.target);
-    this.emit(`{ const __el = ${target}; if (__el) __el.style.display = 'none'; };`);
-  };
-  
-  KarsaCompiler.prototype.visitHapusStatement = function(node) {
-    const target = this.resolveTarget(node.target);
-    this.emit(`{ const __el = ${target}; if (__el && __el.parentElement) __el.parentElement.removeChild(__el); };`);
-  };
-  
-  KarsaCompiler.prototype.visitKosongkanStatement = function(node) {
-    const target = this.resolveTarget(node.target);
-    this.emit(`{ const __el = ${target}; if (__el) __el.innerHTML = ''; };`);
-  };
-  
-  KarsaCompiler.prototype.visitPerbaruiStatement = function(node) {
-    const val = this.lowerExpression(node.value);
-    const target = this.resolveTarget(node.target);
-    
-    const propertyMap = {
-      'teks': 'innerText',
-      'html': 'innerHTML',
-      'nilai': 'value',
-      'kelas': 'className',
-      'gaya': 'style.cssText',
-      'sumber': 'src',
-      'src': 'src',
-      'tautan': 'href',
-      'href': 'href',
-      'tipe': 'type',
-      'nama': 'name',
-      'ditandai': 'checked',
-      'nonaktif': 'disabled',
-      'placeholder': 'placeholder',
-      'atribut': 'setAttribute'
-    };
-    
-    const jsProp = propertyMap[node.property];
-    if (jsProp) {
-      this.emit(`${target}.${jsProp} = ${val};`);
-    } else {
-      this.emit(`${target}.setAttribute("${node.property}", ${val});`);
-    }
-  };
-  
-  // ═══════════════════════════════════════════════════════════
-  // VISITOR IMPLEMENTATIONS — BEHAVIOR & EVENTS
-  // ═══════════════════════════════════════════════════════════
-  
-  KarsaCompiler.prototype.visitKetikaStatement = function(node) {
-    const eventMap = {
-      'diklik': 'click',
-      'diketik': 'input',
-      'disubmit': 'submit',
-      'diubah': 'change',
-      'ditekan': 'keydown',
-      'dilepas': 'keyup',
-      'dimuat': 'DOMContentLoaded',
-      'difokus': 'focus',
-      'diblur': 'blur',
-      'ditinggal': 'blur',
-      'diarahkan': 'mouseover',
-      'ditinggal-kursor': 'mouseout',
-      'digulir': 'scroll',
-      'diseret': 'dragstart',
-      'diubahukuran': 'resize',
-      'dipindah': 'drag',
-      'dikirim': 'submit',
-      'direset': 'reset',
-      'dikonteks': 'contextmenu',
-      'dilewat': 'paste',
-      'masuk': 'mouseenter',
-      'keluar': 'mouseleave',
-      'aktif': 'focus',
-      'nonaktif': 'blur',
-      'muat': 'load',
-      'salah': 'error',
-      'dipasang': '__karsa_mounted',
-      'dilepas-dari-dom': '__karsa_unmounted'
-    };
-    
-    const eventName = eventMap[node.event] || node.event;
-    let target = 'document';
-    
-    if (node.target) {
-      if (node.target.type === 'SelfReference') {
-        target = node.target.referencedNode.compiledVarName || 'null';
-      } else if (node.target.type === 'Identifier') {
-        if (node.target.name === 'halaman') {
-          target = 'document';
-        } else {
-          target = node.target.name;
-        }
-      } else if (node.target.type === 'Selector') {
-        target = this.resolveTarget(node.target);
-      } else if (node.target.type === 'Literal') {
-        target = `document.querySelector("${node.target.value}")`;
-      }
-    }
-  
-    // Custom events (mounted/unmounted) need MutationObserver
-    if (eventName === '__karsa_mounted' || eventName === '__karsa_unmounted') {
-      const domEvent = eventName === '__karsa_mounted' ? 'DOMNodeInserted' : 'DOMNodeRemoved';
-      this.emit(`${target}.addEventListener("${domEvent}", (event) => {`);
-    } else if (eventName === 'DOMContentLoaded') {
-      this.emit(`document.addEventListener("DOMContentLoaded", (event) => {`);
-    } else {
-      this.emit(`${target}.addEventListener("${eventName}", (event) => {`);
-    }
-    
-    this.indent++;
-    if (node.event === 'disubmit') this.emit("event.preventDefault();");
-    
-    if (node.body) accept(node.body, this);
-    if (node.action) accept(node.action, this);
-    
-    this.indent--;
-    this.emit("});");
-  };
-  
-  KarsaCompiler.prototype.visitSaatStatement = function(node) {
-    this.emit(`__watch(${node.target}, (nilaiBaru, nilaiLama) => {`);
-    this.indent++;
-    accept(node.body, this);
-    this.indent--;
-    this.emit("});");
-  };
-  
-  KarsaCompiler.prototype.visitLifecycleStatement = function(node) {
-    // Lifecycle hooks: dipasang, dilepas, diperbarui
-    const lifecycleMap = {
-      'dipasang': '__karsa_mounted',
-      'dilepas': '__karsa_unmounted',
-      'diperbarui': '__karsa_updated'
-    };
-    const hookName = lifecycleMap[node.kind] || node.kind;
-    
-    // Emit as custom event dispatch or callback registration
-    this.emit(`// Lifecycle: saat komponen ${node.kind}`);
-    if (node.kind === 'dipasang') {
-      // mounted — schedule to run after DOM is ready
-      this.emit(`if (document.readyState === 'loading') {`);
-      this.indent++;
-      this.emit(`document.addEventListener('DOMContentLoaded', () => {`);
-      this.indent++;
-      accept(node.body, this);
-      this.indent--;
-      this.emit(`});`);
-      this.indent--;
-      this.emit(`} else {`);
-      this.indent++;
-      accept(node.body, this);
-      this.indent--;
-      this.emit(`}`);
-    } else if (node.kind === 'dilepas') {
-      // unmounted — use beforeunload as approximation
-      this.emit(`window.addEventListener('beforeunload', () => {`);
-      this.indent++;
-      accept(node.body, this);
-      this.indent--;
-      this.emit(`});`);
-    } else {
-      // Generic lifecycle — just emit the body
-      accept(node.body, this);
-    }
-  };
-  
-  KarsaCompiler.prototype.visitSetelahStatement = function(node) {
-    // "setelah X selesai" — X adalah nama operasi/fungsi async
-    // Lower to: X().then(() => { ... }) atau callback setelah pemanggilan
-    const target = node.target;
-  
-    // [Bug 3 FIX] Cek apakah target adalah fungsi KARSA yang sudah di-resolve.
-    // Jika ya, panggil langsung tanpa typeof check (fungsi KARSA selalu lokal).
-    // Jika tidak, gunakan typeof check untuk keamanan (external/async).
-    const isKarsaFunction = node.targetSymbol && node.targetSymbol.isFunction;
-    const callExpr = isKarsaFunction ? `${target}()` : `(typeof ${target} === 'function' ? ${target}() : ${target})`;
-  
-    this.emit(`// setelah ${target} selesai`);
-    if (node.body) {
-      this.emit(`Promise.resolve(${callExpr}).then((__result) => {`);
-      this.indent++;
-      accept(node.body, this);
-      this.indent--;
-      this.emit(`});`);
-    } else if (node.action) {
-      this.emit(`Promise.resolve(${callExpr}).then((__result) => {`);
-      this.indent++;
-      accept(node.action, this);
-      this.indent--;
-      this.emit(`});`);
-    }
-  };
-  
-  // ═══════════════════════════════════════════════════════════
-  // VISITOR IMPLEMENTATIONS — LOGIC & CONTROL FLOW
-  // ═══════════════════════════════════════════════════════════
-  
-  KarsaCompiler.prototype.visitJikaStatement = function(node) {
-    const cond = this.lowerExpression(node.condition);
-    this.emit(`if (${cond}) {`);
-    this.indent++;
-    accept(node.consequent, this);
-    this.indent--;
-    if (node.alternate) {
-      this.emit("} else {");
-      this.indent++;
-      accept(node.alternate, this);
-      this.indent--;
-    }
-    this.emit("}");
-  };
-  
-  KarsaCompiler.prototype.visitUlangiStatement = function(node) {
-    const source = this.lowerExpression(node.source);
-    
-    if (node.kind === 'kali') {
-      // "ulangi N kali:" → for loop
-      this.emit(`for (let __i = 0; __i < ${source}; __i++) {`);
-      this.indent++;
-      accept(node.body, this);
-      this.indent--;
-      this.emit(`}`);
-    } else if (node.kind === 'rentang') {
-      // "ulangi item dari A sampai B:" → for range
-      const rangeEnd = node.rangeEnd ? this.lowerExpression(node.rangeEnd) : source;
-      this.emit(`for (let ${node.iteratorName} = ${source}; ${node.iteratorName} <= ${rangeEnd}; ${node.iteratorName}++) {`);
-      this.indent++;
-      accept(node.body, this);
-      this.indent--;
-      this.emit(`}`);
-    } else {
-      // "ulangi item dari sumber:" → forEach
-      this.emit(`${source}.forEach((${node.iteratorName}, indeks) => {`);
-      this.indent++;
-      accept(node.body, this);
-      this.indent--;
-      this.emit("});");
-    }
-  };
-  
-  KarsaCompiler.prototype.visitSelamaStatement = function(node) {
-    const cond = this.lowerExpression(node.condition);
-    this.emit(`while (${cond}) {`);
-    this.indent++;
-    accept(node.body, this);
-    this.indent--;
-    this.emit("}");
-  };
-  
-  KarsaCompiler.prototype.visitBerhentiStatement = function(node) {
-    this.emit(`break;`);
-  };
-  
-  KarsaCompiler.prototype.visitLewatiStatement = function(node) {
-    this.emit(`continue;`);
-  };
-  
-  KarsaCompiler.prototype.visitKembalikanStatement = function(node) {
-    if (node.value) {
-      const val = this.lowerExpression(node.value);
-      this.emit(`return ${val};`);
-    } else {
-      this.emit(`return;`);
-    }
-  };
-  
-  // ═══════════════════════════════════════════════════════════
-  // VISITOR IMPLEMENTATIONS — DATA & REACTIVITY
-  // ═══════════════════════════════════════════════════════════
-  
-  /**
-   * [Bug 1 FIX] Cek apakah target variabel bersifat reaktif (data/turunan)
-   * atau biasa (ubah/tetap). Menentukan cara assign yang benar.
-   *
-   * - Reaktif (data, turunan) → Proxy punya .value → gunakan __setState()
-   * - Biasa (ubah) → plain variable → gunakan assignment langsung
-   * - Tidak diketahui → fallback ke __setState (aman untuk Proxy)
-   */
-  KarsaCompiler.prototype._isTargetReactive = function(node) {
-    if (node.targetSymbol) {
-      return node.targetSymbol.isReactive === true;
-    }
-    // Fallback: jika tidak ada metadata resolver, anggap reaktif
-    // (lebih aman karena __setState bekerja dengan Proxy)
-    return true;
-  };
-  
-  KarsaCompiler.prototype.visitSimpanStatement = function(node) {
-    const target = node.target;
-    const val = this.lowerExpression(node.value);
-    if (this._isTargetReactive(node)) {
-      // data/turunan → Proxy, gunakan __setState
-      this.emit(`__setState(${target}, ${val});`);
-    } else {
-      // ubah → plain variable, assignment langsung
-      this.emit(`${target} = ${val};`);
-    }
-  };
-  
-  KarsaCompiler.prototype.visitTambahkanStatement = function(node) {
-    const target = node.target;
-    const jumlah = this.lowerExpression(node.value);
-    if (this._isTargetReactive(node)) {
-      // data/turunan → Proxy, akses via .value
-      this.emit(`__setState(${target}, ${target}.value + ${jumlah});`);
-    } else {
-      // ubah → plain variable, assignment langsung
-      this.emit(`${target} = ${target} + ${jumlah};`);
-    }
-  };
-  
-  KarsaCompiler.prototype.visitKurangiStatement = function(node) {
-    const target = node.target;
-    // Default ke 1 jika tidak ada value (kurangi counter → counter - 1)
-    const jumlah = node.value ? this.lowerExpression(node.value) : '1';
-    if (this._isTargetReactive(node)) {
-      // data/turunan → Proxy, akses via .value
-      this.emit(`__setState(${target}, ${target}.value - ${jumlah});`);
-    } else {
-      // ubah → plain variable, assignment langsung
-      this.emit(`${target} = ${target} - ${jumlah};`);
-    }
-  };
-  
-  KarsaCompiler.prototype.visitSisipkanStatement = function(node) {
-    const val = this.lowerExpression(node.value);
-    const target = node.target;
-    if (this._isTargetReactive(node)) {
-      // data/turunan → Proxy, akses via .value
-      this.emit(`${target}.value.push(${val});`);
-    } else {
-      // ubah → plain array, push langsung
-      this.emit(`${target}.push(${val});`);
-    }
-  };
-  
-  KarsaCompiler.prototype.visitAmbilDomStatement = function(node) {
-    // "ambil nilai/teks/html/dll dari sumber -> simpan ke target"
-    const source = this.resolveTarget(node.source);
-    const targetVar = node.target; // string nama variabel
-    
-    const kindMap = {
-      'nilai': 'value',
-      'teks': 'innerText',
-      'html': 'innerHTML',
-      'tinggi': 'offsetHeight',
-      'lebar': 'offsetWidth',
-      'atribut': null  // khusus — pakai getAttribute
-    };
-    
-    if (node.kind === 'atribut') {
-      const attrName = node.attributeName || '';
-      this.emit(`__setState(${targetVar}, ${source}.getAttribute("${attrName}"));`);
-    } else {
-      const jsProp = kindMap[node.kind] || node.kind;
-      this.emit(`__setState(${targetVar}, ${source}.${jsProp});`);
-    }
-  };
-  
-  KarsaCompiler.prototype.visitAmbilLuarStatement = function(node) {
-    // "ambil dari URL" → fetch API
-    const url = this.lowerExpression(node.url);
-    
-    // Build fetch options
-    let fetchOptions = '{}';
-    if (node.options && node.options.length > 0) {
-      const optPairs = node.options.map(opt => {
-        const val = this.lowerExpression(opt.value);
-        return `"${opt.key}": ${val}`;
-      });
-      fetchOptions = `{ ${optPairs.join(', ')} }`;
-    }
-    
-    this.emit(`fetch(${url}, ${fetchOptions})`);
-    this.indent++;
-    
-    // Process branches (berhasil, gagal, selalu)
-    if (node.branches && node.branches.length > 0) {
-      node.branches.forEach(branch => {
-        if (branch.kind === 'berhasil') {
-          this.emit(`.then((__response) => {`);
-          this.indent++;
-          this.emit(`if (!__response.ok) throw new Error("HTTP " + __response.status);`);
-          this.emit(`return __response.json();`);
-          this.indent--;
-          this.emit(`})`);
-          this.emit(`.then((__data) => {`);
-          this.indent++;
-          if (branch.action) accept(branch.action, this);
-          this.indent--;
-          this.emit(`})`);
-        } else if (branch.kind === 'gagal') {
-          this.emit(`.catch((__error) => {`);
-          this.indent++;
-          this.emit(`console.error("AmbilLuar gagal:", __error);`);
-          if (branch.action) accept(branch.action, this);
-          this.indent--;
-          this.emit(`})`);
-        } else if (branch.kind === 'selalu') {
-          this.emit(`.finally(() => {`);
-          this.indent++;
-          if (branch.action) accept(branch.action, this);
-          this.indent--;
-          this.emit(`})`);
-        }
-      });
-    } else {
-      // No branches — just log
-      this.emit(`.then(r => r.json())`);
-      this.emit(`.catch(e => console.error(e))`);
-    }
-    
-    this.emit(`;`);
-    this.indent--;
-  };
-  
-  // ═══════════════════════════════════════════════════════════
-  // VISITOR IMPLEMENTATIONS — KOMPONEN & GUNAKAN
-  // ═══════════════════════════════════════════════════════════
-  
-  KarsaCompiler.prototype.visitGunakanStatement = function(node) {
-    // "gunakan NamaKomponen dengan props di target"
-    const componentFactory = `__komp_${node.componentName}`;
-    
-    // Build props object
-    let propsArg = '';
-    if (node.props && node.props.length > 0) {
-      const propPairs = node.props.map(p => {
-        const val = this.lowerExpression(p.value);
-        return `"${p.key}": ${val}`;
-      });
-      propsArg = `{ ${propPairs.join(', ')} }`;
-    }
-    
-    const instanceVar = this.genVar('komp');
-    this.emit(`const ${instanceVar} = ${componentFactory}(${propsArg});`);
-    
-    // Mount ke target
-    if (node.mountTarget) {
-      const mountTarget = this.resolveTarget(node.mountTarget);
-      this.emit(`${mountTarget}.appendChild(${instanceVar});`);
-    } else if (this.currentParent) {
-      this.emit(`${this.currentParent}.appendChild(${instanceVar});`);
-    } else {
-      this.emit(`document.body.appendChild(${instanceVar});`);
-    }
-  };
-  
-  // ═══════════════════════════════════════════════════════════
-  // VISITOR IMPLEMENTATIONS — NAVIGASI
-  // ═══════════════════════════════════════════════════════════
-  
-  KarsaCompiler.prototype.visitArahkanStatement = function(node) {
-    // "arahkan ke URL" → window.location.href
-    const url = this.lowerExpression(node.url);
-    this.emit(`window.location.href = ${url};`);
-  };
-  
-  KarsaCompiler.prototype.visitMuatUlangStatement = function(node) {
-    this.emit(`window.location.reload();`);
-  };
-  
-  KarsaCompiler.prototype.visitKembaliStatement = function(node) {
-    this.emit(`window.history.back();`);
-  };
-  
-  // ═══════════════════════════════════════════════════════════
-  // VISITOR IMPLEMENTATIONS — INTEROP & RANTAI AKSI
-  // ═══════════════════════════════════════════════════════════
-  
-  KarsaCompiler.prototype.visitLangsungBlock = function(node) {
-    this.emit(node.content);
-  };
-  
-  KarsaCompiler.prototype.visitPanggilNativeExpression = function(node) {
-    const args = node.arguments.map(a => this.lowerExpression(a)).join(', ');
-    // [Bug 2 FIX] Gunakan lowerExpression untuk callee, bukan .name langsung
-    // Ini mendukung MemberExpression seperti console.log, document.querySelector
-    const calleeCode = this.lowerExpression(node.callee);
-    const code = `${calleeCode}(${args})`;
-    
-    if (this.currentParent) {
-        // Jika dipanggil sebagai statement di dalam blok 'buat'
-        this.emit(`${code};`);
-    } else {
-        return code;
-    }
-  };
-  
-  KarsaCompiler.prototype.visitJalankanExpression = function(node) {
-    // [Bug 5 FIX] Hapus node.args fallback — sudah deprecated di resolver (C2 fix).
-    // Hanya gunakan node.arguments atau node.withArgs.
-    const args = (node.arguments || node.withArgs || [])
-      .map(a => this.lowerExpression(a));
-    const code = `${node.callee}(${args.join(', ')})`;
-    
-    // Jika dipakai sebagai statement di dalam blok 'buat' (ada currentParent),
-    // emit langsung; jika tidak, kembalikan sebagai ekspresi.
-    if (this.currentParent) {
-      this.emit(`${code};`);
-    } else {
-      return code;
-    }
-  };
-  
-  KarsaCompiler.prototype.visitRantaiAksi = function(node) {
-    // RantaiAksi: first statement diikuti chain of actions
-    // "aksi1 lalu aksi2 lalu aksi3"
-    // Lower: jalankan first, lalu chain secara berurutan
-    
-    // Visit the first action
-    if (node.first) accept(node.first, this);
-    
-    // Visit each chained action
-    if (node.chain && node.chain.length > 0) {
-      node.chain.forEach(chainedAction => {
-        accept(chainedAction, this);
-      });
-    }
-  };
-  
-  // ═══════════════════════════════════════════════════════════
-  // EXPRESSION LOWERING
-  // ═══════════════════════════════════════════════════════════
-  
-  KarsaCompiler.prototype.lowerExpression = function(node) {
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
     if (!node) return 'undefined';
     
     switch(node.type) {
@@ -8577,11 +7650,7 @@
           'pangkat': '**'
         };
         const op = ops[node.operator] || node.operator;
-<<<<<<< HEAD
         return `(${lowerExpression(compiler, node.left)} ${op} ${lowerExpression(compiler, node.right)})`;
-=======
-        return `(${this.lowerExpression(node.left)} ${op} ${this.lowerExpression(node.right)})`;
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
       case 'UnaryExpression':
         const unaryOps = {
           'tidak': '!',
@@ -8589,7 +7658,6 @@
         };
         const uop = unaryOps[node.operator] || node.operator;
         if (node.prefix !== false) {
-<<<<<<< HEAD
           return `(${uop}${lowerExpression(compiler, node.operand)})`;
         }
         return `(${lowerExpression(compiler, node.operand)}${uop})`;
@@ -8603,21 +7671,6 @@
         if (node.properties && node.properties.length > 0) {
           const pairs = node.properties.map(p => {
             const val = lowerExpression(compiler, p.value);
-=======
-          return `(${uop}${this.lowerExpression(node.operand)})`;
-        }
-        return `(${this.lowerExpression(node.operand)}${uop})`;
-      case 'MemberExpression':
-        let prop = node.property.name;
-        return `${this.lowerExpression(node.object)}.${prop}`;
-      case 'CallExpression':
-        const callArgs = node.arguments.map(a => this.lowerExpression(a)).join(', ');
-        return `${this.lowerExpression(node.callee)}(${callArgs})`;
-      case 'ObjectLiteral':
-        if (node.properties && node.properties.length > 0) {
-          const pairs = node.properties.map(p => {
-            const val = this.lowerExpression(p.value);
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
             return `"${p.key}": ${val}`;
           });
           return `{ ${pairs.join(', ')} }`;
@@ -8625,16 +7678,11 @@
         return '{}';
       case 'ArrayLiteral':
         if (node.elements && node.elements.length > 0) {
-<<<<<<< HEAD
           const elems = node.elements.map(e => lowerExpression(compiler, e));
-=======
-          const elems = node.elements.map(e => this.lowerExpression(e));
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
           return `[${elems.join(', ')}]`;
         }
         return '[]';
       case 'JalankanExpression':
-<<<<<<< HEAD
         return compiler.visitJalankanExpression(node);
       case 'PanggilNativeExpression':
         return compiler.visitPanggilNativeExpression(node);
@@ -8642,15 +7690,6 @@
         return compiler.resolveTarget(node);
       case 'PropertyNode':
         return lowerExpression(compiler, node.value);
-=======
-        return this.visitJalankanExpression(node);
-      case 'PanggilNativeExpression':
-        return this.visitPanggilNativeExpression(node);
-      case 'Selector':
-        return this.resolveTarget(node);
-      case 'PropertyNode':
-        return this.lowerExpression(node.value);
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
       case 'FetchBranch':
       case 'FetchOption':
         return 'undefined';
@@ -8661,7 +7700,6 @@
         console.warn(`[KARSA Compiler] Unknown expression type: ${node.type}`);
         return 'undefined';
     }
-<<<<<<< HEAD
   
   }
   
@@ -9535,11 +8573,6 @@
   
   module.exports = KarsaCompiler;
   
-=======
-  };
-  
-  module.exports = KarsaCompiler;
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
   root.KarsaCompiler = module.exports;
 })(typeof self !== "undefined" ? self : this);
@@ -9585,10 +8618,7 @@
     compile: function (source, options = {}) {
       if (options.recover) {
         var allErrors = [];
-<<<<<<< HEAD
         var allWarnings = [];
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
         var stages = {};
         var ast = null;
         
@@ -9620,12 +8650,9 @@
           if (resolveResult.errors.length > 0) {
             allErrors = allErrors.concat(resolveResult.errors);
           }
-<<<<<<< HEAD
           if (resolveResult.warnings && resolveResult.warnings.length > 0) {
             allWarnings = allWarnings.concat(resolveResult.warnings);
           }
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
           ast = resolveResult.ast;
         } else if (ast) {
           // Try resolver even with parse errors if AST exists
@@ -9636,12 +8663,9 @@
             if (resolveResult.errors.length > 0) {
               allErrors = allErrors.concat(resolveResult.errors);
             }
-<<<<<<< HEAD
             if (resolveResult.warnings && resolveResult.warnings.length > 0) {
               allWarnings = allWarnings.concat(resolveResult.warnings);
             }
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
             ast = resolveResult.ast;
           } catch(e) {
             stages.resolver = { ran: false, error: e.message };
@@ -9654,21 +8678,14 @@
         if (ast) {
           try {
             var analyzer = new Analyzer();
-<<<<<<< HEAD
             var analyzeResult = analyzer.analyze(ast, options);
-=======
-            var analyzeResult = analyzer.analyze(ast);
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
             stages.analyzer = { ran: true, errors: analyzeResult.errors.length, warnings: analyzeResult.warnings.length };
             if (analyzeResult.errors.length > 0) {
               allErrors = allErrors.concat(analyzeResult.errors);
             }
-<<<<<<< HEAD
             if (analyzeResult.warnings && analyzeResult.warnings.length > 0) {
               allWarnings = allWarnings.concat(analyzeResult.warnings);
             }
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
             ast = analyzeResult.ast;
           } catch(e) {
             stages.analyzer = { ran: false, error: e.message };
@@ -9692,34 +8709,23 @@
           success: allErrors.filter(function(e) { return e.severity !== 'warning'; }).length === 0,
           js: javascript,
           errors: allErrors,
-<<<<<<< HEAD
           warnings: allWarnings.concat(allErrors.filter(function(e) { return e.severity === 'warning'; })),
           diagnostics: allErrors.concat(allWarnings),
           stages: stages,
           ast: ast,
           semantic: ast ? ast.semantic : null
-=======
-          warnings: allErrors.filter(function(e) { return e.severity === 'warning'; }),
-          stages: stages,
-          ast: ast
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
         };
       } else {
         try {
           // 1. Lexer
           const lexResult = Lexer.tokenize(source);
-<<<<<<< HEAD
           if (lexResult.errors.length > 0) return { success: false, errors: lexResult.errors, diagnostics: lexResult.errors, stage: 'Lexer' };
-=======
-          if (lexResult.errors.length > 0) return { success: false, errors: lexResult.errors, stage: 'Lexer' };
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
           // 2. Parser
           var parseResult;
           try {
             parseResult = Parser.parse(lexResult.tokens);
           } catch (parseErr) {
-<<<<<<< HEAD
             var parserException = { code: 'E0000', kode: 'E0000', severity: 'error', stage: 'System', message: 'Parser exception: ' + parseErr.message, pesan: 'Parser exception: ' + parseErr.message, suggestion: 'Terjadi kesalahan internal parser.', saran: 'Terjadi kesalahan internal parser.', loc: null };
             return {
               success: false,
@@ -9729,15 +8735,6 @@
             };
           }
           if (parseResult.errors.length > 0) return { success: false, errors: parseResult.errors, diagnostics: parseResult.errors, stage: 'Parser' };
-=======
-            return {
-              success: false,
-              errors: [{ code: 'E0000', kode: 'E0000', severity: 'error', message: 'Parser exception: ' + parseErr.message, pesan: 'Parser exception: ' + parseErr.message, suggestion: 'Terjadi kesalahan internal parser.', saran: 'Terjadi kesalahan internal parser.' }],
-              stage: 'Parser'
-            };
-          }
-          if (parseResult.errors.length > 0) return { success: false, errors: parseResult.errors, stage: 'Parser' };
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
           // 3. Resolver
           var resolveResult;
@@ -9745,7 +8742,6 @@
             const resolver = new Resolver();
             resolveResult = resolver.resolve(parseResult.ast);
           } catch (resolveErr) {
-<<<<<<< HEAD
             var resolverException = { code: 'E0000', kode: 'E0000', severity: 'error', stage: 'System', message: 'Resolver exception: ' + resolveErr.message, pesan: 'Resolver exception: ' + resolveErr.message, suggestion: 'Terjadi kesalahan internal resolver.', saran: 'Terjadi kesalahan internal resolver.', loc: null };
             return {
               success: false,
@@ -9755,21 +8751,11 @@
             };
           }
           if (resolveResult.errors.length > 0) return { success: false, errors: resolveResult.errors, warnings: resolveResult.warnings || [], diagnostics: resolveResult.errors.concat(resolveResult.warnings || []), stage: 'Resolver' };
-=======
-            return {
-              success: false,
-              errors: [{ code: 'E0000', kode: 'E0000', severity: 'error', message: 'Resolver exception: ' + resolveErr.message, pesan: 'Resolver exception: ' + resolveErr.message, suggestion: 'Terjadi kesalahan internal resolver.', saran: 'Terjadi kesalahan internal resolver.' }],
-              stage: 'Resolver'
-            };
-          }
-          if (resolveResult.errors.length > 0) return { success: false, errors: resolveResult.errors, stage: 'Resolver' };
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
           // 4. Analyzer
           var analyzeResult;
           try {
             const analyzer = new Analyzer();
-<<<<<<< HEAD
             analyzeResult = analyzer.analyze(resolveResult.ast, options);
           } catch (analyzeErr) {
             var analyzerException = { code: 'E0000', kode: 'E0000', severity: 'error', stage: 'System', message: 'Analyzer exception: ' + analyzeErr.message, pesan: 'Analyzer exception: ' + analyzeErr.message, suggestion: 'Terjadi kesalahan internal analyzer.', saran: 'Terjadi kesalahan internal analyzer.', loc: null };
@@ -9781,17 +8767,6 @@
             };
           }
           if (analyzeResult.errors.length > 0) return { success: false, errors: analyzeResult.errors, warnings: (resolveResult.warnings || []).concat(analyzeResult.warnings || []), diagnostics: analyzeResult.errors.concat(resolveResult.warnings || [], analyzeResult.warnings || []), stage: 'Analyzer' };
-=======
-            analyzeResult = analyzer.analyze(resolveResult.ast);
-          } catch (analyzeErr) {
-            return {
-              success: false,
-              errors: [{ code: 'E0000', kode: 'E0000', severity: 'error', message: 'Analyzer exception: ' + analyzeErr.message, pesan: 'Analyzer exception: ' + analyzeErr.message, suggestion: 'Terjadi kesalahan internal analyzer.', saran: 'Terjadi kesalahan internal analyzer.' }],
-              stage: 'Analyzer'
-            };
-          }
-          if (analyzeResult.errors.length > 0) return { success: false, errors: analyzeResult.errors, stage: 'Analyzer' };
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
 
           // 5. Compiler
           var javascript;
@@ -9799,17 +8774,11 @@
             const compiler = new Compiler();
             javascript = compiler.compile(analyzeResult.ast);
           } catch (compileErr) {
-<<<<<<< HEAD
             var compilerException = { code: 'E0000', kode: 'E0000', severity: 'error', stage: 'System', message: 'Compiler exception: ' + compileErr.message, pesan: 'Compiler exception: ' + compileErr.message, suggestion: 'Terjadi kesalahan internal compiler.', saran: 'Terjadi kesalahan internal compiler.', loc: null };
             return {
               success: false,
               errors: [compilerException],
               diagnostics: [compilerException],
-=======
-            return {
-              success: false,
-              errors: [{ code: 'E0000', kode: 'E0000', severity: 'error', message: 'Compiler exception: ' + compileErr.message, pesan: 'Compiler exception: ' + compileErr.message, suggestion: 'Terjadi kesalahan internal compiler.', saran: 'Terjadi kesalahan internal compiler.' }],
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
               stage: 'Compiler'
             };
           }
@@ -9817,21 +8786,15 @@
           return {
             success: true,
             js: javascript,
-<<<<<<< HEAD
             warnings: (resolveResult.warnings || []).concat(analyzeResult.warnings || []),
             diagnostics: (resolveResult.warnings || []).concat(analyzeResult.warnings || []),
             ast: analyzeResult.ast,
             semantic: analyzeResult.ast ? analyzeResult.ast.semantic : null
-=======
-            warnings: analyzeResult.warnings,
-            ast: analyzeResult.ast
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
           };
         } catch (err) {
           console.error('=== SYSTEM ERROR STACK ===');
           console.error(err.stack);
           console.error('=========================');
-<<<<<<< HEAD
           var systemException = { 
                   code: 'E0000',
                   kode: 'E0000',
@@ -9847,19 +8810,6 @@
               success: false, 
               errors: [systemException],
               diagnostics: [systemException], 
-=======
-          return { 
-              success: false, 
-              errors: [{ 
-                  code: 'E0000',
-                  kode: 'E0000',
-                  severity: 'error',
-                  message: err.message,
-                  pesan: err.message,
-                  suggestion: 'Terjadi kesalahan sistem. Lihat stack trace di atas.',
-                  saran: 'Terjadi kesalahan sistem. Lihat stack trace di atas.'
-              }], 
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
               stage: 'System' 
           };
         }
@@ -9867,7 +8817,6 @@
     },
 
     /**
-<<<<<<< HEAD
      * Memetakan baris JavaScript ter-generate ke lokasi source KARSA terdekat.
      * Menggunakan komentar `// @karsa-source line:column NodeType` dari compiler.
      */
@@ -9938,8 +8887,6 @@
     },
 
     /**
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
      * Menjalankan kode Karsa langsung di browser
      */
     run: function (source) {
@@ -9983,7 +8930,4 @@
 
   return Karsa;
 }));
-<<<<<<< HEAD
 
-=======
->>>>>>> a767ce64c4b94e2b89d39b76d5aa9551ef1d5e37
