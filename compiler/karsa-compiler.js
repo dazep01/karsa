@@ -295,6 +295,11 @@ KarsaCompiler.prototype.visitBuatStatement = function(node) {
     'masukan': 'input',
     'pilihan': 'select',
     'kolom': 'textarea',
+    'tabel': 'table',
+    'artikel': 'article',
+    'kanvas': 'canvas',
+    'opsi': 'option',
+    'fragmen': 'fragment',
     'wadjud': 'h1',
     'wadah': 'div',
     'kotak': 'div',
@@ -399,9 +404,15 @@ KarsaCompiler.prototype.visitPerbaruiStatement = function(node) {
     'kelas': 'className',
     'gaya': 'style.cssText',
     'sumber': 'src',
+    'src': 'src',
     'tautan': 'href',
+    'href': 'href',
+    'tipe': 'type',
+    'nama': 'name',
     'ditandai': 'checked',
-    'nonaktif': 'disabled'
+    'nonaktif': 'disabled',
+    'placeholder': 'placeholder',
+    'atribut': 'setAttribute'
   };
   
   const jsProp = propertyMap[node.property];
@@ -426,10 +437,24 @@ KarsaCompiler.prototype.visitKetikaStatement = function(node) {
     'dilepas': 'keyup',
     'dimuat': 'DOMContentLoaded',
     'difokus': 'focus',
+    'diblur': 'blur',
     'ditinggal': 'blur',
     'diarahkan': 'mouseover',
     'ditinggal-kursor': 'mouseout',
     'digulir': 'scroll',
+    'diseret': 'dragstart',
+    'diubahukuran': 'resize',
+    'dipindah': 'drag',
+    'dikirim': 'submit',
+    'direset': 'reset',
+    'dikonteks': 'contextmenu',
+    'dilewat': 'paste',
+    'masuk': 'mouseenter',
+    'keluar': 'mouseleave',
+    'aktif': 'focus',
+    'nonaktif': 'blur',
+    'muat': 'load',
+    'salah': 'error',
     'dipasang': '__karsa_mounted',
     'dilepas-dari-dom': '__karsa_unmounted'
   };
