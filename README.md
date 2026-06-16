@@ -2,14 +2,14 @@
 
 # 🇮🇩 KARSA
 
-**Bahasa pemrograman Indonesia untuk membangun antarmuka web reaktif**
+**Bahasa pemrograman berbahasa Indonesia untuk antarmuka web yang reaktif**
 
 [![Versi](https://img.shields.io/badge/versi-0.3.1-blue.svg)](https://github.com/dazep01/karsa)
 [![Lisensi](https://img.shields.io/badge/lisensi-MIT-green.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)](package.json)
 [![Test](https://img.shields.io/badge/test-313%2B%20assertions%20%E2%9C%85-success.svg)](tester)
 
-*Belajar ngoding tanpa hambatan bahasa. Tulis dalam bahasa yang kamu mengerti, dan hasilkan kode yang dunia pahami.*
+*Tulis dalam bahasa yang kamu pahami. Hasilkan kode yang dunia mengerti.*
 
 </div>
 
@@ -17,47 +17,41 @@
 
 ## 🔘 Apa Itu KARSA?
 
-**KARSA** adalah **bahasa pemrograman DSL** (_Domain Specific Language_) berbasis teks berbahasa Indonesia yang dikompilasi menjadi Vanilla JavaScript DOM API murni.
+**KARSA** adalah bahasa pemrograman _Domain-Specific Language_ (DSL) berbahasa Indonesia yang dikompilasi menjadi **Vanilla JavaScript DOM API** murni — tanpa Virtual DOM, tanpa `eval`, tanpa framework eksternal.
 
-### 🏛️ Filosofi
-* **Tanpa Virtual DOM**: Langsung ke DOM API.
-* **Tanpa Eval**: Aman dan deterministik.
-* **Reaktif**: Proxy-based reactivity.
-* **Lokalisasi**: Sintaksis menggunakan bahasa Indonesia yang intuitif.
+KARSA dirancang untuk siapa saja yang ingin mengekspresikan logika antarmuka web dalam bahasa yang terasa alami, lalu menghasilkan kode JavaScript standar industri yang bisa berjalan di browser mana pun.
 
-## 🌋 Kenapa KARSA?
+```karsa
+data nama = "Indonesia"
+buat h1 -> teks: "Halo, " + nama
 
-Saat ini (per-2026), di Indonesia telah diresmikan mata pelajaran **coding** bahkan sejak tingkat sekolah dasar. Tetapi faktanya, seperti yang kita tahu mayoritas materi pembelajaran masih menggunakan istilah bahasa Inggris — `variable`, `function`, `if-else`, `while`, `return`. Bagi seorang anak bahkan sebagian khalayak umum, kata-kata itu bukan sekadar "istilah asing" — itu adalah **tembok kognitif** yang harus dipecah sebelum ia bahkan mulai berpikir secara logis.
-
-**KARSA hadir untuk memangkas tembok itu total.**
-
-Bukan sekadar "diterjemahkan" — KARSA didesain dari nol sebagai **Domain-Specific Language** dengan sintaksis berbahasa Indonesia yang utuh, konsisten, dan sengaja dibuat ketat agar membiasakan disiplin pemrograman industri.
-
-Setiap aturan di KARSA — _indentasi 2 spasi wajib, deklarasi eksplisit, pengetatan logika_ — adalah cerminan langsung dari standar bahasa besar yang sudah ada. Sehingga saat pengguna KARSA bermigrasi ke JavaScript, TypeScript, Python, Vue, atau React, mereka **tidak memulai dari nol**. Mereka hanya perlu mempelajari kosakata baru — _bukan cara berpikir baru_.
-
-> 💡 **KARSA bukan framework !** — KARSA adalah DSL lokal Indonesia yang mengkompilasi menjadi Vanilla JavaScript DOM API murni — tanpa Virtual DOM, tanpa `eval`, tanpa `new Function`. Kode hasil kompilasi bisa dibaca, dipelajari, dan dimengerti siapa saja.
+saat nama berubah:
+  perbarui teks h1 -> "Halo, " + nama
+```
 
 ---
 
-## ✨ Apa yang Membuat KARSA Berbeda?
+## 🌋 Mengapa KARSA Perlu Ada?
 
-### 🗣️ Sintaksis Berbahasa Indonesia Penuh
+Di Indonesia, jutaan orang berurusan dengan teknologi setiap harinya — namun ketika mencoba memahami bagaimana teknologi itu bekerja, mereka berhadapan dengan satu hambatan yang sering luput dari perhatian: **bahasa**.
 
-Tidak ada setengah hati. Setiap keyword, setiap konstruksi, ditulis dalam bahasa yang dimengerti tanpa kamus:
+`variable`, `function`, `if-else`, `while`, `return` — bagi sebagian besar orang, kata-kata itu bukan sekadar istilah teknis. Mereka adalah **tembok kognitif** yang harus diruntuhkan sebelum seseorang bahkan bisa mulai berpikir secara logis tentang sebuah program.
 
-```karsa
-data nama = "Dunia"
-buat h1 -> teks: "Halo " + nama
+**KARSA hadir untuk meruntuhkan tembok itu.**
 
-saat nama berubah:
-  perbarui teks h1 -> "Halo " + nama
-```
+Bukan dengan menerjemahkan secara harfiah, melainkan dengan merancang ulang dari nol — sebuah bahasa yang sintaksis dan cara berpikirnya tumbuh dari bahasa Indonesia, bukan sekadar tempelan di atas bahasa lain.
 
-Bukan `let`, bukan `const`, bukan `document.createElement`. Tetapi `data`, `buat`, `saat ... berubah` — kata-kata yang langsung masuk akal.
+Dan yang lebih penting: setiap kebiasaan yang dibentuk oleh KARSA — indentasi wajib, deklarasi eksplisit, struktur yang ketat — adalah cerminan langsung dari standar bahasa-bahasa besar yang sudah ada. Sehingga ketika seseorang akhirnya bermigrasi ke JavaScript, TypeScript, Python, Vue, atau React, mereka **tidak memulai dari nol**. Mereka hanya perlu mempelajari kosakata baru — bukan cara berpikir baru.
 
-### ⚡ Reaktif dari Akar, Bukan dari Library
+> 💡 **KARSA bukan framework.** KARSA adalah DSL yang mengkompilasi ke Vanilla JavaScript DOM API murni. Kode hasil kompilasinya dapat dibaca, dipelajari, dan dipahami oleh siapa saja.
 
-KARSA mengadopsi **Proxy-based reactivity** yang tertanam di dalam compiler — bukan diimpor dari luar. Variabel deklarasikan dengan `data`, secara otomatis menjadi reaktif. Computed value dideklarasikan dengan `turunan`, watcher dengan `saat ... berubah`. Tidak ada boilerplate. Tidak ada setup. Tulis, dan ia bereaksi.
+---
+
+## ✨ Yang Membuat KARSA Berbeda
+
+### 🗣️ Sintaksis Berbahasa Indonesia — Sungguhan
+
+Tidak setengah hati. Setiap keyword, setiap konstruksi, ditulis dalam bahasa yang langsung dipahami tanpa kamus:
 
 ```karsa
 data hitungan = 0
@@ -67,23 +61,47 @@ saat hitungan berubah:
   perbarui teks "#angka" -> hitungan
 ```
 
-### 🔒 Ketat dengan Sengaja
+Bukan `let`, bukan `const`, bukan `document.createElement`. Tapi `data`, `buat`, `saat ... berubah` — kata-kata yang masuk akal sejak baris pertama.
 
-KARSA memegang prinsip bahwa **disiplin adalah bentuk kepedulian**. Indentasi 2 spasi wajib, bukan opsional — karena Python juga memegang aturan yang sama, dan jutaan programmer hidup dengannya. Deklarasi `data`, `tetap`, dan `ubah` membedakan reaktivitas, kekal, dan bisa diubah — bukan sekadar `var` vs `let` yang mudah tertukar. Analyzer menolak `berhenti` di luar loop, `kembalikan` di luar fungsi, dan lifecycle di luar komponen — **bukan untuk menyulitkan, tetapi untuk membiasakan pikiran struktur yang benar**.
+---
 
-### 🏗️ Arsitektur Compiler 5-Tahap Matang
+### ⚡ Reaktivitas dari Dalam, Bukan dari Library
 
-KARSA bukan transpiler sederhana. Di balik sintaksis yang ramah, berjalan pipeline compiler lengkap yang setara dengan pendekatan bahasa-bahasa besar:
+KARSA mengadopsi **Proxy-based reactivity** yang tertanam langsung di compiler — bukan diimpor dari luar. Variabel dideklarasikan dengan `data`, secara otomatis menjadi reaktif. Nilai turunan dideklarasikan dengan `turunan`. Watcher dengan `saat ... berubah`. Tidak ada boilerplate. Tidak ada setup tersembunyi.
+
+```karsa
+data hitungan = 0
+turunan genap = hitungan % 2 == 0
+
+saat hitungan berubah:
+  perbarui teks "#angka" -> hitungan
+```
+
+---
+
+### 🔒 Ketat dengan Tujuan
+
+KARSA memegang prinsip bahwa **disiplin adalah bentuk kepedulian**. Indentasi 2 spasi adalah kewajiban, bukan saran — karena Python juga memegang aturan yang sama, dan jutaan pengembang hidup dengannya. Deklarasi `data`, `tetap`, dan `ubah` memisahkan reaktivitas, kekal, dan bisa diubah — pembagian semantik yang jauh lebih bermakna dari sekadar `var` vs `let`.
+
+Analyzer KARSA menolak `berhenti` di luar loop, `kembalikan` di luar fungsi, dan lifecycle di luar komponen — **bukan untuk menyulitkan, melainkan untuk membiasakan struktur berpikir yang benar**.
+
+---
+
+### 🏗️ Compiler 5 Tahap yang Matang
+
+Di balik sintaksis yang ramah, berjalan pipeline compiler lengkap:
 
 ```
 Lexer → Parser → Resolver → Analyzer → Compiler
 ```
 
-Setiap tahap memiliki tanggung jawab terpisah, test suite mandiri, dan error bilingual (Indonesia & Inggris) yang konsisten. Resolver membangun semantic graph dengan metadata reaktivitas. Analyzer memvalidasi logika program. Compiler menghasilkan JavaScript mandiri yang siap jalan di browser mana pun.
+Setiap tahap memiliki tanggung jawab terpisah, test suite mandiri, dan pesan error bilingual (Indonesia & Inggris). Resolver membangun semantic graph dengan metadata reaktivitas. Analyzer memvalidasi logika program. Compiler menghasilkan JavaScript mandiri yang siap jalan di browser mana pun.
 
-### 🔐 Aman dan Deterministik
+---
 
-Tidak ada `eval()`. Tidak ada `new Function()`. Tidak ada `document.write()`. Kode KARSA dikompilasi secara statis menjadi DOM API murni — setiap operasi bisa diaudit, diprediksi, dan di-debug.
+### 🔐 Aman dan Dapat Diaudit
+
+Tidak ada `eval()`. Tidak ada `new Function()`. Tidak ada `document.write()`. Kode KARSA dikompilasi secara statis menjadi DOM API murni — setiap operasi dapat diaudit, diprediksi, dan di-debug.
 
 ---
 
@@ -96,7 +114,9 @@ git clone https://github.com/dazep01/karsa.git
 cd karsa
 ```
 
-Tidak butuh `npm install`. Tidak butuh build step. Cukup Node.js ≥ 14.
+Tidak perlu `npm install`. Tidak perlu build step. Cukup **Node.js ≥ 14**.
+
+---
 
 ### Hello World
 
@@ -104,10 +124,10 @@ Buat file `halo.ks`:
 
 ```karsa
 data nama = "Indonesia"
-buat h1 -> teks: "Halo " + nama
+buat h1 -> teks: "Halo, " + nama
 ```
 
-Kompilasi:
+Kompilasi via CLI:
 
 ```bash
 node engine/karsa-cli.js compile halo.ks
@@ -119,11 +139,13 @@ Atau jalankan langsung di browser:
 <script src="engine/karsa.js"></script>
 <script type="text/karsa">
   data nama = "Indonesia"
-  buat h1 -> teks: "Halo " + nama
+  buat h1 -> teks: "Halo, " + nama
 </script>
 ```
 
-### Counter Reaktif — Lengkap dalam 10 Baris
+---
+
+### Counter Reaktif — 10 Baris, 4 Konsep
 
 ```karsa
 data hitungan = 0
@@ -137,22 +159,24 @@ saat hitungan berubah:
   perbarui teks "#angka" -> hitungan
 ```
 
-Empat konsep sekaligus dalam satu contoh kecil: **deklarasi reaktif**, **pembuatan elemen**, **event handler**, dan **watcher**. Itulah kedalaman KARSA — kompleksitas disembunyikan, bukan dihilangkan.
+Empat konsep dalam satu contoh kecil: **deklarasi reaktif**, **pembuatan elemen**, **event handler**, dan **watcher**. Itulah kedalaman KARSA — kompleksitas disembunyikan, bukan dihilangkan.
 
 ---
 
-## 📖 Tour Sintaksis
+## 📖 Tur Sintaksis
 
 ### Deklarasi Data
 
-KARSA membedakan tiga jenis deklarasi dengan jelas — bukan sekadar varian `var`/`let`/`const`, tetapi pembagian semantik yang mencerminkan peran data di dalam program:
+KARSA membedakan tiga jenis deklarasi secara semantik — bukan sekadar varian `var`/`let`/`const`:
 
 ```karsa
-data usia = 17                  -- Reaktif, berubah, bisa di-watch
-tetap PI = 3.14                 -- Konstan, tidak bisa diubah
-ubah pencacah = 0               -- Bisa diubah, tapi tidak reaktif
-turunan luas = sisi * sisi      -- Computed, otomatis dihitung ulang
+data usia = 17              -- Reaktif: berubah, bisa di-watch
+tetap PI = 3.14             -- Konstan: tidak bisa diubah
+ubah pencacah = 0           -- Bisa diubah, tapi tidak reaktif
+turunan luas = sisi * sisi  -- Computed: dihitung ulang otomatis
 ```
+
+---
 
 ### Membangun Antarmuka
 
@@ -164,7 +188,9 @@ buat div.kartu
     ketika diklik -> hapus div.kartu
 ```
 
-Setiap `buat` menghasilkan elemen DOM nyata. Selector CSS (`#id`, `.class`) langsung menjadi atribut elemen. Anak elemen ditentukan oleh indentasi — seperti HTML, tapi tanpa tutup tag.
+Setiap `buat` menghasilkan elemen DOM nyata. Selector CSS (`#id`, `.class`) langsung menjadi atribut elemen. Hierarki ditentukan oleh indentasi — seperti HTML, tapi tanpa tag penutup.
+
+---
 
 ### Event & Interaksi
 
@@ -178,13 +204,15 @@ ketika #input-nama ditekan:
     if (event.key === "Enter") document.getElementById("simpan").click()
 ```
 
+---
+
 ### Kontrol Alur
 
 ```karsa
 jika nilai >= 80:
   tampilkan pesan "Lulus dengan baik!"
 jika tidak:
-  tampilkan pesan "Perlu belajar lagi"
+  tampilkan pesan "Perlu ditingkatkan"
 
 ulangi item dari daftarBelanja:
   buat li -> teks: item
@@ -192,6 +220,8 @@ ulangi item dari daftarBelanja:
 selama pencacah < 10:
   tambahkan 1 ke pencacah
 ```
+
+---
 
 ### Komponen
 
@@ -206,7 +236,9 @@ gunakan Kartu dengan nama: "Kopi", warna: "coklat"
 gunakan Kartu dengan nama: "Teh"
 ```
 
-Komponen di KARSA adalah **factory function** — setiap pemanggilan `gunakan` membuat instance baru yang mandiri. Parameter dengan nilai default didukung, dan aturan penempatan parameter wajib sebelum opsional ditegakkan oleh analyzer.
+Komponen di KARSA adalah **factory function** — setiap pemanggilan `gunakan` membuat instance baru yang mandiri. Parameter opsional dengan nilai default didukung penuh, dan urutannya ditegakkan oleh analyzer.
+
+---
 
 ### Fungsi
 
@@ -218,6 +250,8 @@ fungsi sapa(nama="Kawan"):
   kembalikan "Halo, " + nama + "!"
 ```
 
+---
+
 ### Fetch & Navigasi
 
 ```karsa
@@ -227,6 +261,8 @@ ambil https://api.contoh.com/data
 
 arahkan ke "/halaman-lain"
 ```
+
+---
 
 ### Lifecycle Komponen
 
@@ -242,25 +278,25 @@ komponen Penghitung(awal=0):
 
 ## 🛠️ CLI — Perintah Lengkap
 
-KARSA hadir dengan CLI yang dirancang untuk workflow nyata — bukan sekadar compiler mainan:
+KARSA hadir dengan CLI yang dirancang untuk workflow nyata:
 
 ```bash
-# Compile file ke stdout
+# Compile ke stdout
 karsa compile app.ks
 
 # Compile ke file output
 karsa compile app.ks -o dist/app.js
 
-# Cek sintaks tanpa compile (cocok untuk CI/linter)
+# Cek sintaks tanpa kompilasi (cocok untuk CI/linter)
 karsa check app.ks
 
-# Cek dengan output JSON (untuk editor/tooling)
+# Cek dengan output JSON (untuk editor atau tooling)
 karsa check app.ks --json
 
-# Inspeksi semantic — symbol table, references, dependencies
+# Inspeksi semantik — symbol table, referensi, dependensi
 karsa inspect app.ks --json
 
-# Dependency graph — computed, watcher, cycle detection
+# Dependency graph — computed, watcher, deteksi siklus
 karsa graph app.ks --json
 
 # Build seluruh direktori
@@ -269,26 +305,26 @@ karsa build src/ -o dist/
 # Watch & auto-rebuild saat file berubah
 karsa watch src/ -o dist/
 
-# Format/beautify kode KARSA
+# Format kode KARSA
 karsa format app.ks -w
 
-# Buat project baru
+# Inisiasi project baru
 karsa init nama-proyek
 ```
 
 ### Flag yang Tersedia
 
 | Flag | Fungsi |
-|------|--------|
+|---|---|
 | `-o, --output <path>` | Path output file atau direktori |
-| `-w, --write` | Tulis langsung ke file (format) |
+| `-w, --write` | Tulis langsung ke file (untuk format) |
 | `--recover` | Lanjutkan kompilasi meski ada error |
-| `--sourcemap` | Sertakan source map komentar |
+| `--sourcemap` | Sertakan source map sebagai komentar |
 | `--verbose` | Output detail untuk debugging |
 | `--minify` | Minify output JavaScript |
-| `--json` | Output JSON (check/inspect/graph) |
+| `--json` | Output JSON (check / inspect / graph) |
 | `--quiet` | Kurangi output non-JSON |
-| `--strict-usage` | Peringatkan fungsi/komponen yang tidak dipakai |
+| `--strict-usage` | Peringatkan fungsi/komponen yang tidak digunakan |
 
 ---
 
@@ -296,33 +332,37 @@ karsa init nama-proyek
 
 ### Language Server (LSP)
 
-KARSA memiliki Language Server MVP yang mendukung integrasi editor:
+KARSA dilengkapi Language Server MVP untuk integrasi editor modern:
 
 ```bash
 node tooling/language-server/server.js
 ```
 
-Fitur LSP saat ini: live diagnostics, hover basic, go to definition, find references.
+Fitur saat ini: live diagnostics, hover dasar, go to definition, find references.
+
+---
 
 ### Ekstensi VS Code
 
-Tersedia di `tooling/vscode/` — syntax highlighting TextMate, language configuration, dan koneksi ke language server. Cukup salin folder ke direktori extensions VS Code untuk mulai menulis KARSA dengan penyorotan sintaks dan diagnostics real-time.
+Tersedia di `tooling/vscode/` — syntax highlighting TextMate, language configuration, dan koneksi ke language server. Salin folder ke direktori extensions VS Code untuk mulai menulis KARSA dengan penyorotan sintaks dan diagnostics real-time.
+
+---
 
 ### Playground & Visualizer
 
-`tooling/playground/index.html` menyediakan antarmuka visual untuk eksplorasi kode KARSA — panel diagnostics, symbol table, dependency graph, AST, dan compile output dalam satu tampilan.
+`tooling/playground/index.html` menyediakan antarmuka visual untuk eksplorasi — panel diagnostics, symbol table, dependency graph, AST viewer, dan compile output dalam satu tampilan terpadu.
 
 ---
 
 ## 🧪 Test Suite
 
-KARSA memiliki test suite komprehensif yang menjangkau seluruh pipeline:
+KARSA memiliki test suite komprehensif yang menjangkau seluruh pipeline kompilasi:
 
 | Suite | Cakupan | Status |
-|-------|---------|--------|
+|---|---|---|
 | Lexer | 61 assertions — token, indentasi, literal, selector, komentar, performa 5MB | ✅ |
 | Parser | 95 assertions — 23 kategori AST, idempotency, invariant | ✅ |
-| Resolver | 5 assertions — metadata semantic, shadowing, undefined, write-to-const | ✅ |
+| Resolver | 5 assertions — metadata semantik, shadowing, undefined, write-to-const | ✅ |
 | Analyzer | 6 assertions — lifecycle, parameter, type hint, kontrol alur | ✅ |
 | Diagnostics JSON | 5 assertions — kontrak API `--json`, error/warning shape | ✅ |
 | Semantic Graph | 6 assertions — inspect, graph, cycle detection, CLI JSON | ✅ |
@@ -330,7 +370,7 @@ KARSA memiliki test suite komprehensif yang menjangkau seluruh pipeline:
 | Runtime Behavior | 5 assertions — DOM creation, reaktivitas, event, cleanup | ✅ |
 | Source Map | 3 assertions — source comment, error mapping, CLI flag | ✅ |
 | Compiler Unit | 105 assertions — 34 kategori per node type + helpers | ✅ |
-| Pipeline Integration | 1 assertion — end-to-end lexer→compiler | ✅ |
+| Pipeline Integration | 1 assertion — end-to-end lexer → compiler | ✅ |
 | Standalone Smoke | 1 assertion — bundle mandiri di browser | ✅ |
 | Language Server | 6 assertions — initialize, diagnostics, hover, definition, references | ✅ |
 | VS Code Extension | 4 assertions — package.json, grammar, config, syntax | ✅ |
@@ -349,7 +389,7 @@ Atau per suite:
 npm run test:lexer
 npm run test:compiler
 npm run test:lsp
-# ... lihat package.json untuk daftar lengkap
+# lihat package.json untuk daftar lengkap
 ```
 
 ---
@@ -358,102 +398,108 @@ npm run test:lsp
 
 ```
 karsa/
-├── lexer/                  Pemecah teks menjadi token
-│   └── karsa-lexer.js      (1.461 baris — handel indentasi, keyword multi-kata, selector CSS)
+├── lexer/
+│   └── karsa-lexer.js          Pemecah teks menjadi token
+│                               (1.461 baris — indentasi, keyword multi-kata, selector CSS)
 │
-├── parser/                 Pembangun pohon sintaks abstrak (AST)
-│   ├── karsa-parser.js      Orkestrator parsing
-│   ├── statement-parser.js  (1.671 baris — semua konstruksi statement)
-│   ├── expression-parser.js Ekspresi, operator, precedence
-│   ├── selector-parser.js   Parser selector CSS
-│   ├── ast-factory.js       Pabrik node AST + ensureLoc
-│   ├── binding-powers.js    Tabel precedence Pratt parser
-│   ├── token-types.js       Definisi tipe token
-│   ├── error-codes.js       (474 baris — 84 kode error/warning bilingual)
-│   └── index.js             Entry point modul parser
+├── parser/
+│   ├── karsa-parser.js         Orkestrator parsing
+│   ├── statement-parser.js     (1.671 baris — semua konstruksi statement)
+│   ├── expression-parser.js    Ekspresi, operator, precedence
+│   ├── selector-parser.js      Parser selector CSS
+│   ├── ast-factory.js          Pabrik node AST + ensureLoc
+│   ├── binding-powers.js       Tabel precedence Pratt parser
+│   ├── token-types.js          Definisi tipe token
+│   ├── error-codes.js          (474 baris — 84 kode error/warning bilingual)
+│   └── index.js                Entry point modul parser
 │
-├── resolver/               Pengelola lingkup (scope), nama, dan metadata semantic
-│   └── karsa-resolver.js    (674 baris — SemanticSymbol, Scope, reference tracking)
+├── resolver/
+│   └── karsa-resolver.js       Pengelola scope, nama, dan metadata semantik
+│                               (674 baris — SemanticSymbol, Scope, reference tracking)
 │
-├── analyzer/               Validasi semantik dan logika
-│   ├── karsa-analyzer.js    Pemeriksa aturan (lifecycle, konteks, type hint)
-│   └── dependency-graph.js  Deteksi siklus dependensi turunan
+├── analyzer/
+│   ├── karsa-analyzer.js       Validasi semantik dan logika program
+│   └── dependency-graph.js     Deteksi siklus dependensi turunan
 │
-├── compiler/               Generator kode JavaScript
-│   ├── karsa-compiler.js    Orkestrator kompilasi + source context
+├── compiler/
+│   ├── karsa-compiler.js       Orkestrator kompilasi + source context
 │   ├── emitters/
-│   │   ├── runtime.js       Emitter runtime helpers
-│   │   └── statements.js    (698 baris — 36 visitor method per statement type)
+│   │   ├── runtime.js          Emitter runtime helpers
+│   │   └── statements.js       (698 baris — 36 visitor method per statement type)
 │   ├── lower/
-│   │   └── expression.js    Lowering ekspresi AST ke JavaScript
+│   │   └── expression.js       Lowering ekspresi AST ke JavaScript
 │   └── utils/
-│       └── codegen.js       Utilitas pembangkit kode
+│       └── codegen.js          Utilitas pembangkit kode
 │
-├── engine/                 Orkestrator utama & CLI
-│   ├── karsa.js             Engine API (compile, inspect, graph, mapRuntimeError)
-│   ├── karsa-cli.js         (1.143 baris — CLI lengkap dengan 10 sub-command)
-│   └── karsa.standalone.js  Bundle mandiri untuk browser (8.934 baris, dihasilkan otomatis)
+├── engine/
+│   ├── karsa.js                Engine API (compile, inspect, graph, mapRuntimeError)
+│   ├── karsa-cli.js            (1.143 baris — CLI lengkap dengan 10 sub-command)
+│   └── karsa.standalone.js     Bundle mandiri untuk browser (8.934 baris, auto-generated)
 │
-├── utils/                  Pola Visitor dan utilitas bersama
-│   └── visitor.js           BaseVisitor + accept dispatch
+├── utils/
+│   └── visitor.js              BaseVisitor + accept dispatch
 │
-├── scripts/                Skrip build dan utilitas
-│   └── build-standalone.js Pembangun bundle standalone
+├── scripts/
+│   └── build-standalone.js     Builder bundle standalone
 │
-├── tooling/                Perangkat pengembangan
-│   ├── language-server/     LSP server MVP
-│   ├── vscode/              Ekstensi VS Code MVP
-│   └── playground/          Playground & semantic visualizer
+├── tooling/
+│   ├── language-server/        LSP server MVP
+│   ├── vscode/                 Ekstensi VS Code MVP
+│   └── playground/             Playground & semantic visualizer
 │
-├── tester/                 Test suite (16 file, 313+ assertions)
-├── example/                Contoh aplikasi (counter, todo-app, halo)
-├── doc-dev/                Dokumentasi pengembangan internal
-└── style.css               Stylesheet demo
+├── tester/                     Test suite (16 file, 313+ assertions)
+├── example/                    Contoh aplikasi (counter, todo-app, halo)
+├── doc-dev/                    Dokumentasi pengembangan internal
+└── style.css                   Stylesheet demo
 ```
 
 ---
 
-## 🎓 Visi Pendidikan — Modul Ajar
+## 🗺️ Modul Panduan
 
-KARSA tidak hanya bahasa — ia dirancang sebagai **landasan belajar dan mengajar**. Enam modul ajar (_sebagai pengenalan dna cara penggunaan KARSA_) sedang dikembangkan untuk membentang kurva belajar dari nol hingga siap industri:
+KARSA hadir dengan modul panduan yang dirancang untuk membantu siapa saja — dari yang baru memulai hingga yang ingin memahami arsitektur web secara lebih dalam:
 
 | Modul | Fokus | Status |
-|-------|-------|--------|
-| **Modul 1** | Dasar KARSA — deklarasi, buat, teks, event | ✅ Tersedia |
+|---|---|---|
+| **Modul 1** | Fondasi — deklarasi, buat, teks, event | ✅ Tersedia |
 | **Modul 2** | Alur & Logika — jika, ulangi, selama, fungsi | ✅ Tersedia |
 | **Modul 3** | Komponen & Komposisi | 🔜 Dalam pengerjaan |
 | **Modul 4** | Interoperabilitas — JS, API, framework | 🔜 Dalam pengerjaan |
 | **Modul 5** | Pola & Arsitektur — state, props, watcher | 🔜 Dalam pengerjaan |
-| **Modul 6** | Migrasi Industri — dari KARSA ke JS/TS/Vue/React/Python | 🔜 Dalam pengerjaan |
+| **Modul 6** | Jembatan ke Industri — dari KARSA ke JS / TS / Vue / React / Python | 🔜 Dalam pengerjaan |
 
-Setiap modul tidak hanya mengajarkan KARSA — terselip secara halus konsep yang berlaku di bahasa dan framework besar: variabel reaktif (Vue `ref`), computed property (Vue `computed`), component props (React/Vue), event binding, lifecycle hook, hingga dependency injection. Sehingga saat murid akhirnya memasuki dunia JavaScript atau Python, mereka menemukan bahwa **konsep yang mereka kenal sudah memiliki nama lain** — dan itu cukup, tidak perlu mulai dari nol.
+Setiap modul tidak hanya membahas KARSA — secara tersirat ia memperkenalkan konsep yang berlaku universal: variabel reaktif (Vue `ref`), computed property (Vue `computed`), component props (React/Vue), event binding, lifecycle hook, hingga dependency injection. Sehingga ketika pembaca akhirnya berhadapan dengan JavaScript atau Python, mereka akan menemukan bahwa **konsep yang mereka kenal sudah memiliki nama lain** — dan itu cukup.
 
 ---
 
 ## 🧭 Filosofi Desain
 
-Prinsip-prinsip yang membentuk setiap keputusan desain KARSA:
+Prinsip-prinsip yang membentuk setiap keputusan dalam KARSA:
 
-**Indonesia Dulu, Global Kemudian.** Sintaksis ditulis dalam bahasa yang dimengerti pertama, bukan bahasa yang dipinjam. Tapi output-nya adalah JavaScript standar industri yang berjalan di mana saja.
+**🇮🇩 Indonesia Dulu, Global Kemudian.**
+Sintaksis ditulis dalam bahasa yang dipahami pertama, bukan bahasa yang dipinjam. Tapi output-nya adalah JavaScript standar industri yang berjalan di mana saja.
 
-**Ketatan adalah Kepedulian.** Aturan indentasi, deklarasi eksplisit, dan validasi ketat bukan hambatan — mereka adalah latihan yang membentuk kebiasaan. Murid KARSA tidak akan terkejut saat Python menolak tab, atau saat TypeScript menolak implicit any.
+**🔒 Ketatan adalah Kepedulian.**
+Aturan indentasi, deklarasi eksplisit, dan validasi ketat bukan hambatan — mereka adalah latihan yang membentuk kebiasaan. Pengguna KARSA tidak akan terkejut saat Python menolak tab, atau saat TypeScript menolak implicit `any`.
 
-**Tanpa Sihir.** Setiap baris kode KARSA bisa ditelusuri ke output JavaScript-nya. Komentar source map (`// @karsa-source`) mencantumkan baris dan kolom asal. Runtime helpers (`__createReactive`, `__watch`, `__setState`) adalah fungsi JavaScript biasa yang bisa di-inspect di DevTools. Tidak ada abstraksi yang tidak bisa ditembus.
+**🔍 Tanpa Sihir.**
+Setiap baris kode KARSA dapat ditelusuri ke output JavaScript-nya. Source map (`// @karsa-source`) mencantumkan baris dan kolom asal. Runtime helpers (`__createReactive`, `__watch`, `__setState`) adalah fungsi JavaScript biasa yang bisa di-inspect di DevTools. Tidak ada abstraksi yang tidak bisa ditembus.
 
-**Kedewasaan dari Dalam.** Pipeline 5-tahap, error code registry 84 kode bilingual, semantic graph, dependency cycle detection, source map — ini bukan fitur yang terlihat dari luar. Tapi mereka adalah tulang punggung yang membuat KARSA bukan mainan, melainkan bahasa yang siap diajak serius.
+**🏛️ Kedewasaan dari Dalam.**
+Pipeline 5-tahap, registry 84 kode error bilingual, semantic graph, dependency cycle detection, source map — ini bukan fitur yang terlihat dari luar. Tapi mereka adalah tulang punggung yang membuat KARSA bukan sekadar proyek eksperimental, melainkan bahasa yang siap diajak serius.
 
 ---
 
 ## 🤝 Kontribusi
 
-KARSA adalah proyek sumber terbuka dengan lisensi MIT. Kontribusi — kode, dokumentasi, modul ajar, terjemahan, atau sekadar laporan bug — sangat diterima.
+KARSA adalah proyek sumber terbuka berlisensi MIT. Kontribusi dalam bentuk apa pun — kode, dokumentasi, modul panduan, terjemahan, atau laporan bug — sangat diterima dan dihargai.
 
-Cara berkontribusi:
+**Cara berkontribusi:**
 
 1. Fork repositori ini
-2. Buat branch fitur (`git checkout -b fitur/nama-fitur`)
-3. Commit perubahanmu (`git commit -m "Deskripsi jelas"`)
-4. Push ke fork-mu (`git push origin fitur/nama-fitur`)
+2. Buat branch fitur: `git checkout -b fitur/nama-fitur`
+3. Commit perubahan: `git commit -m "Deskripsi yang jelas"`
+4. Push ke fork: `git push origin fitur/nama-fitur`
 5. Buat Pull Request
 
 Pastikan semua test lulus sebelum mengajukan PR:
@@ -466,14 +512,14 @@ npm test
 
 ## 📜 Lisensi
 
-KARSA dirilis di bawah [Lisensi MIT](LICENSE).
+KARSA dirilis di bawah [Lisensi MIT](LICENSE) — bebas digunakan, dimodifikasi, dan didistribusikan.
 
 ---
 
 <div align="center">
 
-**KARSA** — *Bahasa yang kau pahami, kode yang dunia pahami.*
+**KARSA** — *Bahasa yang kamu pahami. Kode yang dunia mengerti.*
 
-Dibuat dengan ❤️ oleh [RaaRion](https://github.com/dazep01)
+Dibuat dengan ❤️ untuk Indonesia, oleh [RaaRion](https://github.com/dazep01)
 
 </div>
