@@ -500,8 +500,10 @@ function install(KarsaCompiler, accept) {
     const val = this.lowerExpression(node.value);
     const target = node.target;
     if (this._isTargetReactive(node)) {
-      // data/turunan → Proxy, akses via .value
-      this.emit(`${target}.value.push(${val});`);
+      // data/turunan → Proxy, push lalu trigger reaktivitas via spread assignment
+      // .push() saja bermutasi array tanpa mengubah reference .value,
+      // sehingga Proxy setter tidak terpicu dan watcher tidak terpanggil.
+      this.emit(`${target}.value.push(${val}); ${target}.value = [...${target}.value];`);
     } else {
       // ubah → plain array, push langsung
       this.emit(`${target}.push(${val});`);

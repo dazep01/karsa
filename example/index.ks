@@ -1,9 +1,9 @@
 --! index.ks - Aplikasi Counter Reaktif dengan KARSA
 
-langsung:
-  function cekGenap(n) {
-    return n % 2 === 0 ? "Genap" : "Ganjil";
-  }
+fungsi cekGenap(n):
+  jika n mod 2 sama dengan 0:
+    kembalikan "Genap"
+  kembalikan "Ganjil"
 
 data counter = 0
 data nama_pengguna = "Kawan"

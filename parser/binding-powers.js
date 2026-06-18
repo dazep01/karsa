@@ -37,6 +37,10 @@ BINDING_POWERS[TT.TK_MINUS] = { left: 9, right: 8 };
 // ─── Level 6: multiplicative ───────────────────────────────
 BINDING_POWERS[TT.TK_BINTANG] = { left: 11, right: 10 };
 BINDING_POWERS[TT.TK_GARIS_MIRING] = { left: 11, right: 10 };
+BINDING_POWERS[TT.TK_MOD] = { left: 11, right: 10 };
+
+// Level 6b: exponentiation (right-associative, binds tighter than multiplicative)
+BINDING_POWERS[TT.TK_PANGKAT] = { left: 13, right: 12 };
 
 // ─── Level 7: unary prefix minus ───────────────────────────
 // TK_MINUS sebagai prefix: right = 12 (dipakai di parsePrefix)
@@ -101,6 +105,8 @@ function operatorFromToken(tokenType, tokenNilai) {
     case TT.TK_MINUS: return '-';
     case TT.TK_BINTANG: return '*';
     case TT.TK_GARIS_MIRING: return '/';
+    case TT.TK_MOD: return 'mod';
+    case TT.TK_PANGKAT: return 'pangkat';
     case TT.TK_DAN: return 'dan';
     case TT.TK_ATAU: return 'atau';
     case TT.TK_SAMA_DENGAN: return 'sama dengan';

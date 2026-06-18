@@ -52,6 +52,64 @@ const ALIAS_PROPERTI = {
 };
 
 // ============================================================================
+// ALIAS METHOD — Indonesian method names → JavaScript method names
+// Digunakan untuk akses method pada objek (arr.untukSetiap → arr.forEach)
+// ============================================================================
+const ALIAS_METHOD = {
+  'untukSetiap': 'forEach',
+  'untukSetiapItem': 'forEach',
+  'sisip': 'push',
+  'sisipAkhir': 'push',
+  'ambilAkhir': 'pop',
+  'ambilAwal': 'shift',
+  'sisipAwal': 'unshift',
+  'gabung': 'join',
+  'saring': 'filter',
+  'pilih': 'map',
+  'kurangi': 'reduce',
+  'temukan': 'find',
+  'temukanIndex': 'findIndex',
+  'apakahAda': 'includes',
+  'urutkan': 'sort',
+  'balik': 'reverse',
+  'potong': 'slice',
+  'sambung': 'splice',
+  'isi': 'fill',
+  'keTeks': 'toString',
+  'gabungTeks': 'join',
+  'setiap': 'every',
+  'beberapa': 'some',
+  'indeksDari': 'indexOf',
+  'indeksTerakhir': 'lastIndexOf',
+  'datar': 'flat',
+  'petakanDatar': 'flatMap'
+};
+
+// ============================================================================
+// FUNGSI BAWAAN (Builtins) — Indonesian function names → JS equivalents
+// Digunakan saat nama fungsi dipanggil sebagai CallExpression: panjang(arr)
+// Tidak sama dengan ALIAS_PROPERTI yang hanya bekerja di MemberExpression.
+// ============================================================================
+const BUILTIN_FUNCTIONS = {
+  // Array/string utilities
+  'panjang': { jsName: '__karsa_panjang', helper: true },
+  'tipeData': { jsName: 'typeof', helper: false, prefix: true },
+  'apakahArray': { jsName: 'Array.isArray', helper: false },
+  'keTeks': { jsName: 'String', helper: false },
+  'keAngka': { jsName: 'Number', helper: false },
+  'keTeksAngka': { jsName: 'parseInt', helper: false },
+  'keAngkaDesimal': { jsName: 'parseFloat', helper: false },
+  'apakahKosong': { jsName: '__karsa_apakahKosong', helper: true },
+  'gabung': { jsName: '__karsa_gabung', helper: true },
+  'saring': { jsName: '__karsa_saring', helper: true },
+  'pilih': { jsName: '__karsa_pilih', helper: true },
+  'urutkan': { jsName: '__karsa_urutkan', helper: true },
+  'balik': { jsName: '__karsa_balik', helper: true },
+  'temukan': { jsName: '__karsa_temukan', helper: true },
+  'apakahAda': { jsName: '__karsa_apakahAda', helper: true }
+};
+
+// ============================================================================
 // EVENT NAMES yang valid untuk ketika (dari spesifikasi KARSA)
 // ============================================================================
 const VALID_EVENT_NAMES = new Set([
@@ -235,6 +293,14 @@ KarsaResolver.prototype.visitIdentifier = function(node) {
     return;
   }
 
+  // [BUG-3 FIX] Abaikan jika ini adalah nama fungsi bawaan (builtin)
+  // Fungsi bawaan seperti panjang(), tipeData(), dll. tidak dideklarasikan
+  // dalam scope, tapi tetap valid sebagai callee di CallExpression.
+  if (node.isBuiltinCallee && BUILTIN_FUNCTIONS[node.name]) {
+    node.resolved = { kind: 'builtin', name: node.name, isReactive: false, isWritable: false };
+    return;
+  }
+
   const symbol = this.currentScope.lookup(node.name);
   if (symbol) {
     node.resolved = symbol;
@@ -242,6 +308,13 @@ KarsaResolver.prototype.visitIdentifier = function(node) {
     symbol.readCount++;
     symbol.references.push(node);
   } else {
+    // Jika identifier adalah nama fungsi bawaan, jangan emit E3001
+    // (akan ditangani di visitCallExpression sebagai builtin)
+    if (BUILTIN_FUNCTIONS[node.name]) {
+      node.resolved = { kind: 'builtin', name: node.name, isReactive: false, isWritable: false };
+      return;
+    }
+
     // [C3 FIX] Emit E3001 untuk identifier yang tidak dideklarasikan
     node.isUndefined = true;
     this.errors.push(Err.createError('E3001', node.loc, {
@@ -256,7 +329,7 @@ KarsaResolver.prototype.visitMemberExpression = function(node) {
   // Visit object (kiri)
   accept(node.object, this);
 
-  // Resolusi alias properti (Tim A)
+  // Resolusi alias properti dan method (Tim A + fix BUG-5)
   if (node.property.type === 'Identifier') {
     const propName = node.property.name;
 
@@ -265,11 +338,58 @@ KarsaResolver.prototype.visitMemberExpression = function(node) {
       node.property.isVirtual = true;
     }
 
+    // Cek alias properti terlebih dahulu
     if (ALIAS_PROPERTI[propName]) {
       node.property.originalName = propName;
       node.property.name = ALIAS_PROPERTI[propName];
       node.isTranslatedAlias = true;
     }
+    // Cek alias method (untukSetiap → forEach, sisip → push, dll)
+    else if (ALIAS_METHOD[propName]) {
+      node.property.originalName = propName;
+      node.property.name = ALIAS_METHOD[propName];
+      node.isTranslatedMethodAlias = true;
+      // Tandai jika method ini bermutasi array (perlu trigger reaktivitas)
+      const MUTATING_METHODS = new Set(['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse', 'fill']);
+      node.isMutatingMethod = MUTATING_METHODS.has(ALIAS_METHOD[propName]);
+    }
+  }
+};
+
+KarsaResolver.prototype.visitCallExpression = function(node) {
+  // Visit callee
+  accept(node.callee, this);
+
+  // Visit arguments
+  if (node.arguments && node.arguments.length > 0) {
+    node.arguments.forEach(arg => accept(arg, this));
+  }
+
+  // Cek apakah callee adalah Identifier yang cocok dengan fungsi bawaan
+  if (node.callee && node.callee.type === 'Identifier') {
+    const calleeName = node.callee.name;
+    if (BUILTIN_FUNCTIONS[calleeName]) {
+      const builtin = BUILTIN_FUNCTIONS[calleeName];
+      node.isBuiltin = true;
+      node.builtinInfo = builtin;
+      node.callee.originalName = calleeName;
+
+      // Jika builtin adalah prefix operator (seperti typeof), tandai khusus
+      if (builtin.prefix) {
+        node.isPrefixBuiltin = true;
+      }
+
+      // Jika builtin memerlukan runtime helper, tandai untuk compiler
+      if (builtin.helper) {
+        node.needsRuntimeHelper = true;
+      }
+    }
+  }
+
+  // Cek jika callee adalah MemberExpression dengan method alias yang bermutasi
+  if (node.callee && node.callee.type === 'MemberExpression' && node.callee.isMutatingMethod) {
+    node.isMutatingMethodCall = true;
+    node.mutatingMethodName = node.callee.property.name; // already translated
   }
 };
 

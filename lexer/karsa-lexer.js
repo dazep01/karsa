@@ -123,6 +123,9 @@
     TK_PALING_BANYAK: "TK_PALING_BANYAK",
     TK_ADA_DI: "TK_ADA_DI",
     TK_TIDAK_ADA_DI: "TK_TIDAK_ADA_DI",
+    // Operator aritmatika kata
+    TK_MOD: "TK_MOD",
+    TK_PANGKAT: "TK_PANGKAT",
     // Simbol / Operator simbol
     TK_PANAH: "TK_PANAH",
     TK_TITIK_DUA: "TK_TITIK_DUA",
@@ -248,6 +251,9 @@
     ["paling banyak", TT.TK_PALING_BANYAK],
     ["ada di", TT.TK_ADA_DI],
     ["tidak ada di", TT.TK_TIDAK_ADA_DI],
+    // Operator aritmatika kata
+    ["mod", TT.TK_MOD],
+    ["pangkat", TT.TK_PANGKAT],
     // Interop / Node
     ["langsung", TT.TK_LANGSUNG],
     ["fragmen", TT.TK_FRAGMEN],

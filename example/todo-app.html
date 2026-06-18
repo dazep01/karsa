@@ -18,6 +18,7 @@
         .hapus-btn { color: #e41e3f; cursor: pointer; font-weight: bold; border: none; background: none; }
         .info { font-size: 0.9rem; color: #65676b; margin-top: 15px; text-align: center; }
     </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
 <body>
 
@@ -49,9 +50,9 @@
 
         --! Event: Menambah tugas
         ketika #tambah-btn diklik:
-            ambil nilai dari #input-tugas -> simpan ke teksBaru
-            jika teksBaru tidak kosong:
-                tambahkan teksBaru ke semuaTugas
+            ambil nilai dari #input-tugas -> simpan ke inputSekarang
+            jika inputSekarang tidak sama dengan "":
+                sisipkan inputSekarang ke semuaTugas
                 perbarui nilai #input-tugas -> ""
 
         --! Event: Tekan Enter di input
@@ -68,25 +69,9 @@
             ulangi tugas dari semuaTugas:
                 buat li
                     buat span -> teks: tugas
-                    buat tombol.hapus-btn -> teks: "Hapus"
-                        ketika diklik:
-                            langsung:
-                                // Logika hapus sederhana menggunakan JS native
-                                // karena compiler v0.3.1 kita sedang mematangkan filter array
-                                const idx = event.target.closest('li').dataset.index;
-                                semuaTugas.value.splice(idx, 1);
-                                semuaTugas.value = [...semuaTugas.value];
             
-            --! Update counter
-            perbarui teks #total-angka -> semuaTugas.panjang
-
-        --! Injeksi atribut dataset untuk keperluan hapus (Virtual Index)
-        langsung:
-            // Helper tambahan untuk menaruh index pada elemen li
-            __watch(semuaTugas, () => {
-                const items = document.querySelectorAll('#list-tugas li');
-                items.forEach((li, i) => li.dataset.index = i);
-            });
+            --! Update counter menggunakan fungsi bawaan panjang()
+            perbarui teks #total-angka -> panjang(semuaTugas)
     </script>
 
 </body>
