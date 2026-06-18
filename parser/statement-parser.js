@@ -357,16 +357,42 @@ function parseSembunyikanStatement(parser) {
 }
 
 /**
- * parseHapusStatement: "hapus" target_elemen
+ * parseHapusStatement:
+ *   "hapus" target_elemen                            (DOM removal)
+ * | "hapus" item "dari" IDENTIFIER                    (array item removal)
  */
 function parseHapusStatement(parser) {
   var startToken = parser.advance();
   var docstring = startToken.docstring;
-  var target = Sel.parseTargetElemen(parser);
-  return AST.buatHapusStatement(target,
+
+  // Parse the first target/item
+  var item = Sel.parseTargetElemen(parser);
+
+  // Check if followed by "dari" → array item removal syntax
+  if (parser.check(TT.TK_DARI)) {
+    parser.advance(); // consume "dari"
+    var arrayToken = parser.expect(TT.TK_IDENTIFIER);
+    if (!arrayToken) {
+      parser.addError('E2025', 'Diharapkan nama array setelah "dari"',
+        AST.buatLoc({ line: startToken.baris, column: startToken.kolom }, null));
+      return AST.buatErrorNode('E2025', 'Diharapkan nama array setelah "dari"',
+        AST.buatLoc({ line: startToken.baris, column: startToken.kolom }, null));
+    }
+    var fromArray = arrayToken.nilai;
+    var endLoc = { line: arrayToken.baris, column: arrayToken.kolom + fromArray.length };
+    return AST.buatHapusDariStatement(item, fromArray,
+      AST.buatLoc(
+        { line: startToken.baris, column: startToken.kolom },
+        endLoc
+      ),
+      docstring);
+  }
+
+  // No "dari" → regular DOM removal
+  return AST.buatHapusStatement(item,
     AST.buatLoc(
       { line: startToken.baris, column: startToken.kolom },
-      target ? target.loc.end : { line: startToken.baris, column: startToken.kolom + 1 }
+      item ? item.loc.end : { line: startToken.baris, column: startToken.kolom + 1 }
     ),
     docstring);
 }

@@ -1,5 +1,5 @@
 --! todo-app.ks - Aplikasi Daftar Tugas dengan KARSA
---! Contoh penggunaan operasi array yang benar
+--! Contoh penggunaan operasi array: sisipkan, hapus, panjang()
 
 data semuaTugas = []
 data inputSekarang = ""
@@ -27,4 +27,7 @@ saat semuaTugas berubah:
   ulangi tugas dari semuaTugas:
     buat li
       buat span -> teks: tugas
+      buat tombol.hapus-btn -> teks: "Hapus"
+        ketika diklik:
+          hapus tugas dari semuaTugas
   perbarui teks "#total-angka" -> panjang(semuaTugas)

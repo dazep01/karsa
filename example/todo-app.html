@@ -15,7 +15,8 @@
         button#tambah-btn:hover { background: #166fe5; }
         ul { list-style: none; padding: 0; }
         li { background: #f9f9f9; padding: 10px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #1877f2; }
-        .hapus-btn { color: #e41e3f; cursor: pointer; font-weight: bold; border: none; background: none; }
+        .hapus-btn { color: #e41e3f; cursor: pointer; font-weight: bold; border: none; background: none; font-size: 1rem; }
+        .hapus-btn:hover { color: #c41234; }
         .info { font-size: 0.9rem; color: #65676b; margin-top: 15px; text-align: center; }
     </style>
 <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
@@ -65,12 +66,14 @@
         --! Reaktivitas: Render daftar setiap kali data berubah
         saat semuaTugas berubah:
             kosongkan #list-tugas
-            
+
             ulangi tugas dari semuaTugas:
                 buat li
                     buat span -> teks: tugas
-            
-            --! Update counter menggunakan fungsi bawaan panjang()
+                    buat tombol.hapus-btn -> teks: "Hapus"
+                        ketika diklik:
+                            hapus tugas dari semuaTugas
+
             perbarui teks #total-angka -> panjang(semuaTugas)
     </script>
 

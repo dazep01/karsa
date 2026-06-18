@@ -557,6 +557,19 @@ KarsaResolver.prototype.visitHapusStatement = function(node) {
   this.genericVisit(node);
 };
 
+KarsaResolver.prototype.visitHapusDariStatement = function(node) {
+  // Resolve the item expression
+  if (node.item) accept(node.item, this);
+  // Resolve the array identifier and attach metadata
+  var symbol = this.currentScope.lookup(node.fromArray);
+  if (symbol) {
+    node.fromArraySymbol = symbol;
+    node.fromArrayReactive = (symbol.kind === 'data' || symbol.kind === 'turunan');
+  } else {
+    this.addError('E3001', 'Identifier "' + node.fromArray + '" tidak dideklarasikan', node.loc);
+  }
+};
+
 // ─── KosongkanStatement (H3 FIX) ───────────────────────────
 KarsaResolver.prototype.visitKosongkanStatement = function(node) {
   if (node.target) accept(node.target, this);
