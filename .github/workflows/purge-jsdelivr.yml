@@ -1,7 +1,7 @@
 # ============================================================================
 #  KARSA — jsDelivr Cache Purge Action
 # ----------------------------------------------------------------------------
-#  Otomatis memindai dan refresh cache semua link jsDelivr di repo.
+#  Otomatis refresh cache semua link jsDelivr di repo.
 #
 #  Trigger:
 #    1. Push ke main (setelah merge PR / release)
@@ -9,10 +9,9 @@
 #
 #  Cara kerja:
 #    - Memindai seluruh file di repo untuk link cdn.jsdelivr.net
-#    - Ekstrak semua path unik (npm/ dan gh/ format)
-#    - Panggil jsDelivr Purge API untuk setiap link
-#    - Juga purge path berdasarkan versi dari package.json
-#      (untuk menangani link yang belum ada di file tapi mungkin di-cache)
+#    - Bangun path jsDelivr (format gh/) berdasarkan versi dari package.json
+#    - Panggil jsDelivr Purge API (format: {"path": ["/gh/..."]})
+#    - Rate limit ~1 req/detik
 # ============================================================================
 
 name: 🔄 Purge jsDelivr Cache
@@ -58,13 +57,13 @@ jobs:
         with:
           fetch-depth: 0  # Ambil semua tag untuk purge_all_tags
 
-      # ── Setup Node ────────────────────────────────────────────────────────
+      # ── Setup Node ───────────────────────────────────────────────────────
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # ── Scan & Purge ──────────────────────────────────────────────────────
+      # ── Scan & Purge ─────────────────────────────────────────────────────
       - name: 🔍 Scan & 🔄 Purge jsDelivr Cache
         env:
           INPUT_VERSION: ${{ github.event.inputs.version }}
@@ -74,11 +73,11 @@ jobs:
           set -e
 
           echo "╔══════════════════════════════════════════════════════════════╗"
-          echo "║        🔄 KARSA — jsDelivr Cache Purge                      ║"
+          echo "║        🔄 KARSA — jsDelivr Cache Purge                     ║"
           echo "╚══════════════════════════════════════════════════════════════╝"
           echo ""
 
-          # ── 1. Ambil versi dari package.json ──────────────────────────
+          # ── 1. Ambil versi dari package.json ──────────────────────────────
           PKG_VERSION=$(node -p "require('./package.json').version")
           VERSION="${INPUT_VERSION:-$PKG_VERSION}"
           REPO="dazep01/karsa"
@@ -89,26 +88,49 @@ jobs:
           echo "📌 Package:     $PKG_NAME"
           echo ""
 
-          # ── 2. Kumpulkan semua link jsDelivr dari repo ────────────────
-          LINKS=()
+          # ── 2. Cek apakah package ada di npm ──────────────────────────────
+          NPM_EXISTS=false
+          NPM_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://data.jsdelivr.com/v1/packages/npm/${PKG_NAME}")
+          if [ "$NPM_STATUS" -ge 200 ] && [ "$NPM_STATUS" -lt 300 ]; then
+            NPM_EXISTS=true
+            echo "📦 Package ditemukan di npm — akan purge format npm/ juga"
+          else
+            echo "📦 Package TIDAK ditemukan di npm — hanya purge format gh/"
+          fi
+
+          # ── 3. Kumpulkan semua link jsDelivr dari repo ────────────────────
+          # Array untuk menyimpan path jsDelivr (tanpa domain, format: /gh/... atau /npm/...)
+          PATHS=()
 
           echo "🔍 Memindai file untuk link jsDelivr..."
+          # Excluding .github/workflows/ agar tidak menangkap template string YAML
           while IFS= read -r link; do
             if [ -n "$link" ]; then
-              LINKS+=("$link")
-              echo "   ↳ Ditemukan: $link"
+              # Konversi full URL ke path format jsDelivr
+              # https://cdn.jsdelivr.net/gh/... → /gh/...
+              # https://cdn.jsdelivr.net/npm/... → /npm/...
+              path="${link#https://cdn.jsdelivr.net}"
+              # Abaikan jika masih mengandung template variable ($ atau ${)
+              if echo "$path" | grep -qE '\$|\{'; then
+                echo "   ↳ Diabaikan (template variable): $path"
+                continue
+              fi
+              PATHS+=("$path")
+              echo "   ↳ Ditemukan: $path"
             fi
-          done < <(grep -roh 'https://cdn\.jsdelivr\.net/[^"'\''`) ]*' . \
+          done < <(grep -roh 'https://cdn\.jsdelivr\.net/[^"'"'"' )>`]*' . \
+            --exclude-dir=.git \
+            --exclude-dir=.github/workflows \
             --include="*.md" --include="*.html" --include="*.js" \
-            --include="*.json" --include="*.yml" --include="*.yaml" \
-            --include="*.txt" 2>/dev/null | sort -u)
+            --include="*.json" --include="*.txt" 2>/dev/null | sort -u)
 
-          echo "   ↳ Ditemukan ${#LINKS[@]} link dari scan file"
+          echo "   ↳ Ditemukan ${#PATHS[@]} link dari scan file"
           echo ""
 
-          # ── 3. Bangun path-path yang wajar berdasarkan versi ───────────
+          # ── 4. Bangun path-path berdasarkan versi ─────────────────────────
           # Path file utama KARSA yang biasanya diakses via CDN
-          KNOWN_PATHS=(
+          KNOWN_FILES=(
             "/engine/karsa.js"
             "/engine/karsa-cli.js"
             "/engine/karsa.standalone.js"
@@ -119,41 +141,49 @@ jobs:
             "/compiler/karsa-compiler.js"
           )
 
-          # Format npm: cdn.jsdelivr.net/npm/karsa@VERSION/path
-          for P in "${KNOWN_PATHS[@]}"; do
-            LINKS+=("https://cdn.jsdelivr.net/npm/${PKG_NAME}@${VERSION}${P}")
+          # Format gh: /gh/dazep01/karsa@VERSION/path
+          for F in "${KNOWN_FILES[@]}"; do
+            PATHS+=("/gh/${REPO}@${VERSION}${F}")
           done
 
-          # Format gh: cdn.jsdelivr.net/gh/dazep01/karsa@VERSION/path
-          for P in "${KNOWN_PATHS[@]}"; do
-            LINKS+=("https://cdn.jsdelivr.net/gh/${REPO}@${VERSION}${P}")
-          done
+          # Format npm: /npm/karsa@VERSION/path (hanya jika package ada di npm)
+          if [ "$NPM_EXISTS" = true ]; then
+            for F in "${KNOWN_FILES[@]}"; do
+              PATHS+=("/npm/${PKG_NAME}@${VERSION}${F}")
+            done
+          fi
 
-          # ── 4. Tambahkan extra paths dari input ───────────────────────
+          # ── 5. Tambahkan extra paths dari input ──────────────────────────
           if [ -n "$EXTRA_PATHS" ]; then
             echo "📋 Menambahkan extra paths dari input..."
             IFS=',' read -ra EXTRA <<< "$EXTRA_PATHS"
-            for P in "${EXTRA[@]}"; do
-              P=$(echo "$P" | xargs)  # trim whitespace
-              if [ -n "$P" ]; then
-                LINKS+=("https://cdn.jsdelivr.net/npm/${PKG_NAME}@${VERSION}${P}")
-                LINKS+=("https://cdn.jsdelivr.net/gh/${REPO}@${VERSION}${P}")
-                echo "   ↳ $P"
+            for F in "${EXTRA[@]}"; do
+              F=$(echo "$F" | xargs)  # trim whitespace
+              if [ -n "$F" ]; then
+                PATHS+=("/gh/${REPO}@${VERSION}${F}")
+                if [ "$NPM_EXISTS" = true ]; then
+                  PATHS+=("/npm/${PKG_NAME}@${VERSION}${F}")
+                fi
+                echo "   ↳ $F"
               fi
             done
           fi
 
-          # ── 5. Purge semua tag jika diminta ────────────────────────────
+          # ── 6. Purge semua tag jika diminta ───────────────────────────────
           if [ "$PURGE_ALL_TAGS" = "true" ]; then
             echo "🏷️  Memindai semua git tag untuk purge..."
             TAGS=$(git tag -l 2>/dev/null || echo "")
             if [ -n "$TAGS" ]; then
               while IFS= read -r TAG; do
                 if [ -n "$TAG" ]; then
-                  for P in "${KNOWN_PATHS[@]}"; do
-                    LINKS+=("https://cdn.jsdelivr.net/npm/${PKG_NAME}@${TAG}${P}")
-                    LINKS+=("https://cdn.jsdelivr.net/gh/${REPO}@${TAG}${P}")
+                  for F in "${KNOWN_FILES[@]}"; do
+                    PATHS+=("/gh/${REPO}@${TAG}${F}")
                   done
+                  if [ "$NPM_EXISTS" = true ]; then
+                    for F in "${KNOWN_FILES[@]}"; do
+                      PATHS+=("/npm/${PKG_NAME}@${TAG}${F}")
+                    done
+                  fi
                   echo "   ↳ Tag: $TAG"
                 fi
               done <<< "$TAGS"
@@ -162,52 +192,66 @@ jobs:
             fi
           fi
 
-          # ── 6. Deduplikasi link ─────────────────────────────────────────
-          UNIQUE_LINKS=()
+          # ── 7. Deduplikasi path ───────────────────────────────────────────
+          UNIQUE_PATHS=()
           declare -A SEEN
-          for L in "${LINKS[@]}"; do
-            if [ -z "${SEEN[$L]}" ]; then
-              SEEN[$L]=1
-              UNIQUE_LINKS+=("$L")
+          for P in "${PATHS[@]}"; do
+            if [ -z "${SEEN[$P]}" ]; then
+              SEEN[$P]=1
+              UNIQUE_PATHS+=("$P")
             fi
           done
 
           echo ""
-          echo "📊 Total link unik untuk di-purge: ${#UNIQUE_LINKS[@]}"
+          echo "📊 Total path unik untuk di-purge: ${#UNIQUE_PATHS[@]}"
           echo ""
 
-          # ── 7. Purge via jsDelivr API ──────────────────────────────────
+          # ── 8. Purge via jsDelivr API ─────────────────────────────────────
+          # jsDelivr Purge API format: {"path": ["/gh/owner/repo@version/file"]}
+          # Bisa kirim banyak path sekaligus dalam satu request
           echo "🔄 Memulai purge..."
+
           SUCCESS=0
           FAIL=0
+          BATCH_SIZE=50  # jsDelivr mendukung banyak path per request
 
-          for LINK in "${UNIQUE_LINKS[@]}"; do
-            echo -n "   ↳ Purging: $LINK ... "
+          # Proses dalam batch
+          for ((i=0; i<${#UNIQUE_PATHS[@]}; i+=BATCH_SIZE)); do
+            BATCH=()
+            for ((j=i; j<i+BATCH_SIZE && j<${#UNIQUE_PATHS[@]}; j++)); do
+              BATCH+=("\"${UNIQUE_PATHS[$j]}\"")
+            done
 
-            # jsDelivr Purge API
-            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-              -X POST "https://purge.jsdelivr.net/" \
+            # Bangun JSON array untuk path
+            PATH_JSON=$(IFS=,; echo "[${BATCH[*]}]")
+
+            echo "   ↳ Batch $((i/BATCH_SIZE + 1)): ${#BATCH[@]} path"
+
+            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://purge.jsdelivr.net/" \
               -H "Content-Type: application/json" \
-              -d "{\"url\": \"$LINK\"}" \
-              --max-time 10)
+              -d "{\"path\": ${PATH_JSON}}" \
+              --max-time 30)
 
-            if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
-              echo "✅ ($RESPONSE)"
-              SUCCESS=$((SUCCESS + 1))
+            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+            BODY=$(echo "$RESPONSE" | sed '$d')
+
+            if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+              echo "     ✅ Berhasil ($HTTP_CODE)"
+              SUCCESS=$((SUCCESS + ${#BATCH[@]}))
             else
-              echo "❌ ($RESPONSE)"
-              FAIL=$((FAIL + 1))
+              echo "     ❌ Gagal ($HTTP_CODE): $BODY"
+              FAIL=$((FAIL + ${#BATCH[@]}))
             fi
 
-            # Rate limit: jsDelivr mengizinkan ~1 req/detik
+            # Rate limit: jsDelivr mengizinkan ~5 req/detik, tapi kita amankan
             sleep 1
           done
 
           echo ""
           echo "╔══════════════════════════════════════════════════════════════╗"
-          echo "║  ✅ Berhasil: $SUCCESS                                          "
+          echo "║  ✅ Berhasil: $SUCCESS                                        "
           echo "║  ❌ Gagal:    $FAIL                                           "
-          echo "║  📊 Total:    ${#UNIQUE_LINKS[@]}                                         "
+          echo "║  📊 Total:    ${#UNIQUE_PATHS[@]}                                         "
           echo "╚══════════════════════════════════════════════════════════════╝"
 
           # Jika terlalu banyak gagal, return error
@@ -216,7 +260,7 @@ jobs:
             exit 1
           fi
 
-      # ── Summary ──────────────────────────────────────────────────────────
+      # ── Summary ───────────────────────────────────────────────────────────
       - name: 📋 Summary
         if: always()
         run: |
