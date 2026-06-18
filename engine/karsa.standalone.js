@@ -3,7 +3,7 @@
  *  KARSA v0.3.1 — STANDALONE BUNDLE
  * --------------------------------------------------------------------------
  *  Di-generate oleh scripts/build-standalone.js
- *  Build time: 2026-06-16T13:06:07.443Z
+ *  Build time: 2026-06-18T06:36:23.225Z
  *
  *  Seluruh modul KARSA dalam satu file untuk penggunaan di browser.
  *  Tanpa memerlukan Node.js, module bundler, atau dependensi lainnya.
@@ -142,6 +142,9 @@
     TK_PALING_BANYAK: "TK_PALING_BANYAK",
     TK_ADA_DI: "TK_ADA_DI",
     TK_TIDAK_ADA_DI: "TK_TIDAK_ADA_DI",
+    // Operator aritmatika kata
+    TK_MOD: "TK_MOD",
+    TK_PANGKAT: "TK_PANGKAT",
     // Simbol / Operator simbol
     TK_PANAH: "TK_PANAH",
     TK_TITIK_DUA: "TK_TITIK_DUA",
@@ -267,6 +270,9 @@
     ["paling banyak", TT.TK_PALING_BANYAK],
     ["ada di", TT.TK_ADA_DI],
     ["tidak ada di", TT.TK_TIDAK_ADA_DI],
+    // Operator aritmatika kata
+    ["mod", TT.TK_MOD],
+    ["pangkat", TT.TK_PANGKAT],
     // Interop / Node
     ["langsung", TT.TK_LANGSUNG],
     ["fragmen", TT.TK_FRAGMEN],
@@ -1595,6 +1601,10 @@
     var TK_ADA_DI = 'TK_ADA_DI';
     var TK_TIDAK_ADA_DI = 'TK_TIDAK_ADA_DI';
     
+    // ─── Operator Aritmatika Kata ──────────────────────────────────────────────
+    var TK_MOD = 'TK_MOD';
+    var TK_PANGKAT = 'TK_PANGKAT';
+    
     // ─── Operator Simbol ───────────────────────────────────────
     var TK_PANAH = 'TK_PANAH';
     var TK_TITIK_DUA = 'TK_TITIK_DUA';
@@ -1663,6 +1673,7 @@
     // Ekspresi infix operator tokens
     var INFIX_OPERATOR_TOKENS = [
       TK_PLUS, TK_MINUS, TK_BINTANG, TK_GARIS_MIRING,
+      TK_MOD, TK_PANGKAT,
       TK_DAN, TK_ATAU,
       TK_SAMA_DENGAN, TK_TIDAK_SAMA_DENGAN,
       TK_LEBIH_DARI, TK_KURANG_DARI,
@@ -1687,6 +1698,7 @@
       TK_DAN, TK_ATAU, TK_BUKAN, TK_SAMA_DENGAN, TK_TIDAK_SAMA_DENGAN,
       TK_LEBIH_DARI, TK_KURANG_DARI, TK_PALING_SEDIKIT, TK_PALING_BANYAK,
       TK_ADA_DI, TK_TIDAK_ADA_DI,
+      TK_MOD, TK_PANGKAT,
       TK_PANAH, TK_TITIK_DUA, TK_KOMA, TK_TITIK, TK_PLUS, TK_MINUS,
       TK_BINTANG, TK_GARIS_MIRING, TK_TANDA_SAMA,
       TK_KURUNG_BUKA, TK_KURUNG_TUTUP, TK_KURAWAL_BUKA, TK_KURAWAL_TUTUP,
@@ -1744,6 +1756,10 @@
     // ─── Level 6: multiplicative ───────────────────────────────
     BINDING_POWERS[TT.TK_BINTANG] = { left: 11, right: 10 };
     BINDING_POWERS[TT.TK_GARIS_MIRING] = { left: 11, right: 10 };
+    BINDING_POWERS[TT.TK_MOD] = { left: 11, right: 10 };
+    
+    // Level 6b: exponentiation (right-associative, binds tighter than multiplicative)
+    BINDING_POWERS[TT.TK_PANGKAT] = { left: 13, right: 12 };
     
     // ─── Level 7: unary prefix minus ───────────────────────────
     // TK_MINUS sebagai prefix: right = 12 (dipakai di parsePrefix)
@@ -1808,6 +1824,8 @@
         case TT.TK_MINUS: return '-';
         case TT.TK_BINTANG: return '*';
         case TT.TK_GARIS_MIRING: return '/';
+        case TT.TK_MOD: return 'mod';
+        case TT.TK_PANGKAT: return 'pangkat';
         case TT.TK_DAN: return 'dan';
         case TT.TK_ATAU: return 'atau';
         case TT.TK_SAMA_DENGAN: return 'sama dengan';
@@ -1974,6 +1992,7 @@
     // ═══════════════════════════════════════════════════════════════
     
     var E0000 = 'E0000'; // System error (unhandled exception)
+    var W0000 = 'W0000'; // System warning (fallback untuk warning tanpa kode spesifik)
     
     // ═══════════════════════════════════════════════════════════════
     // ERROR MESSAGES (unified registry)
@@ -2063,6 +2082,7 @@
     
     // -- System --
     ERROR_MESSAGES[E0000] = 'System error';
+    ERROR_MESSAGES[W0000] = 'Peringatan sistem';
     
     // ═══════════════════════════════════════════════════════════════
     // SUGGESTIONS (unified registry)
@@ -2149,6 +2169,10 @@
     ERROR_SUGGESTIONS[E6002] = 'Gunakan "lewati" hanya di dalam "ulangi" atau "selama"';
     ERROR_SUGGESTIONS[E6003] = 'Gunakan "kembalikan" hanya di dalam fungsi atau komponen';
     ERROR_SUGGESTIONS[E6004] = 'Lihat detail error pada tahap yang gagal';
+    
+    // -- System --
+    ERROR_SUGGESTIONS[E0000] = 'Periksa stack trace atau laporkan sebagai bug';
+    ERROR_SUGGESTIONS[W0000] = 'Periksa detail peringatan untuk informasi lebih lanjut';
     
     // ═══════════════════════════════════════════════════════════════
     // SEVERITY HELPER
@@ -2293,6 +2317,7 @@
     
       // System errors
       E0000: E0000,
+      W0000: W0000,
     
       // Registries
       ERROR_MESSAGES: ERROR_MESSAGES,
@@ -3101,6 +3126,16 @@
           // Token TK_CLASS sudah berisi nama class tanpa .
           classes.push(tok.nilai);
           parser.advance();
+        } else if (tok.tipe === TT.TK_TITIK) {
+          // Pola: TK_TITIK diikuti TK_IDENTIFIER -> class selector
+          parser.advance(); // konsumsi TK_TITIK
+          var nextTok = parser.peek();
+          if (nextTok && nextTok.tipe === TT.TK_IDENTIFIER) {
+            classes.push(nextTok.nilai);
+            parser.advance(); // konsumsi TK_IDENTIFIER
+          } else {
+            parser.addError('E2003', 'Selector class tidak valid: setelah "." diharapkan nama class');
+          }
         } else if (tok.tipe === TT.TK_ATRIBUT) {
           // Token TK_ATRIBUT: nilai berisi string "[k=v]" atau "[k=\"v\"]"
           // Lexer harus sudah memisahkan key dan value
@@ -5977,6 +6012,64 @@
   };
   
   // ============================================================================
+  // ALIAS METHOD — Indonesian method names → JavaScript method names
+  // Digunakan untuk akses method pada objek (arr.untukSetiap → arr.forEach)
+  // ============================================================================
+  const ALIAS_METHOD = {
+    'untukSetiap': 'forEach',
+    'untukSetiapItem': 'forEach',
+    'sisip': 'push',
+    'sisipAkhir': 'push',
+    'ambilAkhir': 'pop',
+    'ambilAwal': 'shift',
+    'sisipAwal': 'unshift',
+    'gabung': 'join',
+    'saring': 'filter',
+    'pilih': 'map',
+    'kurangi': 'reduce',
+    'temukan': 'find',
+    'temukanIndex': 'findIndex',
+    'apakahAda': 'includes',
+    'urutkan': 'sort',
+    'balik': 'reverse',
+    'potong': 'slice',
+    'sambung': 'splice',
+    'isi': 'fill',
+    'keTeks': 'toString',
+    'gabungTeks': 'join',
+    'setiap': 'every',
+    'beberapa': 'some',
+    'indeksDari': 'indexOf',
+    'indeksTerakhir': 'lastIndexOf',
+    'datar': 'flat',
+    'petakanDatar': 'flatMap'
+  };
+  
+  // ============================================================================
+  // FUNGSI BAWAAN (Builtins) — Indonesian function names → JS equivalents
+  // Digunakan saat nama fungsi dipanggil sebagai CallExpression: panjang(arr)
+  // Tidak sama dengan ALIAS_PROPERTI yang hanya bekerja di MemberExpression.
+  // ============================================================================
+  const BUILTIN_FUNCTIONS = {
+    // Array/string utilities
+    'panjang': { jsName: '__karsa_panjang', helper: true },
+    'tipeData': { jsName: 'typeof', helper: false, prefix: true },
+    'apakahArray': { jsName: 'Array.isArray', helper: false },
+    'keTeks': { jsName: 'String', helper: false },
+    'keAngka': { jsName: 'Number', helper: false },
+    'keTeksAngka': { jsName: 'parseInt', helper: false },
+    'keAngkaDesimal': { jsName: 'parseFloat', helper: false },
+    'apakahKosong': { jsName: '__karsa_apakahKosong', helper: true },
+    'gabung': { jsName: '__karsa_gabung', helper: true },
+    'saring': { jsName: '__karsa_saring', helper: true },
+    'pilih': { jsName: '__karsa_pilih', helper: true },
+    'urutkan': { jsName: '__karsa_urutkan', helper: true },
+    'balik': { jsName: '__karsa_balik', helper: true },
+    'temukan': { jsName: '__karsa_temukan', helper: true },
+    'apakahAda': { jsName: '__karsa_apakahAda', helper: true }
+  };
+  
+  // ============================================================================
   // EVENT NAMES yang valid untuk ketika (dari spesifikasi KARSA)
   // ============================================================================
   const VALID_EVENT_NAMES = new Set([
@@ -6160,6 +6253,14 @@
       return;
     }
   
+    // [BUG-3 FIX] Abaikan jika ini adalah nama fungsi bawaan (builtin)
+    // Fungsi bawaan seperti panjang(), tipeData(), dll. tidak dideklarasikan
+    // dalam scope, tapi tetap valid sebagai callee di CallExpression.
+    if (node.isBuiltinCallee && BUILTIN_FUNCTIONS[node.name]) {
+      node.resolved = { kind: 'builtin', name: node.name, isReactive: false, isWritable: false };
+      return;
+    }
+  
     const symbol = this.currentScope.lookup(node.name);
     if (symbol) {
       node.resolved = symbol;
@@ -6167,6 +6268,13 @@
       symbol.readCount++;
       symbol.references.push(node);
     } else {
+      // Jika identifier adalah nama fungsi bawaan, jangan emit E3001
+      // (akan ditangani di visitCallExpression sebagai builtin)
+      if (BUILTIN_FUNCTIONS[node.name]) {
+        node.resolved = { kind: 'builtin', name: node.name, isReactive: false, isWritable: false };
+        return;
+      }
+  
       // [C3 FIX] Emit E3001 untuk identifier yang tidak dideklarasikan
       node.isUndefined = true;
       this.errors.push(Err.createError('E3001', node.loc, {
@@ -6181,7 +6289,7 @@
     // Visit object (kiri)
     accept(node.object, this);
   
-    // Resolusi alias properti (Tim A)
+    // Resolusi alias properti dan method (Tim A + fix BUG-5)
     if (node.property.type === 'Identifier') {
       const propName = node.property.name;
   
@@ -6190,11 +6298,58 @@
         node.property.isVirtual = true;
       }
   
+      // Cek alias properti terlebih dahulu
       if (ALIAS_PROPERTI[propName]) {
         node.property.originalName = propName;
         node.property.name = ALIAS_PROPERTI[propName];
         node.isTranslatedAlias = true;
       }
+      // Cek alias method (untukSetiap → forEach, sisip → push, dll)
+      else if (ALIAS_METHOD[propName]) {
+        node.property.originalName = propName;
+        node.property.name = ALIAS_METHOD[propName];
+        node.isTranslatedMethodAlias = true;
+        // Tandai jika method ini bermutasi array (perlu trigger reaktivitas)
+        const MUTATING_METHODS = new Set(['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse', 'fill']);
+        node.isMutatingMethod = MUTATING_METHODS.has(ALIAS_METHOD[propName]);
+      }
+    }
+  };
+  
+  KarsaResolver.prototype.visitCallExpression = function(node) {
+    // Visit callee
+    accept(node.callee, this);
+  
+    // Visit arguments
+    if (node.arguments && node.arguments.length > 0) {
+      node.arguments.forEach(arg => accept(arg, this));
+    }
+  
+    // Cek apakah callee adalah Identifier yang cocok dengan fungsi bawaan
+    if (node.callee && node.callee.type === 'Identifier') {
+      const calleeName = node.callee.name;
+      if (BUILTIN_FUNCTIONS[calleeName]) {
+        const builtin = BUILTIN_FUNCTIONS[calleeName];
+        node.isBuiltin = true;
+        node.builtinInfo = builtin;
+        node.callee.originalName = calleeName;
+  
+        // Jika builtin adalah prefix operator (seperti typeof), tandai khusus
+        if (builtin.prefix) {
+          node.isPrefixBuiltin = true;
+        }
+  
+        // Jika builtin memerlukan runtime helper, tandai untuk compiler
+        if (builtin.helper) {
+          node.needsRuntimeHelper = true;
+        }
+      }
+    }
+  
+    // Cek jika callee adalah MemberExpression dengan method alias yang bermutasi
+    if (node.callee && node.callee.type === 'MemberExpression' && node.callee.isMutatingMethod) {
+      node.isMutatingMethodCall = true;
+      node.mutatingMethodName = node.callee.property.name; // already translated
     }
   };
   
@@ -7547,6 +7702,36 @@
     const subs = __subscribers.get(reactive);
     if (subs) subs.clear();
   }
+  
+  // ============================================================================
+  // KARSA Builtin Helper Functions — Fungsi bawaan KARSA
+  // ============================================================================
+  // Catatan: panjang() diterjemahkan langsung ke .length oleh expression lowering,
+  // jadi tidak perlu runtime helper. Helper di bawah ini untuk builtins yang
+  // memerlukan logika tambahan.
+  
+  function __karsa_panjang(val) {
+    if (val === null || val === undefined) return 0;
+    if (typeof val === 'string' || Array.isArray(val)) return val.length;
+    if (typeof val === 'object' && val.hasOwnProperty('value')) return __karsa_panjang(val.value);
+    return 0;
+  }
+  
+  function __karsa_apakahKosong(val) {
+    if (val === null || val === undefined) return true;
+    if (typeof val === 'string' && val === '') return true;
+    if (Array.isArray(val) && val.length === 0) return true;
+    if (typeof val === 'object' && val.hasOwnProperty('value')) return __karsa_apakahKosong(val.value);
+    return false;
+  }
+  
+  function __karsa_apakahAda(arr, item) {
+    if (arr === null || arr === undefined) return false;
+    if (typeof arr === 'object' && arr.hasOwnProperty('value')) return __karsa_apakahAda(arr.value, item);
+    if (Array.isArray(arr)) return arr.includes(item);
+    if (typeof arr === 'string') return arr.indexOf(item) !== -1;
+    return false;
+  }
   `;
   
   function emitRuntimeHelpers(compiler) {
@@ -7617,9 +7802,22 @@
    * KARSA v0.3.1 — Expression Lowering
    * ----------------------------------------------------------------------------
    * Refinement lvl.4E: expression lowering dipisah dari compiler utama.
+   *
+   * v0.3.1-patch2: Fix BUG-3, BUG-4, BUG-5
+   *   - Built-in function calls (panjang, tipeData, apakahArray, dll.) 
+   *     diturunkan ke JavaScript yang benar
+   *   - Mutating array methods pada variabel reaktif (push, pop, splice, dll.)
+   *     sekarang memicu reaktivitas dengan spread assignment
+   *   - Alias method Indonesia (untukSetiap, sisip, dll.) diterjemahkan
+   *     oleh resolver dan ditangani di sini
    */
   
   'use strict';
+  
+  // Method yang bermutasi array (tidak mengubah reference, jadi Proxy setter tidak terpicu)
+  const MUTATING_ARRAY_METHODS = new Set([
+    'push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse', 'fill'
+  ]);
   
   function lowerExpression(compiler, node) {
     if (!node) return 'undefined';
@@ -7663,10 +7861,12 @@
         return `(${lowerExpression(compiler, node.operand)}${uop})`;
       case 'MemberExpression':
         let prop = node.property.name;
-        return `${lowerExpression(compiler, node.object)}.${prop}`;
+        const objCode = lowerExpression(compiler, node.object);
+        // Jika objek adalah identifier reaktif (data/turunan), ekspresi sudah menghasilkan .value
+        // Jadi kita bisa langsung akses properti method array seperti push, forEach, dll
+        return `${objCode}.${prop}`;
       case 'CallExpression':
-        const callArgs = node.arguments.map(a => lowerExpression(compiler, a)).join(', ');
-        return `${lowerExpression(compiler, node.callee)}(${callArgs})`;
+        return lowerCallExpression(compiler, node);
       case 'ObjectLiteral':
         if (node.properties && node.properties.length > 0) {
           const pairs = node.properties.map(p => {
@@ -7700,7 +7900,151 @@
         console.warn(`[KARSA Compiler] Unknown expression type: ${node.type}`);
         return 'undefined';
     }
+  }
   
+  /**
+   * Menurunkan CallExpression ke JavaScript.
+   * Menangani:
+   *   - Fungsi bawaan (builtins): panjang(arr) → arr.value.length, dll.
+   *   - Method call pada variabel reaktif: arr.push(x) → arr.value.push(x); arr.value = [...arr.value]
+   *   - Method call non-mutating: arr.forEach(...) → arr.value.forEach(...)
+   *   - Panggilan fungsi biasa: myFunc(args)
+   */
+  function lowerCallExpression(compiler, node) {
+    // ── Kasus 1: Fungsi bawaan (builtin) ──────────────────────────────
+    if (node.isBuiltin && node.builtinInfo) {
+      return lowerBuiltinCall(compiler, node);
+    }
+  
+    // ── Kasus 2: Method call pada objek reaktif ───────────────────────
+    if (node.callee && node.callee.type === 'MemberExpression') {
+      return lowerMethodCall(compiler, node);
+    }
+  
+    // ── Kasus 3: Panggilan fungsi biasa ───────────────────────────────
+    const callArgs = node.arguments.map(a => lowerExpression(compiler, a)).join(', ');
+    const calleeCode = lowerExpression(compiler, node.callee);
+    return `${calleeCode}(${callArgs})`;
+  }
+  
+  /**
+   * Menurunkan panggilan fungsi bawaan (builtin) ke JavaScript.
+   * panjang(arr) → arr.value.length  (atau arr.length jika bukan reaktif)
+   * tipeData(x) → typeof x
+   * apakahArray(x) → Array.isArray(x)
+   * dll.
+   */
+  function lowerBuiltinCall(compiler, node) {
+    const builtin = node.builtinInfo;
+    const args = node.arguments.map(a => lowerExpression(compiler, a));
+  
+    // Prefix operator (typeof)
+    if (node.isPrefixBuiltin || builtin.prefix) {
+      return `${builtin.jsName} ${args[0]}`;
+    }
+  
+    // Helper functions yang memerlukan runtime helper
+    if (builtin.helper) {
+      switch (builtin.jsName) {
+        case '__karsa_panjang': {
+          // panjang(arr) → arr.length (unwrap .value jika reaktif, arg sudah di-lower)
+          // arg sudah di-lower oleh lowerExpression, jadi jika reaktif sudah ada .value
+          return `${args[0]}.length`;
+        }
+        case '__karsa_apakahKosong': {
+          // apakahKosong(arr) → (Array.isArray(x) ? x.length === 0 : x === null || x === undefined || x === '')
+          return `(${args[0]} === null || ${args[0]} === undefined || (Array.isArray(${args[0]}) && ${args[0]}.length === 0) || ${args[0]} === '')`;
+        }
+        case '__karsa_gabung': {
+          // gabung(arr, pemisah) → arr.join(pemisah)
+          const separator = args[1] || '","';
+          return `${args[0]}.join(${separator})`;
+        }
+        case '__karsa_saring': {
+          // saring(arr, fn) → arr.filter(fn)
+          return `${args[0]}.filter(${args[1]})`;
+        }
+        case '__karsa_pilih': {
+          // pilih(arr, fn) → arr.map(fn)
+          return `${args[0]}.map(${args[1]})`;
+        }
+        case '__karsa_urutkan': {
+          // urutkan(arr) → [...arr].sort() (salin dulu agar tidak bermutasi)
+          return `[...${args[0]}].sort(${args[1] || ''})`;
+        }
+        case '__karsa_balik': {
+          // balik(arr) → [...arr].reverse() (salin dulu agar tidak bermutasi)
+          return `[...${args[0]}].reverse()`;
+        }
+        case '__karsa_temukan': {
+          // temukan(arr, fn) → arr.find(fn)
+          return `${args[0]}.find(${args[1]})`;
+        }
+        case '__karsa_apakahAda': {
+          // apakahAda(arr, item) → arr.includes(item)
+          return `${args[0]}.includes(${args[1]})`;
+        }
+        default:
+          // Fallback: gunakan jsName langsung
+          return `${builtin.jsName}(${args.join(', ')})`;
+      }
+    }
+  
+    // Non-helper builtins (langsung ke JS native)
+    // keTeks(x) → String(x), keAngka(x) → Number(x), dll.
+    return `${builtin.jsName}(${args.join(', ')})`;
+  }
+  
+  /**
+   * Menurunkan method call pada objek (arr.method(args)).
+   * Menangani:
+   *   - Mutating methods pada variabel reaktif: picu reaktivitas
+   *   - Non-mutating methods: langsung panggil
+   */
+  function lowerMethodCall(compiler, node) {
+    const callArgs = node.arguments.map(a => lowerExpression(compiler, a)).join(', ');
+    const calleeCode = lowerExpression(compiler, node.callee);
+    const methodName = node.callee.property.name; // sudah ditranslasi oleh resolver
+  
+    // Cek apakah ini mutating method pada variabel reaktif
+    const isMutating = MUTATING_ARRAY_METHODS.has(methodName);
+    const objectIsReactive = isObjectReactive(node.callee.object);
+  
+    if (isMutating && objectIsReactive) {
+      // [BUG-4 FIX] Method yang bermutasi array pada variabel reaktif
+      // harus memicu Proxy setter dengan assignment baru.
+      // arr.value.push(x) → (arr.value.push(x), arr.value = [...arr.value])
+      // Menggunakan comma operator agar ekspresi mengembalikan hasil push
+      // sekaligus memicu reaktivitas.
+      const objExpr = lowerExpression(compiler, node.callee.object);
+      // objExpr sudah mengandung .value karena reaktif
+      return `(function() { var __r = ${calleeCode}(${callArgs}); ${objExpr} = [...${objExpr}]; return __r; })()`;
+    }
+  
+    // Non-mutating atau non-reaktif: panggil biasa
+    return `${calleeCode}(${callArgs})`;
+  }
+  
+  /**
+   * Cek apakah objek ekspresi adalah variabel reaktif (data/turunan).
+   * Menggunakan metadata resolver yang dilampirkan ke Identifier node.
+   */
+  function isObjectReactive(objectNode) {
+    if (!objectNode) return false;
+  
+    // Jika node adalah Identifier, cek metadata resolved
+    if (objectNode.type === 'Identifier' && objectNode.resolved) {
+      return objectNode.resolved.kind === 'data' || objectNode.resolved.kind === 'turunan';
+    }
+  
+    // Jika node adalah MemberExpression yang mengakses .value dari reaktif,
+    // maka .object dari MemberExpression parent adalah reaktif
+    if (objectNode.type === 'MemberExpression') {
+      return isObjectReactive(objectNode.object);
+    }
+  
+    // Default: anggap tidak reaktif
+    return false;
   }
   
   module.exports = { lowerExpression };
@@ -8219,8 +8563,10 @@
       const val = this.lowerExpression(node.value);
       const target = node.target;
       if (this._isTargetReactive(node)) {
-        // data/turunan → Proxy, akses via .value
-        this.emit(`${target}.value.push(${val});`);
+        // data/turunan → Proxy, push lalu trigger reaktivitas via spread assignment
+        // .push() saja bermutasi array tanpa mengubah reference .value,
+        // sehingga Proxy setter tidak terpicu dan watcher tidak terpanggil.
+        this.emit(`${target}.value.push(${val}); ${target}.value = [...${target}.value];`);
       } else {
         // ubah → plain array, push langsung
         this.emit(`${target}.push(${val});`);
@@ -8792,9 +9138,11 @@
             semantic: analyzeResult.ast ? analyzeResult.ast.semantic : null
           };
         } catch (err) {
-          console.error('=== SYSTEM ERROR STACK ===');
-          console.error(err.stack);
-          console.error('=========================');
+          if (options.verbose) {
+            console.error('=== SYSTEM ERROR STACK ===');
+            console.error(err.stack);
+            console.error('=========================');
+          }
           var systemException = { 
                   code: 'E0000',
                   kode: 'E0000',
@@ -8802,8 +9150,8 @@
                   stage: 'System',
                   message: err.message,
                   pesan: err.message,
-                  suggestion: 'Terjadi kesalahan sistem. Lihat stack trace di atas.',
-                  saran: 'Terjadi kesalahan sistem. Lihat stack trace di atas.',
+                  suggestion: 'Terjadi kesalahan sistem internal.',
+                  saran: 'Terjadi kesalahan sistem internal.',
                   loc: null
               };
           return { 
@@ -8897,7 +9245,18 @@
         script.textContent = result.js;
         document.head.appendChild(script);
       } else {
-        console.error(`[KARSA ${result.stage} Error]`, result.errors);
+        // [Bug Fix] Format errors dengan benar agar tidak menampilkan [object Object]
+        var errorMsg = '[KARSA ' + result.stage + ' Error]\n';
+        if (result.errors && result.errors.length > 0) {
+          for (var i = 0; i < result.errors.length; i++) {
+            var err = result.errors[i];
+            errorMsg += '  - ' + (err.message || err.pesan || err) + '\n';
+            if (err.suggestion || err.saran) {
+              errorMsg += '    Saran: ' + (err.suggestion || err.saran) + '\n';
+            }
+          }
+        }
+        console.error(errorMsg);
       }
     },
 

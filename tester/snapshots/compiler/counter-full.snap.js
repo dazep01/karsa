@@ -104,6 +104,36 @@ function __cleanup(reactive) {
   if (subs) subs.clear();
 }
 
+// ============================================================================
+// KARSA Builtin Helper Functions — Fungsi bawaan KARSA
+// ============================================================================
+// Catatan: panjang() diterjemahkan langsung ke .length oleh expression lowering,
+// jadi tidak perlu runtime helper. Helper di bawah ini untuk builtins yang
+// memerlukan logika tambahan.
+
+function __karsa_panjang(val) {
+  if (val === null || val === undefined) return 0;
+  if (typeof val === 'string' || Array.isArray(val)) return val.length;
+  if (typeof val === 'object' && val.hasOwnProperty('value')) return __karsa_panjang(val.value);
+  return 0;
+}
+
+function __karsa_apakahKosong(val) {
+  if (val === null || val === undefined) return true;
+  if (typeof val === 'string' && val === '') return true;
+  if (Array.isArray(val) && val.length === 0) return true;
+  if (typeof val === 'object' && val.hasOwnProperty('value')) return __karsa_apakahKosong(val.value);
+  return false;
+}
+
+function __karsa_apakahAda(arr, item) {
+  if (arr === null || arr === undefined) return false;
+  if (typeof arr === 'object' && arr.hasOwnProperty('value')) return __karsa_apakahAda(arr.value, item);
+  if (Array.isArray(arr)) return arr.includes(item);
+  if (typeof arr === 'string') return arr.indexOf(item) !== -1;
+  return false;
+}
+
 // === User Code ===
 (function() {
   // @karsa-source 2:1 DataDeclaration
