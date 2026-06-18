@@ -3,7 +3,7 @@
  *  KARSA v0.3.1 — STANDALONE BUNDLE
  * --------------------------------------------------------------------------
  *  Di-generate oleh scripts/build-standalone.js
- *  Build time: 2026-06-18T06:36:23.225Z
+ *  Build time: 2026-06-18T08:19:49.163Z
  *
  *  Seluruh modul KARSA dalam satu file untuk penggunaan di browser.
  *  Tanpa memerlukan Node.js, module bundler, atau dependensi lainnya.
@@ -2570,6 +2570,16 @@
       };
     }
     
+    function buatHapusDariStatement(item, fromArray, loc, docstring) {
+      return {
+        type: 'HapusDariStatement',
+        loc: ensureLoc(loc),
+        docstring: docstring || undefined,
+        item: item,
+        fromArray: fromArray
+      };
+    }
+    
     function buatKosongkanStatement(target, loc, docstring) {
       return {
         type: 'KosongkanStatement',
@@ -2990,6 +3000,7 @@
       buatTampilkanStatement: buatTampilkanStatement,
       buatSembunyikanStatement: buatSembunyikanStatement,
       buatHapusStatement: buatHapusStatement,
+      buatHapusDariStatement: buatHapusDariStatement,
       buatKosongkanStatement: buatKosongkanStatement,
       buatPerbaruiStatement: buatPerbaruiStatement,
       buatKetikaStatement: buatKetikaStatement,
@@ -4204,16 +4215,42 @@
     }
     
     /**
-     * parseHapusStatement: "hapus" target_elemen
+     * parseHapusStatement:
+     *   "hapus" target_elemen                            (DOM removal)
+     * | "hapus" item "dari" IDENTIFIER                    (array item removal)
      */
     function parseHapusStatement(parser) {
       var startToken = parser.advance();
       var docstring = startToken.docstring;
-      var target = Sel.parseTargetElemen(parser);
-      return AST.buatHapusStatement(target,
+    
+      // Parse the first target/item
+      var item = Sel.parseTargetElemen(parser);
+    
+      // Check if followed by "dari" → array item removal syntax
+      if (parser.check(TT.TK_DARI)) {
+        parser.advance(); // consume "dari"
+        var arrayToken = parser.expect(TT.TK_IDENTIFIER);
+        if (!arrayToken) {
+          parser.addError('E2025', 'Diharapkan nama array setelah "dari"',
+            AST.buatLoc({ line: startToken.baris, column: startToken.kolom }, null));
+          return AST.buatErrorNode('E2025', 'Diharapkan nama array setelah "dari"',
+            AST.buatLoc({ line: startToken.baris, column: startToken.kolom }, null));
+        }
+        var fromArray = arrayToken.nilai;
+        var endLoc = { line: arrayToken.baris, column: arrayToken.kolom + fromArray.length };
+        return AST.buatHapusDariStatement(item, fromArray,
+          AST.buatLoc(
+            { line: startToken.baris, column: startToken.kolom },
+            endLoc
+          ),
+          docstring);
+      }
+    
+      // No "dari" → regular DOM removal
+      return AST.buatHapusStatement(item,
         AST.buatLoc(
           { line: startToken.baris, column: startToken.kolom },
-          target ? target.loc.end : { line: startToken.baris, column: startToken.kolom + 1 }
+          item ? item.loc.end : { line: startToken.baris, column: startToken.kolom + 1 }
         ),
         docstring);
     }
@@ -6517,6 +6554,19 @@
     this.genericVisit(node);
   };
   
+  KarsaResolver.prototype.visitHapusDariStatement = function(node) {
+    // Resolve the item expression
+    if (node.item) accept(node.item, this);
+    // Resolve the array identifier and attach metadata
+    var symbol = this.currentScope.lookup(node.fromArray);
+    if (symbol) {
+      node.fromArraySymbol = symbol;
+      node.fromArrayReactive = (symbol.kind === 'data' || symbol.kind === 'turunan');
+    } else {
+      this.addError('E3001', 'Identifier "' + node.fromArray + '" tidak dideklarasikan', node.loc);
+    }
+  };
+  
   // ─── KosongkanStatement (H3 FIX) ───────────────────────────
   KarsaResolver.prototype.visitKosongkanStatement = function(node) {
     if (node.target) accept(node.target, this);
@@ -8242,6 +8292,21 @@
     KarsaCompiler.prototype.visitHapusStatement = function(node) {
       const target = this.resolveTarget(node.target);
       this.emit(`{ const __el = ${target}; if (__el && __el.parentElement) __el.parentElement.removeChild(__el); };`);
+    };
+  
+    KarsaCompiler.prototype.visitHapusDariStatement = function(node) {
+      const item = this.lowerExpression(node.item);
+      const arr = node.fromArray;
+      const isReactive = node.fromArrayReactive;
+  
+      if (isReactive) {
+        // Reactive array: use filter to remove item and trigger Proxy setter
+        // arr.value = arr.value.filter(__item => __item !== item)
+        this.emit(`${arr}.value = ${arr}.value.filter((__item) => __item !== ${item});`);
+      } else {
+        // Non-reactive array: use filter with assignment
+        this.emit(`${arr} = ${arr}.filter((__item) => __item !== ${item});`);
+      }
     };
   
     KarsaCompiler.prototype.visitKosongkanStatement = function(node) {
