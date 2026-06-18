@@ -181,6 +181,21 @@ function install(KarsaCompiler, accept) {
     this.emit(`{ const __el = ${target}; if (__el && __el.parentElement) __el.parentElement.removeChild(__el); };`);
   };
 
+  KarsaCompiler.prototype.visitHapusDariStatement = function(node) {
+    const item = this.lowerExpression(node.item);
+    const arr = node.fromArray;
+    const isReactive = node.fromArrayReactive;
+
+    if (isReactive) {
+      // Reactive array: use filter to remove item and trigger Proxy setter
+      // arr.value = arr.value.filter(__item => __item !== item)
+      this.emit(`${arr}.value = ${arr}.value.filter((__item) => __item !== ${item});`);
+    } else {
+      // Non-reactive array: use filter with assignment
+      this.emit(`${arr} = ${arr}.filter((__item) => __item !== ${item});`);
+    }
+  };
+
   KarsaCompiler.prototype.visitKosongkanStatement = function(node) {
     const target = this.resolveTarget(node.target);
     this.emit(`{ const __el = ${target}; if (__el) __el.innerHTML = ''; };`);

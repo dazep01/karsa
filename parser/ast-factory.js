@@ -231,6 +231,16 @@ function buatHapusStatement(target, loc, docstring) {
   };
 }
 
+function buatHapusDariStatement(item, fromArray, loc, docstring) {
+  return {
+    type: 'HapusDariStatement',
+    loc: ensureLoc(loc),
+    docstring: docstring || undefined,
+    item: item,
+    fromArray: fromArray
+  };
+}
+
 function buatKosongkanStatement(target, loc, docstring) {
   return {
     type: 'KosongkanStatement',
@@ -651,6 +661,7 @@ module.exports = {
   buatTampilkanStatement: buatTampilkanStatement,
   buatSembunyikanStatement: buatSembunyikanStatement,
   buatHapusStatement: buatHapusStatement,
+  buatHapusDariStatement: buatHapusDariStatement,
   buatKosongkanStatement: buatKosongkanStatement,
   buatPerbaruiStatement: buatPerbaruiStatement,
   buatKetikaStatement: buatKetikaStatement,
