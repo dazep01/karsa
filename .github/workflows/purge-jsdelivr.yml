@@ -1,0 +1,235 @@
+# ============================================================================
+#  KARSA — jsDelivr Cache Purge Action
+# ----------------------------------------------------------------------------
+#  Otomatis memindai dan refresh cache semua link jsDelivr di repo.
+#
+#  Trigger:
+#    1. Push ke main (setelah merge PR / release)
+#    2. Manual dispatch (workflow_dispatch) — bisa pilih versi target
+#
+#  Cara kerja:
+#    - Memindai seluruh file di repo untuk link cdn.jsdelivr.net
+#    - Ekstrak semua path unik (npm/ dan gh/ format)
+#    - Panggil jsDelivr Purge API untuk setiap link
+#    - Juga purge path berdasarkan versi dari package.json
+#      (untuk menangani link yang belum ada di file tapi mungkin di-cache)
+# ============================================================================
+
+name: 🔄 Purge jsDelivr Cache
+
+on:
+  push:
+    branches: [main]
+    paths:
+      # Hanya jalankan jika file yang relevan berubah
+      - 'engine/**'
+      - 'lexer/**'
+      - 'parser/**'
+      - 'resolver/**'
+      - 'analyzer/**'
+      - 'compiler/**'
+      - 'package.json'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versi target (kosongkan = ambil dari package.json)'
+        required: false
+        default: ''
+      purge_all_tags:
+        description: 'Purge semua tag yang pernah ada? (true/false)'
+        required: false
+        default: 'false'
+      extra_paths:
+        description: 'Path tambahan (pisah koma, mis: /engine/karsa.js,/engine/karsa.standalone.js)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  purge-jsdelivr:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Checkout ──────────────────────────────────────────────────────────
+      - name: 📥 Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ambil semua tag untuk purge_all_tags
+
+      # ── Setup Node ────────────────────────────────────────────────────────
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ── Scan & Purge ──────────────────────────────────────────────────────
+      - name: 🔍 Scan & 🔄 Purge jsDelivr Cache
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          PURGE_ALL_TAGS: ${{ github.event.inputs.purge_all_tags }}
+          EXTRA_PATHS: ${{ github.event.inputs.extra_paths }}
+        run: |
+          set -e
+
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║        🔄 KARSA — jsDelivr Cache Purge                      ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+
+          # ── 1. Ambil versi dari package.json ──────────────────────────
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          VERSION="${INPUT_VERSION:-$PKG_VERSION}"
+          REPO="dazep01/karsa"
+          PKG_NAME=$(node -p "require('./package.json').name")
+
+          echo "📌 Versi target: $VERSION"
+          echo "📌 Repo:        $REPO"
+          echo "📌 Package:     $PKG_NAME"
+          echo ""
+
+          # ── 2. Kumpulkan semua link jsDelivr dari repo ────────────────
+          LINKS=()
+
+          echo "🔍 Memindai file untuk link jsDelivr..."
+          while IFS= read -r link; do
+            if [ -n "$link" ]; then
+              LINKS+=("$link")
+              echo "   ↳ Ditemukan: $link"
+            fi
+          done < <(grep -roh 'https://cdn\.jsdelivr\.net/[^"'\''`) ]*' . \
+            --include="*.md" --include="*.html" --include="*.js" \
+            --include="*.json" --include="*.yml" --include="*.yaml" \
+            --include="*.txt" 2>/dev/null | sort -u)
+
+          echo "   ↳ Ditemukan ${#LINKS[@]} link dari scan file"
+          echo ""
+
+          # ── 3. Bangun path-path yang wajar berdasarkan versi ───────────
+          # Path file utama KARSA yang biasanya diakses via CDN
+          KNOWN_PATHS=(
+            "/engine/karsa.js"
+            "/engine/karsa-cli.js"
+            "/engine/karsa.standalone.js"
+            "/lexer/karsa-lexer.js"
+            "/parser/karsa-parser.js"
+            "/resolver/karsa-resolver.js"
+            "/analyzer/karsa-analyzer.js"
+            "/compiler/karsa-compiler.js"
+          )
+
+          # Format npm: cdn.jsdelivr.net/npm/karsa@VERSION/path
+          for P in "${KNOWN_PATHS[@]}"; do
+            LINKS+=("https://cdn.jsdelivr.net/npm/${PKG_NAME}@${VERSION}${P}")
+          done
+
+          # Format gh: cdn.jsdelivr.net/gh/dazep01/karsa@VERSION/path
+          for P in "${KNOWN_PATHS[@]}"; do
+            LINKS+=("https://cdn.jsdelivr.net/gh/${REPO}@${VERSION}${P}")
+          done
+
+          # ── 4. Tambahkan extra paths dari input ───────────────────────
+          if [ -n "$EXTRA_PATHS" ]; then
+            echo "📋 Menambahkan extra paths dari input..."
+            IFS=',' read -ra EXTRA <<< "$EXTRA_PATHS"
+            for P in "${EXTRA[@]}"; do
+              P=$(echo "$P" | xargs)  # trim whitespace
+              if [ -n "$P" ]; then
+                LINKS+=("https://cdn.jsdelivr.net/npm/${PKG_NAME}@${VERSION}${P}")
+                LINKS+=("https://cdn.jsdelivr.net/gh/${REPO}@${VERSION}${P}")
+                echo "   ↳ $P"
+              fi
+            done
+          fi
+
+          # ── 5. Purge semua tag jika diminta ────────────────────────────
+          if [ "$PURGE_ALL_TAGS" = "true" ]; then
+            echo "🏷️  Memindai semua git tag untuk purge..."
+            TAGS=$(git tag -l 2>/dev/null || echo "")
+            if [ -n "$TAGS" ]; then
+              while IFS= read -r TAG; do
+                if [ -n "$TAG" ]; then
+                  for P in "${KNOWN_PATHS[@]}"; do
+                    LINKS+=("https://cdn.jsdelivr.net/npm/${PKG_NAME}@${TAG}${P}")
+                    LINKS+=("https://cdn.jsdelivr.net/gh/${REPO}@${TAG}${P}")
+                  done
+                  echo "   ↳ Tag: $TAG"
+                fi
+              done <<< "$TAGS"
+            else
+              echo "   ↳ Tidak ada tag ditemukan"
+            fi
+          fi
+
+          # ── 6. Deduplikasi link ─────────────────────────────────────────
+          UNIQUE_LINKS=()
+          declare -A SEEN
+          for L in "${LINKS[@]}"; do
+            if [ -z "${SEEN[$L]}" ]; then
+              SEEN[$L]=1
+              UNIQUE_LINKS+=("$L")
+            fi
+          done
+
+          echo ""
+          echo "📊 Total link unik untuk di-purge: ${#UNIQUE_LINKS[@]}"
+          echo ""
+
+          # ── 7. Purge via jsDelivr API ──────────────────────────────────
+          echo "🔄 Memulai purge..."
+          SUCCESS=0
+          FAIL=0
+
+          for LINK in "${UNIQUE_LINKS[@]}"; do
+            echo -n "   ↳ Purging: $LINK ... "
+
+            # jsDelivr Purge API
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST "https://purge.jsdelivr.net/" \
+              -H "Content-Type: application/json" \
+              -d "{\"url\": \"$LINK\"}" \
+              --max-time 10)
+
+            if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
+              echo "✅ ($RESPONSE)"
+              SUCCESS=$((SUCCESS + 1))
+            else
+              echo "❌ ($RESPONSE)"
+              FAIL=$((FAIL + 1))
+            fi
+
+            # Rate limit: jsDelivr mengizinkan ~1 req/detik
+            sleep 1
+          done
+
+          echo ""
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║  ✅ Berhasil: $SUCCESS                                          "
+          echo "║  ❌ Gagal:    $FAIL                                           "
+          echo "║  📊 Total:    ${#UNIQUE_LINKS[@]}                                         "
+          echo "╚══════════════════════════════════════════════════════════════╝"
+
+          # Jika terlalu banyak gagal, return error
+          if [ $FAIL -gt 0 ] && [ $FAIL -gt $((SUCCESS / 2)) ]; then
+            echo "⚠️  Terlalu banyak gagal, mungkin ada masalah dengan API"
+            exit 1
+          fi
+
+      # ── Summary ──────────────────────────────────────────────────────────
+      - name: 📋 Summary
+        if: always()
+        run: |
+          echo "## 🔄 jsDelivr Cache Purge" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Nilai |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          VERSION=$(node -p "require('./package.json').version")
+          echo "| Versi | \`${VERSION}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Repo | \`dazep01/karsa\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trigger | \`${{ github.event_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event.inputs.version }}" != "" ]; then
+            echo "| Versi Input | \`${{ github.event.inputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Cache jsDelivr telah di-refresh untuk versi **${VERSION}**" >> $GITHUB_STEP_SUMMARY
