@@ -317,7 +317,18 @@
         script.textContent = result.js;
         document.head.appendChild(script);
       } else {
-        console.error(`[KARSA ${result.stage} Error]`, result.errors);
+        // [Bug Fix] Format errors dengan benar agar tidak menampilkan [object Object]
+        var errorMsg = '[KARSA ' + result.stage + ' Error]\n';
+        if (result.errors && result.errors.length > 0) {
+          for (var i = 0; i < result.errors.length; i++) {
+            var err = result.errors[i];
+            errorMsg += '  - ' + (err.message || err.pesan || err) + '\n';
+            if (err.suggestion || err.saran) {
+              errorMsg += '    Saran: ' + (err.suggestion || err.saran) + '\n';
+            }
+          }
+        }
+        console.error(errorMsg);
       }
     },
 
