@@ -48,10 +48,18 @@ function lowerExpression(compiler, node) {
       return `(${lowerExpression(compiler, node.operand)}${uop})`;
     case 'MemberExpression':
       let prop = node.property.name;
-      return `${lowerExpression(compiler, node.object)}.${prop}`;
+      const objCode = lowerExpression(compiler, node.object);
+      // Jika objek adalah identifier reaktif (data/turunan), ekspresi sudah menghasilkan .value
+      // Jadi kita bisa langsung akses properti method array seperti push, forEach, dll
+      return `${objCode}.${prop}`;
     case 'CallExpression':
+      // Handle method calls on reactive arrays/objects
       const callArgs = node.arguments.map(a => lowerExpression(compiler, a)).join(', ');
-      return `${lowerExpression(compiler, node.callee)}(${callArgs})`;
+      const calleeCode = lowerExpression(compiler, node.callee);
+      
+      // Jika callee adalah MemberExpression dan objeknya adalah array reaktif,
+      // kita sudah mengakses .value di MemberExpression, jadi tinggal panggil method
+      return `${calleeCode}(${callArgs})`;
     case 'ObjectLiteral':
       if (node.properties && node.properties.length > 0) {
         const pairs = node.properties.map(p => {
