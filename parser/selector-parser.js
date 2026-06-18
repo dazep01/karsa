@@ -85,6 +85,16 @@ function parseSelector(parser) {
       // Token TK_CLASS sudah berisi nama class tanpa .
       classes.push(tok.nilai);
       parser.advance();
+    } else if (tok.tipe === TT.TK_TITIK) {
+      // Pola: TK_TITIK diikuti TK_IDENTIFIER -> class selector
+      parser.advance(); // konsumsi TK_TITIK
+      var nextTok = parser.peek();
+      if (nextTok && nextTok.tipe === TT.TK_IDENTIFIER) {
+        classes.push(nextTok.nilai);
+        parser.advance(); // konsumsi TK_IDENTIFIER
+      } else {
+        parser.addError('E2003', 'Selector class tidak valid: setelah "." diharapkan nama class');
+      }
     } else if (tok.tipe === TT.TK_ATRIBUT) {
       // Token TK_ATRIBUT: nilai berisi string "[k=v]" atau "[k=\"v\"]"
       // Lexer harus sudah memisahkan key dan value
