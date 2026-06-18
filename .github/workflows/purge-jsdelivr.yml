@@ -141,9 +141,24 @@ jobs:
             "/compiler/karsa-compiler.js"
           )
 
+          # Alias jsDelivr yang wajar diakses (selain versi spesifik)
+          # @main = branch main terbaru, @latest = versi terbaru (npm) atau default branch (gh)
+          ALIASES=("main")
+          if [ "$NPM_EXISTS" = true ]; then
+            ALIASES+=("latest")
+          fi
+
           # Format gh: /gh/dazep01/karsa@VERSION/path
           for F in "${KNOWN_FILES[@]}"; do
             PATHS+=("/gh/${REPO}@${VERSION}${F}")
+          done
+
+          # Format gh dengan alias (@main, @latest): /gh/dazep01/karsa@main/path
+          for ALIAS in "${ALIASES[@]}"; do
+            for F in "${KNOWN_FILES[@]}"; do
+              PATHS+=("/gh/${REPO}@${ALIAS}${F}")
+            done
+            echo "   ↳ Alias: @${ALIAS}"
           done
 
           # Format npm: /npm/karsa@VERSION/path (hanya jika package ada di npm)
@@ -151,6 +166,11 @@ jobs:
             for F in "${KNOWN_FILES[@]}"; do
               PATHS+=("/npm/${PKG_NAME}@${VERSION}${F}")
             done
+            # Format npm dengan alias @latest
+            for F in "${KNOWN_FILES[@]}"; do
+              PATHS+=("/npm/${PKG_NAME}@latest${F}")
+            done
+            echo "   ↳ Alias: @latest (npm)"
           fi
 
           # ── 5. Tambahkan extra paths dari input ──────────────────────────
@@ -161,8 +181,12 @@ jobs:
               F=$(echo "$F" | xargs)  # trim whitespace
               if [ -n "$F" ]; then
                 PATHS+=("/gh/${REPO}@${VERSION}${F}")
+                for ALIAS in "${ALIASES[@]}"; do
+                  PATHS+=("/gh/${REPO}@${ALIAS}${F}")
+                done
                 if [ "$NPM_EXISTS" = true ]; then
                   PATHS+=("/npm/${PKG_NAME}@${VERSION}${F}")
+                  PATHS+=("/npm/${PKG_NAME}@latest${F}")
                 fi
                 echo "   ↳ $F"
               fi
@@ -276,4 +300,8 @@ jobs:
             echo "| Versi Input | \`${{ github.event.inputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Cache jsDelivr telah di-refresh untuk versi **${VERSION}**" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Cache jsDelivr telah di-refresh untuk versi **${VERSION}** serta alias **@main**" >> $GITHUB_STEP_SUMMARY
+          if [ "$NPM_EXISTS" = true ]; then
+            echo " dan **@latest**" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
